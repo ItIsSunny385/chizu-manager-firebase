@@ -79,7 +79,8 @@ SSH and GPG keys → New SSH key
 
 - Title：適当
 - Key：さっきコピーしたid_rsa.pubの中身
-- Add SSH keyを押す
+
+Add SSH keyを押す
 
 → 登録完了
 
@@ -156,3 +157,33 @@ npm run dev
 新規作成したコンテナからコミットできるようにするにはコンテナ内のGitの設定をする必要があります。
 
 [git & githubの設定](#git--githubの設定)に従って行えばできるものと思われます。
+
+## 開発環境の設定（初期開発、Gitからの環境構築共通事項）
+
+ここでは開発環境を利用するために必要な設定について説明します。
+
+### Firebase Projectの設定
+
+[Firebaseのホームページ](https://firebase.google.com/?hl=ja)からFirebaseアプリを作成します。
+
+アプリ作成後に .firebaserc ファイルの以下の部分を適切に修正してください。
+
+```
+{
+  "projects": {
+    "default": "<project-name-here>"
+  }
+}
+```
+
+### Basic認証情報の変更
+
+firebaseFunctions.jsにBasic認証情報が記載されているため、変更してください
+```
+const USERNAME = 'user';
+const PASSWORD = 'password';
+```
+
+## 実装時の参考資料
+
+[Next.js+Firebaseでbasic認証をかける](https://qiita.com/ut0n/items/274fd1cc43f6fc883d99)

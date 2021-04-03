@@ -6,8 +6,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update && \
     apt -y upgrade && \
-    apt install -y git nodejs npm curl && \
-    npm install n -g && \
+    apt install -y curl git nodejs npm && \
+    npm install firebase-tools n -g && \
     apt purge -y nodejs npm && \
     n lts
 

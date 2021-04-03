@@ -1,17 +1,26 @@
 const { join } = require('path')
 const { https } = require('firebase-functions')
 const { default: next } = require('next')
+const express = require('express')
+
+const routes = require('next-routes');
+const basicAuth = require('basic-auth-connect');
+
+const USERNAME = 'user';
+const PASSWORD = 'password';
+
+const server = express();
 
 const nextjsDistDir = join('src', require('./src/next.config.js').distDir)
 
-const nextjsServer = next({
+const app = next({
   dev: false,
   conf: {
     distDir: nextjsDistDir,
   },
 })
-const nextjsHandle = nextjsServer.getRequestHandler()
+const handler = routes().getRequestHandler(app);
+server.use(basicAuth(USERNAME, PASSWORD));
+server.get('*', (req, res) => handler(req, res));
 
-exports.nextjsFunc = https.onRequest((req, res) => {
-  return nextjsServer.prepare().then(() => nextjsHandle(req, res))
-})
+exports.nextjsFunc = https.onRequest(server);
