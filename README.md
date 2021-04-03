@@ -1,39 +1,17 @@
-# 地図マネージャ環境構築マニュアル
+# 地図マネージャ
 
-## 第一弾
-### コンテナの起動
-直下で以下のコマンドを実行します。Git bash が見やすいです。
-```
-docker-compose up -d --build
-```
-その後 powershell で以下のコマンドを実行するとコンテナの中に入ることができます。
-```
-docker-compose exec app bash
-```
+## 初期環境構築メモ
+ここでは本システム製作者が最初に開発環境を構築した時のメモです。
+基本的には読み飛ばしてしまって構いません。
+以下の環境構築メモは次の環境、アプリを使用して実行しました。
+- Windows 10 Home
+- Docker Desktop for Windows
+- Git
+- VSCode
+- VSCode Remote Container
+Docker DesktopとGitのWindows上でのインストール・設定は割愛します。
+VSCode Remote Container のインストールについても割愛します。 
 
-### コンテナ内での操作
-以下のコマンドを実行してコンテナ内に next.js + firebase アプリを作成します
-```
-npx create-next-app --example with-firebase-hosting chizu-manager-firebase
-cd chizu-manager-firebase
-npm install firebase
-npm install --save-dev typescript @types/react @types/node
-```
-
-### next.js アプリの実行
-以下のコマンドで next.js アプリが実行されます
-```
-npm run dev
-```
-
-### コンテナの停止
-以下のコマンドでコンテナを停止します
-```
-docker-compose stop
-```
-第一弾はここまでで終了。第二段でやり直す
-
-## 第二段
 ### コンテナの開始
 プロジェクトフォルダをVSCodeで開く
 左下の><マークを押す
@@ -51,7 +29,8 @@ npm run dev
 ```
 これで firebase - next.js サンプルアプリが動く
 
-### git & githubの設定をする
+### git & githubの設定
+#### 基本的な設定
 ```
 git config --global user.name 'username'
 git config --global user.email 'username@example.com'
@@ -60,3 +39,73 @@ git config --global merge.tool 'code --wait "$MERGED"'
 git config --global push.default simple
 ```
 vscodeの左側のメニューの3番目を選んで「Initialize Repository」を選択する
+
+#### SSHの設定
+```
+ssh-keygen -t rsa
+```
+後は全部Enterにする。
+→ /root/.ssh/ に 公開鍵と秘密鍵が生成される
+
+ブラウザでGithubにアクセスする
+プロフィールアイコン → Settings
+SSH and GPG keys → New SSH key
+
+Title：適当
+Key：さっきコピーしたid_rsa.pubの中身
+Add SSH keyを押す
+→ 登録完了
+
+#### known_host の作成
+```
+ssh -T git@github.com
+```
+
+#### リポジトリの作成
+ブラウザでGithubにアクセスする
+ホーム画面で左上の「New」ボタンをクリックする
+リポジトリ名として
+chizu-manager-firebase
+を入力する
+private
+に設定する
+「Create repository」ボタンをクリックする
+→ リポジトリの作成完了
+
+#### リモートリポジトリへの push
+Ctrl + Shift + P でコマンドパレットを開く
+「Git: Add Remote」を選択する
+URLとして、git@github.com:ItIsSunny385/chizu-manager-firebase.git を指定する
+リモート名として origin と指定する
+→ 完了！
+
+## 開発環境構築メモ（Githubからcloneして環境構築）
+Github にコミットされたソースコードを用いて環境構築を行う方法です。
+以下の環境構築メモは次の環境、アプリを使用して実行しました。
+- Windows 10 Home
+- Docker Desktop for Windows
+- Git
+- VSCode
+- VSCode Remote Container
+Docker DesktopとGitのWindows上でのインストール・設定は割愛します。
+VSCode Remote Container のインストールについても割愛します。
+
+### リモートリポジトリからクローンする
+```
+git clone git@github.com:ItIsSunny385/chizu-manager-firebase.git chizu-manager-firebase2
+```
+
+### VSCode & Remote Container で環境構築をする
+chizu-manager-firebase2 フォルダを開く
+右下に Reopen in container ボタンが出てくるので、クリックする
+container 内で以下を実行すると開発環境が立ち上がる
+```
+cd chizu-manager-firebase
+npm install
+npm run dev 
+```
+これで、ブラウザで localhost:3000 にアクセスすると開発環境にアクセスできる
+
+### コンテナ内のGitの設定
+新規作成したコンテナからコミットできるようにするにはコンテナ内のGitの設定をする必要があります。
+[git & githubの設定](#git-&-githubの設定)に従って行えばできるものと思われます。
