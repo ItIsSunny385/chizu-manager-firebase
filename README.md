@@ -176,13 +176,20 @@ npm run dev
 }
 ```
 
+本システムでは Cloud Functions を利用するため、Firebaseの課金も有効にする必要があります。
+
 ### Basic認証情報の変更
 
-firebaseFunctions.jsにBasic認証情報が記載されているため、変更してください
+以下のコマンドでBasic認証情報を環境データとして保存します。
+
 ```
-const USERNAME = 'user';
-const PASSWORD = 'password';
+firebase functions:config:set basic_auth.username='username' basic_auth.password='password'
+npm run deploy
 ```
+
+これでBasic認証情報が保存されます。
+
+開発環境での認証情報は .runtimeconfig.json に記載されています。
 
 ## 実装時の参考資料
 
