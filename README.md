@@ -178,6 +178,21 @@ npm run dev
 
 本システムでは Cloud Functions を利用するため、Firebaseの課金も有効にする必要があります。
 
+その後 Firestore と Authentication を有効にしてください。デフォルトの設定のままで構いません。
+
+また、作成したプロジェクトのコンソールの「プロジェクトの概要」右の設定アイコン → 「プロジェクトを設定」から Firebase の構成情報を InitializeFirebase.tsx の以下の部分にコピーしてください。
+
+```
+var firebaseConfig = {
+    apiKey: "apiKey",
+    authDomain: "authDomain",
+    projectId: "projectId",
+    storageBucket: "storageBucket",
+    messagingSenderId: "messagingSenderId",
+    appId: "appId"
+};
+```
+
 ### Basic認証情報の変更
 
 以下のコマンドでBasic認証情報を環境データとして保存します。
