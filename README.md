@@ -12,7 +12,8 @@
 - Docker Desktop for Windows
 - Git
 - VSCode
-- VSCode Remote Container
+- Remote Container (VSCode Addin)
+- Firebase (VSCode Addin)
 
 Docker DesktopとGitのWindows上でのインストール・設定は割愛します。
 
