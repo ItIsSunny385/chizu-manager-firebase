@@ -180,17 +180,20 @@ npm run dev
 
 その後 Firestore と Authentication を有効にしてください。デフォルトの設定のままで構いません。
 
-また、作成したプロジェクトのコンソールの「プロジェクトの概要」右の設定アイコン → 「プロジェクトを設定」から Firebase の構成情報を InitializeFirebase.tsx の以下の部分にコピーしてください。
+また、作成したプロジェクトのコンソールの「プロジェクトの概要」右の設定アイコン → 「プロジェクトを設定」から Firebase の構成情報を next.config.js の以下の部分にコピーしてください。
 
 ```
-var firebaseConfig = {
-    apiKey: "apiKey",
-    authDomain: "authDomain",
-    projectId: "projectId",
-    storageBucket: "storageBucket",
-    messagingSenderId: "messagingSenderId",
-    appId: "appId"
-};
+module.exports = {
+    distDir: '../.next',
+    env: {
+      apiKey: "apiKey",
+      authDomain: "authDomain",
+      projectId: "projectId",
+      storageBucket: "storageBucket",
+      messagingSenderId: "messagingSenderId",
+      appId: "appId"
+    }
+}
 ```
 
 ### Basic認証情報の変更

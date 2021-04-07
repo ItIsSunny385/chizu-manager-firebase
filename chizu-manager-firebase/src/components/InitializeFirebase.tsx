@@ -1,12 +1,12 @@
 import firebase from 'firebase';
 
-var firebaseConfig = {
-    apiKey: "apiKey",
-    authDomain: "authDomain",
-    projectId: "projectId",
-    storageBucket: "storageBucket",
-    messagingSenderId: "messagingSenderId",
-    appId: "appId"
+const firebaseConfig = {
+    apiKey: process.env.apiKey,
+    authDomain: process.env.authDomain,
+    projectId: process.env.projectId,
+    storageBucket: process.env.storageBucket,
+    messagingSenderId: process.env.messagingSenderId,
+    appId: process.env.appId,
 };
 // Initialize Firebase
 if (firebase.apps.length === 0) {
