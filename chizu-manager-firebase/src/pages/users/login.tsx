@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import firebase from 'firebase';
 import '../../components/InitializeFirebase';
+import App from '../../components/App';
 
 const auth = firebase.auth();
 const provider = new firebase.auth.GoogleAuthProvider();
@@ -14,7 +15,9 @@ export default function Login() {
     }, []);
 
     return (
-        <h5>{message}</h5>
+        <App>
+            <h5>{message}</h5>
+        </App>
     );
 }
 

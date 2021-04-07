@@ -1,6 +1,6 @@
 {
-  "basic_auth": {
-    "username": "username",
-    "password": "password"
-  }
+    "basic_auth": {
+        "username": "username",
+        "password": "password"
+    }
 }

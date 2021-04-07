@@ -14,10 +14,10 @@ const server = express();
 const nextjsDistDir = join('src', require('./src/next.config.js').distDir)
 
 const app = next({
-  dev: false,
-  conf: {
-    distDir: nextjsDistDir,
-  },
+    dev: false,
+    conf: {
+        distDir: nextjsDistDir,
+    },
 })
 const handler = routes().getRequestHandler(app)
 server.use(basicAuth(USERNAME, PASSWORD))
