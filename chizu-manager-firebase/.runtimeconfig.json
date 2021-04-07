@@ -1,4 +1,13 @@
 {
+    "debug": true,
+    "firebase_config": {
+        "api_key": "api_key",
+        "auth_domain": "auth_domain",
+        "project_id": "project_id",
+        "storage_bucket": "storage_bucket",
+        "messaging_sender_id": "messaging_sender_id",
+        "app_id": "app_id"
+    },
     "basic_auth": {
         "username": "username",
         "password": "password"
