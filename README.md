@@ -181,20 +181,17 @@ npm run dev
 
 その後 Firestore と Authentication を有効にしてください。デフォルトの設定のままで構いません。
 
-また、作成したプロジェクトのコンソールの「プロジェクトの概要」右の設定アイコン → 「プロジェクトを設定」から Firebase の構成情報を next.config.js の以下の部分にコピーしてください。
+また、作成したプロジェクトのコンソールの「プロジェクトの概要」右の設定アイコン → 「プロジェクトを設定」から Firebase の構成情報を .runtimeconfig.json の以下の部分にコピーしてください。
 
 ```
-module.exports = {
-    distDir: '../.next',
-    env: {
-      apiKey: "apiKey",
-      authDomain: "authDomain",
-      projectId: "projectId",
-      storageBucket: "storageBucket",
-      messagingSenderId: "messagingSenderId",
-      appId: "appId"
-    }
-}
+    "firebase_config": {
+        "api_key": "api_key",
+        "auth_domain": "auth_domain",
+        "project_id": "project_id",
+        "storage_bucket": "storage_bucket",
+        "messaging_sender_id": "messaging_sender_id",
+        "app_id": "app_id"
+    },
 ```
 
 ### Basic認証情報の変更
@@ -209,6 +206,8 @@ npm run deploy
 これでBasic認証情報が保存されます。
 
 開発環境での認証情報は .runtimeconfig.json に記載されています。
+
+同様にして、ApiKeyなどの情報も環境データとして保存させる必要があります。
 
 ## 実装時の参考資料
 
