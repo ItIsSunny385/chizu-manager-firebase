@@ -1,12 +1,9 @@
-import { useState, useEffect, MouseEvent } from 'react';
-import Link from 'next/link';
+import { useState, MouseEvent } from 'react';
 import firebase from 'firebase';
 import { useRouter } from 'next/router';
 import '../../components/InitializeFirebase';
-import App from '../../components/App';
-import NavTabs from '../../components/NavTabs';
-import { Button, Container, Form, FormGroup, Label, Input, FormText, FormFeedback, Breadcrumb, BreadcrumbItem, Alert } from 'reactstrap';
-import { PeopleFill } from 'react-bootstrap-icons';
+import AdminApp from '../../components/AdminApp';
+import { Button, Form, FormGroup, Label, Input, FormText, FormFeedback } from 'reactstrap';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -18,6 +15,7 @@ const Role = {
 };
 
 export default function Add() {
+    const [alertType, setAlertType] = useState(undefined);
     const [alertMessage, setAlertMessage] = useState(undefined);
     const [displayName, setDisplayName] = useState('');
     const [displayError1, setDisplayError1] = useState(false);
@@ -31,23 +29,40 @@ export default function Add() {
     const onChangeDisplayName = ((e) => {
         setDisplayName(e.target.value);
     });
+
     const onChangeRole = ((e) => {
         setRole(e.target.value);
     });
+
     const onChangeEmail = ((e) => {
         setEmail(e.target.value);
     });
+
     const onChangePassword = ((e) => {
         setPassword(e.target.value);
     });
+
     const onClickRegisterButton = ((e: MouseEvent) => {
         e.preventDefault();
-        setDisplayError1(!(0 < displayName.length && displayName.length <= 32));
+
+        /* 各入力値がエラーかどうかを判別 */
+        const newDisplayError1 = !(0 < displayName.length && displayName.length <= 32);
+        setDisplayError1(newDisplayError1);
         const regEmail = /^[A-Za-z0-9]{1}[A-Za-z0-9_.-]*@{1}[A-Za-z0-9_.-]{1,}\.[A-Za-z0-9]{1,}$/;
-        setDisplayError2(!(regEmail.test(email) && email.length <= 256));
+        const newDisplayError2 = !(regEmail.test(email) && email.length <= 256);
+        setDisplayError2(newDisplayError2);
         const regPassword = /^(?=.*?[a-z])(?=.*?\d)[a-z\d]{8,32}$/i;
-        setDisplayError3(!regPassword.test(password));
-        if (!displayError1 && !displayError2 && !displayError3) {
+        const newDisplayError3 = !regPassword.test(password);
+        setDisplayError3(newDisplayError3);
+
+        /* エラーがある場合は該当箇所が見えるようにし、そうでない場合はデータをサーバに送る */
+        if (newDisplayError1) {
+            router.push('#displayNameLabel');
+        } else if (newDisplayError2) {
+            router.push('#emailLabel');
+        } else if (newDisplayError3) {
+            router.push('#passwordLabel');
+        } else {
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     db.collection('users').doc(userCredential.user.uid).set({
@@ -60,47 +75,53 @@ export default function Add() {
                         db.collection('delete_auth_users').add({
                             uid: userCredential.user.uid,
                         }).then((ref2) => {
+                            setAlertType('danger');
                             setAlertMessage('ユーザ登録に失敗しました。管理者にお問い合わせください。');
                         }).catch((error2) => {
                             console.log(error2);
+                            setAlertType('danger');
                             setAlertMessage('ユーザ登録に失敗しました。管理者にお問い合わせください。');
                         });
                     });
                 }).catch((error) => {
                     switch (error.code) {
                         case 'auth/email-already-in-use':
+                            setAlertType('danger');
                             setAlertMessage('このメールアドレスは登録済みです。');
                             break;
                         case 'auth/invalid-email':
+                            setAlertType('danger');
                             setAlertMessage('このメールアドレスは不正です。');
                             break;
                         case 'auth/operation-not-allowed':
+                            setAlertType('danger');
                             setAlertMessage('この操作には対応していません。');
                             break;
                         case 'auth/weak-password':
+                            setAlertType('danger');
                             setAlertMessage('パスワードが弱すぎます。');
                             break;
                     }
+                    router.push('#alert');
                 });
         }
     });
+
     const onClickBackButton = ((e: MouseEvent) => {
         e.preventDefault();
         router.push('/users');
     });
 
     return (
-        <App>
-            <NavTabs activeTabId={2} />
-            {
-                alertMessage
-                &&
-                <Alert color="danger" className="mt-3">{alertMessage}</Alert>
-            }
-            <h4 className="mb-3 mt-3"><PeopleFill className="mb-1 mr-2" />ユーザ登録</h4>
+        <AdminApp
+            activeTabId={2}
+            pageTitle="ユーザ登録"
+            alertType={alertType}
+            alertMessage={alertMessage}
+        >
             <Form>
                 <FormGroup>
-                    <Label for="displayName">表示名</Label>
+                    <Label id="displayNameLabel" for="displayName">表示名</Label>
                     <Input
                         type="text"
                         name="displayName"
@@ -115,7 +136,7 @@ export default function Add() {
                     <FormText>表示名は1～32文字で入力してください。</FormText>
                 </FormGroup>
                 <FormGroup>
-                    <Label for="role">権限</Label>
+                    <Label id="roleLabel" for="role">権限</Label>
                     <Input type="select" name="role" onChange={onChangeRole}>
                         <option value="GeneralUser">一般ユーザ</option>
                         <option value="Editor">編集者</option>
@@ -123,7 +144,7 @@ export default function Add() {
                     </Input>
                 </FormGroup>
                 <FormGroup>
-                    <Label for="email">メールアドレス</Label>
+                    <Label id="emailLabel" for="email">メールアドレス</Label>
                     <Input
                         type="email"
                         name="email"
@@ -138,7 +159,7 @@ export default function Add() {
                     <FormText>メールアドレスは256文字以内で入力してください。</FormText>
                 </FormGroup>
                 <FormGroup>
-                    <Label for="password">パスワード</Label>
+                    <Label id="passwordLabel" for="password">パスワード</Label>
                     <Input
                         type="password"
                         name="password"
@@ -157,6 +178,6 @@ export default function Add() {
                     <Button onClick={onClickRegisterButton} className="ml-1">登録</Button>
                 </div>
             </Form>
-        </App>
+        </AdminApp>
     );
 }

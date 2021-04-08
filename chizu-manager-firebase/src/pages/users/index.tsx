@@ -1,12 +1,12 @@
 import { useState, useEffect, MouseEvent } from 'react';
 import { useRouter } from 'next/router';
-import App from '../../components/App';
-import NavTabs from '../../components/NavTabs';
-import { Container, Breadcrumb, BreadcrumbItem, Button } from 'reactstrap';
-import { PeopleFill } from 'react-bootstrap-icons';
+import AdminApp from '../../components/AdminApp';
+import { Button } from 'reactstrap';
 
 export default function Index() {
     const router = useRouter();
+    const [alertType, setAlertType] = useState(undefined);
+    const [alertMessage, setAlertMessage] = useState(undefined);
 
     const onClickAddButton = ((e: MouseEvent) => {
         e.preventDefault();
@@ -14,12 +14,15 @@ export default function Index() {
     });
 
     return (
-        <App>
-            <NavTabs activeTabId={2} />
-            <h4 className="mb-3 mt-3"><PeopleFill className="mb-1 mr-2" />ユーザ一覧</h4>
+        <AdminApp
+            activeTabId={2}
+            pageTitle="ユーザ一覧"
+            alertType={alertType}
+            alertMessage={alertMessage}
+        >
             <div className="text-left mb-2">
                 <Button onClick={onClickAddButton} className="ml-1">追加</Button>
             </div>
-        </App>
+        </AdminApp>
     );
 }
