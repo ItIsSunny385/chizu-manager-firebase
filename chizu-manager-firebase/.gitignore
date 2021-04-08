@@ -40,3 +40,4 @@ firebase-debug.log
 firestore-debug.log
 pubsub-debug.log
 ui-debug.log
+data/firestore_export/all_namespaces

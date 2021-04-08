@@ -53,10 +53,18 @@ export default function Add() {
                     db.collection('users').doc(userCredential.user.uid).set({
                         displayName: displayName,
                         role: role,
-                    }).then(ref => {
+                    }).then(ref1 => {
                         router.push('/users');
-                    }).catch((error) => {
-                        setAlertMessage('ユーザ登録に失敗しました。管理者にお問い合わせください。');
+                    }).catch((error1) => {
+                        console.log(error1);
+                        db.collection('delete_auth_users').add({
+                            uid: userCredential.user.uid,
+                        }).then((ref2) => {
+                            setAlertMessage('ユーザ登録に失敗しました。管理者にお問い合わせください。');
+                        }).catch((error2) => {
+                            console.log(error2);
+                            setAlertMessage('ユーザ登録に失敗しました。管理者にお問い合わせください。');
+                        });
                     });
                 }).catch((error) => {
                     switch (error.code) {
