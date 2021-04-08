@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import '../../components/InitializeFirebase';
 import AdminApp from '../../components/AdminApp';
 import { Button, Form, FormGroup, Label, Input, FormText, FormFeedback } from 'reactstrap';
+import { setCookie } from 'nookies';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -69,6 +70,8 @@ export default function Add() {
                         displayName: displayName,
                         role: role,
                     }).then(ref1 => {
+                        setCookie(null, 'alertType', 'success', { path: '/' });
+                        setCookie(null, 'alertMessage', 'ユーザを登録しました。', { path: '/' })
                         router.push('/users');
                     }).catch((error1) => {
                         console.log(error1);

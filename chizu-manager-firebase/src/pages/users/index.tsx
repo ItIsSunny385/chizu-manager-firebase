@@ -2,11 +2,17 @@ import { useState, useEffect, MouseEvent } from 'react';
 import { useRouter } from 'next/router';
 import AdminApp from '../../components/AdminApp';
 import { Button } from 'reactstrap';
+import nookies from 'nookies'
 
-export default function Index() {
+interface Props {
+    alertType: string;
+    alertMessage: string;
+}
+
+export default function Index(props: Props) {
     const router = useRouter();
-    const [alertType, setAlertType] = useState(undefined);
-    const [alertMessage, setAlertMessage] = useState(undefined);
+    const [alertType, setAlertType] = useState(props.alertType);
+    const [alertMessage, setAlertMessage] = useState(props.alertMessage);
 
     const onClickAddButton = ((e: MouseEvent) => {
         e.preventDefault();
@@ -25,4 +31,18 @@ export default function Index() {
             </div>
         </AdminApp>
     );
+}
+
+export async function getServerSideProps(ctx) {
+    const cookies = nookies.get(ctx);
+    const alertType = cookies.alertType;
+    const alertMessage = cookies.alertMessage;
+    nookies.destroy(ctx, 'alertType', { path: '/' });
+    nookies.destroy(ctx, 'alertMessage', { path: '/' });
+    return {
+        props: {
+            alertType: alertType,
+            alertMessage: alertMessage
+        }
+    };
 }

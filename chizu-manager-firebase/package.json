@@ -20,6 +20,7 @@
         "firebase-functions": "^3.13.1",
         "next": "latest",
         "next-routes": "^1.4.2",
+        "nookies": "^2.5.2",
         "react": "^17.0.1",
         "react-bootstrap-icons": "^1.4.0",
         "react-dom": "^17.0.1",
