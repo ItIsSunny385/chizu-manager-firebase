@@ -69,6 +69,7 @@ export default function Add() {
                     db.collection('users').doc(userCredential.user.uid).set({
                         displayName: displayName,
                         role: role,
+                        deleted: false,
                     }).then(ref1 => {
                         setCookie(null, 'alertType', 'success', { path: '/' });
                         setCookie(null, 'alertMessage', 'ユーザを登録しました。', { path: '/' })
