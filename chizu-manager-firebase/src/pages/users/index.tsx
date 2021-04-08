@@ -11,8 +11,6 @@ interface Props {
 
 export default function Index(props: Props) {
     const router = useRouter();
-    const [alertType, setAlertType] = useState(props.alertType);
-    const [alertMessage, setAlertMessage] = useState(props.alertMessage);
 
     const onClickAddButton = ((e: MouseEvent) => {
         e.preventDefault();
@@ -23,8 +21,8 @@ export default function Index(props: Props) {
         <AdminApp
             activeTabId={2}
             pageTitle="ユーザ一覧"
-            alertType={alertType}
-            alertMessage={alertMessage}
+            alertType={props.alertType}
+            alertMessage={props.alertMessage}
         >
             <div className="text-left mb-2">
                 <Button onClick={onClickAddButton} className="ml-1">追加</Button>
