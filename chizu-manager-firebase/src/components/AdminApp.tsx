@@ -1,7 +1,7 @@
-import { useState, MouseEvent } from 'react';
+import { useState, MouseEvent, Dispatch } from 'react';
 import App from './App';
 import NavTabs from './NavTabs';
-import { Alert } from 'reactstrap';
+import { Alert, Button } from 'reactstrap';
 import { PeopleFill } from 'react-bootstrap-icons';
 
 interface Props {
@@ -10,16 +10,17 @@ interface Props {
     pageTitle: string,
     alertType: string | undefined,
     alertMessage: string | undefined,
+    loading: boolean,
+    setAlertType: Dispatch<any>,
+    setAlertMessage: Dispatch<any>,
 };
 
 export default function AdminApp(props: Props) {
-    const [alertType, setAlertType] = useState(props.alertType);
-    const [alertMessage, setAlertMessage] = useState(props.alertMessage);
 
     const onClickAlertCloseButton = ((e: MouseEvent) => {
         e.preventDefault();
-        setAlertType(undefined);
-        setAlertMessage(undefined);
+        props.setAlertType(undefined);
+        props.setAlertMessage(undefined);
     });
 
     let pageIcon = undefined;
@@ -30,22 +31,20 @@ export default function AdminApp(props: Props) {
     }
 
     return (
-        <App>
+        <App loading={props.loading}>
             <NavTabs activeTabId={2} />
             {
-                alertType
+                props.alertType
                 &&
-                alertMessage
+                props.alertMessage
                 &&
-                <Alert id="alert" color={alertType} className="mt-3">
-                    {alertMessage}
-                    <button type="button" className="close" data-dismiss="alert" aria-label="Close" onClick={onClickAlertCloseButton}>
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                <Alert id="alert" color={props.alertType} className="mt-3">
+                    {props.alertMessage}
+                    <Button close onClick={onClickAlertCloseButton} />
                 </Alert>
             }
             <h4 className="mb-3 mt-3">{pageIcon}{props.pageTitle}</h4>
             {props.children}
-        </App >
+        </App>
     );
 }

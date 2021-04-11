@@ -1,4 +1,4 @@
-import { useState, useEffect, MouseEvent } from 'react';
+import { useState, useEffect, MouseEvent, Fragment } from 'react';
 import firebase from 'firebase';
 import { useRouter } from 'next/router';
 import AdminApp from '../../components/AdminApp';
@@ -29,6 +29,9 @@ const db = firebase.firestore();
 
 export default function Index(props: Props) {
     const router = useRouter();
+    const [alertType, setAlertType] = useState(props.alertType);
+    const [alertMessage, setAlertMessage] = useState(props.alertMessage);
+    const [loading, setLoading] = useState(true);
     const [data, setData] = useState([]);
 
     const onClickAddButton = ((e: MouseEvent) => {
@@ -46,10 +49,15 @@ export default function Index(props: Props) {
                     id: user.id.substr(0, 10) + '...',
                     displayName: userData.displayName,
                     role: roles[userData.role],
-                    action: <Link href={'/users/edit/' + user.id}><a>編集</a></Link>,
+                    action:
+                        <Fragment>
+                            <Link href={'/users/edit/' + user.id}><a className="mr-1">編集</a></Link>
+                            <Link href="#"><a>削除</a></Link>
+                        </Fragment>,
                 });
             })
             setData(newData);
+            setLoading(false);
         });
     }, [])
 
@@ -57,13 +65,17 @@ export default function Index(props: Props) {
         <AdminApp
             activeTabId={2}
             pageTitle="ユーザ一覧"
-            alertType={props.alertType}
-            alertMessage={props.alertMessage}
+            alertType={alertType}
+            alertMessage={alertMessage}
+            loading={loading}
+            setAlertType={setAlertType}
+            setAlertMessage={setAlertMessage}
         >
             <BootstrapTable keyField='fullId' data={data} columns={columns} />
             <div className="text-left mb-2">
                 <Button onClick={onClickAddButton} className="ml-1">追加</Button>
             </div>
+
         </AdminApp>
     );
 }

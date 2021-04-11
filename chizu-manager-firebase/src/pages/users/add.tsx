@@ -16,6 +16,7 @@ const Role = {
 };
 
 export default function Add() {
+    const [loading, setLoading] = useState(false);
     const [alertType, setAlertType] = useState(undefined);
     const [alertMessage, setAlertMessage] = useState(undefined);
     const [displayName, setDisplayName] = useState('');
@@ -46,6 +47,9 @@ export default function Add() {
     const onClickRegisterButton = ((e: MouseEvent) => {
         e.preventDefault();
 
+        /* Spinnerを表示 */
+        setLoading(true);
+
         /* 各入力値がエラーかどうかを判別 */
         const newDisplayError1 = !(0 < displayName.length && displayName.length <= 32);
         setDisplayError1(newDisplayError1);
@@ -58,10 +62,13 @@ export default function Add() {
 
         /* エラーがある場合は該当箇所が見えるようにし、そうでない場合はデータをサーバに送る */
         if (newDisplayError1) {
+            setLoading(false);
             router.push('#displayNameLabel');
         } else if (newDisplayError2) {
+            setLoading(false);
             router.push('#emailLabel');
         } else if (newDisplayError3) {
+            setLoading(false);
             router.push('#passwordLabel');
         } else {
             auth.createUserWithEmailAndPassword(email, password)
@@ -88,6 +95,7 @@ export default function Add() {
                         });
                     });
                 }).catch((error) => {
+                    console.log(error);
                     switch (error.code) {
                         case 'auth/email-already-in-use':
                             setAlertType('danger');
@@ -105,7 +113,14 @@ export default function Add() {
                             setAlertType('danger');
                             setAlertMessage('パスワードが弱すぎます。');
                             break;
+                        default:
+                            setAlertType('danger');
+                            setAlertMessage('不明なエラーが発生しました。');
+                            break;
                     }
+                    /* Spinnerを消去 */
+                    setLoading(false);
+
                     router.push('#alert');
                 });
         }
@@ -122,6 +137,9 @@ export default function Add() {
             pageTitle="ユーザ登録"
             alertType={alertType}
             alertMessage={alertMessage}
+            loading={loading}
+            setAlertType={setAlertType}
+            setAlertMessage={setAlertMessage}
         >
             <Form>
                 <FormGroup>

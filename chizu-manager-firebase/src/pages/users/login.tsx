@@ -15,7 +15,7 @@ export default function Login() {
     }, []);
 
     return (
-        <App>
+        <App loading={false}>
             <h5>{message}</h5>
         </App>
     );

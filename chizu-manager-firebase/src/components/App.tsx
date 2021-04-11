@@ -2,18 +2,25 @@ import React from 'react';
 import Header from './Header';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col } from 'reactstrap';
+import SpinnerWithBack from './SpinnerWithBack';
 
-export default function App({ children }) {
+interface Props {
+    children: any;
+    loading: boolean;
+}
+
+export default function App(props: Props) {
     return (
         <main>
             <Header />
             <Container>
                 <Row>
                     <Col>
-                        {children}
+                        {props.children}
                     </Col>
                 </Row>
             </Container>
+            {props.loading && <SpinnerWithBack />}
         </main>
     );
 }
