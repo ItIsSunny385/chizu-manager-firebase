@@ -24,6 +24,7 @@
         "react": "^17.0.1",
         "react-bootstrap-icons": "^1.4.0",
         "react-bootstrap-table-next": "^4.0.3",
+        "react-bootstrap-table2-paginator": "^2.1.2",
         "react-dom": "^17.0.1",
         "reactstrap": "^8.9.0"
     },
@@ -31,6 +32,7 @@
         "@types/firebase": "^3.2.1",
         "@types/node": "^14.14.37",
         "@types/react": "^17.0.3",
+        "@types/react-bootstrap-table-next": "^4.0.13",
         "@types/reactstrap": "^8.7.2",
         "firebase-functions-test": "^0.2.3",
         "firebase-tools": "^9.3.0",

@@ -6,7 +6,9 @@ import { Button } from 'reactstrap';
 import Link from 'next/link'
 import nookies from 'nookies';
 import BootstrapTable from 'react-bootstrap-table-next';
+import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
+import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
 import '../../components/InitializeFirebase';
 
 interface Props {
@@ -20,9 +22,9 @@ const roles = {
     'Administrator': '管理者',
 }
 const columns = [
-    { dataField: 'id', text: 'ID', classes: 'd-none d-md-block', headerClasses: 'd-none d-md-block' },
-    { dataField: 'displayName', text: '表示名' },
-    { dataField: 'role', text: '権限' },
+    { dataField: 'id', text: 'ID', classes: 'd-none d-md-block', headerClasses: 'd-none d-md-block', sort: true },
+    { dataField: 'displayName', text: '表示名', sort: true },
+    { dataField: 'role', text: '権限', sort: true },
     { dataField: 'action', text: '' },
 ]
 const db = firebase.firestore();
@@ -71,7 +73,13 @@ export default function Index(props: Props) {
             setAlertType={setAlertType}
             setAlertMessage={setAlertMessage}
         >
-            <BootstrapTable keyField='fullId' data={data} columns={columns} />
+            <BootstrapTable
+                keyField='fullId'
+                data={data}
+                columns={columns}
+                bootstrap4={true}
+                pagination={paginationFactory()}
+            />
             <div className="text-left mb-2">
                 <Button onClick={onClickAddButton} className="ml-1">追加</Button>
             </div>
