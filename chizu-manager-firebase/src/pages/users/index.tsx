@@ -29,36 +29,73 @@ const columns = [
 ]
 const db = firebase.firestore();
 
+interface UserRow {
+    fullId: string;
+    id: string;
+    displayName: string;
+    role: string;
+    action: JSX.Element;
+}
+
 export default function Index(props: Props) {
     const router = useRouter();
     const [alertType, setAlertType] = useState(props.alertType);
     const [alertMessage, setAlertMessage] = useState(props.alertMessage);
     const [loading, setLoading] = useState(true);
-    const [data, setData] = useState([]);
+    const [data, setData] = useState([] as UserRow[]);
 
     const onClickAddButton = ((e: MouseEvent) => {
         e.preventDefault();
         router.push('/users/add');
     });
 
+    const onClickDeleteLink = ((e: MouseEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        const targetId = (e.target as HTMLAnchorElement).dataset.id;
+        const batch = db.batch();
+        const userRef = db.collection('users').doc(targetId);
+        batch.update(userRef, { deleted: true });
+        const deleteAuthUserRef = db.collection('delete_auth_users').doc(targetId);
+        batch.set(deleteAuthUserRef, { uid: targetId });
+        batch.commit().then(ref => {
+            setAlertType('success');
+            setAlertMessage('削除しました。');
+            /* ローディングアニメーションは リアルタイムリスナーで消去 */
+        }).catch(error => {
+            console.log(error);
+            setAlertType('danger');
+            setAlertType('削除に失敗しました。');
+            setLoading(false);
+        });
+    });
+
+    const createNewData = (snapshot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>) => {
+        let newData = [];
+        snapshot.forEach((user) => {
+            const userData = user.data();
+            newData.push({
+                fullId: user.id,
+                id: user.id.substr(0, 10) + '...',
+                displayName: userData.displayName,
+                role: roles[userData.role],
+                action:
+                    <Fragment>
+                        <Link href={'/users/edit/' + user.id}><a className="mr-1">編集</a></Link>
+                        <Link href="#alert"><a onClick={onClickDeleteLink} data-id={user.id}>削除</a></Link>
+                    </Fragment>,
+            });
+        });
+        return newData;
+    }
+
     useEffect(() => {
         db.collection('users').where('deleted', '!=', true).get().then((snapshot) => {
-            let newData = [];
-            snapshot.forEach((user) => {
-                const userData = user.data();
-                newData.push({
-                    fullId: user.id,
-                    id: user.id.substr(0, 10) + '...',
-                    displayName: userData.displayName,
-                    role: roles[userData.role],
-                    action:
-                        <Fragment>
-                            <Link href={'/users/edit/' + user.id}><a className="mr-1">編集</a></Link>
-                            <Link href="#"><a>削除</a></Link>
-                        </Fragment>,
-                });
-            })
-            setData(newData);
+            setData(createNewData(snapshot));
+            setLoading(false);
+        });
+        db.collection('users').where('deleted', '!=', true).onSnapshot((snapshot) => {
+            setData(createNewData(snapshot));
             setLoading(false);
         });
     }, [])
@@ -74,16 +111,15 @@ export default function Index(props: Props) {
             setAlertMessage={setAlertMessage}
         >
             <BootstrapTable
+                bootstrap4
                 keyField='fullId'
                 data={data}
                 columns={columns}
-                bootstrap4={true}
                 pagination={paginationFactory()}
             />
-            <div className="text-left mb-2">
+            <div className="text-left mb-2 mt-2">
                 <Button onClick={onClickAddButton} className="ml-1">追加</Button>
             </div>
-
         </AdminApp>
     );
 }
