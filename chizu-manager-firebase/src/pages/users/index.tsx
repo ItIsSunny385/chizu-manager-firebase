@@ -81,7 +81,7 @@ export default function Index(props: Props) {
                 role: roles[userData.role],
                 action:
                     <Fragment>
-                        <Link href={'/users/edit/' + user.id}><a className="mr-1">編集</a></Link>
+                        <Link href={'/users/edit?id=' + user.id}><a className="mr-1">編集</a></Link>
                         <Link href="#alert"><a onClick={onClickDeleteLink} data-id={user.id}>削除</a></Link>
                     </Fragment>,
             });
@@ -90,10 +90,6 @@ export default function Index(props: Props) {
     }
 
     useEffect(() => {
-        db.collection('users').where('deleted', '!=', true).get().then((snapshot) => {
-            setData(createNewData(snapshot));
-            setLoading(false);
-        });
         db.collection('users').where('deleted', '!=', true).onSnapshot((snapshot) => {
             setData(createNewData(snapshot));
             setLoading(false);
