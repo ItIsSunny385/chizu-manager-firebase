@@ -49,7 +49,7 @@ export default function Index(props: Props) {
         router.push('/users/add');
     });
 
-    const onClickDeleteLink = ((e: MouseEvent) => {
+    const onClickDeleteLink = (async (e: MouseEvent) => {
         e.preventDefault();
         setLoading(true);
         const targetId = (e.target as HTMLAnchorElement).dataset.id;
@@ -58,16 +58,19 @@ export default function Index(props: Props) {
         batch.update(userRef, { deleted: true });
         const deleteAuthUserRef = db.collection('delete_auth_users').doc(targetId);
         batch.set(deleteAuthUserRef, { uid: targetId });
-        batch.commit().then(ref => {
+        try {
+            await batch.commit();
             setAlertType('success');
             setAlertMessage('削除しました。');
             /* ローディングアニメーションは リアルタイムリスナーで消去 */
-        }).catch(error => {
+            return;
+        } catch (error) {
             console.log(error);
             setAlertType('danger');
             setAlertType('削除に失敗しました。');
             setLoading(false);
-        });
+            return;
+        }
     });
 
     const createNewData = (snapshot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>) => {

@@ -44,7 +44,7 @@ export default function Add() {
         setPassword(e.target.value);
     });
 
-    const onClickRegisterButton = ((e: MouseEvent) => {
+    const onClickRegisterButton = (async (e: MouseEvent) => {
         e.preventDefault();
 
         /* Spinnerを表示 */
@@ -64,66 +64,69 @@ export default function Add() {
         if (newDisplayError1) {
             setLoading(false);
             router.push('#displayNameLabel');
+            return;
         } else if (newDisplayError2) {
             setLoading(false);
             router.push('#emailLabel');
+            return;
         } else if (newDisplayError3) {
             setLoading(false);
             router.push('#passwordLabel');
-        } else {
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    db.collection('users').doc(userCredential.user.uid).set({
-                        displayName: displayName,
-                        role: role,
-                        deleted: false,
-                    }).then(ref1 => {
-                        setCookie(null, 'alertType', 'success', { path: '/' });
-                        setCookie(null, 'alertMessage', 'ユーザを登録しました。', { path: '/' })
-                        router.push('/users');
-                    }).catch((error1) => {
-                        console.log(error1);
-                        db.collection('delete_auth_users').add({
-                            uid: userCredential.user.uid,
-                        }).then((ref2) => {
-                            setAlertType('danger');
-                            setAlertMessage('ユーザ登録に失敗しました。管理者にお問い合わせください。');
-                        }).catch((error2) => {
-                            console.log(error2);
-                            setAlertType('danger');
-                            setAlertMessage('ユーザ登録に失敗しました。管理者にお問い合わせください。');
-                        });
-                    });
-                }).catch((error) => {
-                    console.log(error);
-                    switch (error.code) {
-                        case 'auth/email-already-in-use':
-                            setAlertType('danger');
-                            setAlertMessage('このメールアドレスは登録済みです。');
-                            break;
-                        case 'auth/invalid-email':
-                            setAlertType('danger');
-                            setAlertMessage('このメールアドレスは不正です。');
-                            break;
-                        case 'auth/operation-not-allowed':
-                            setAlertType('danger');
-                            setAlertMessage('この操作には対応していません。');
-                            break;
-                        case 'auth/weak-password':
-                            setAlertType('danger');
-                            setAlertMessage('パスワードが弱すぎます。');
-                            break;
-                        default:
-                            setAlertType('danger');
-                            setAlertMessage('不明なエラーが発生しました。');
-                            break;
-                    }
-                    /* Spinnerを消去 */
-                    setLoading(false);
-
-                    router.push('#alert');
-                });
+            return;
         }
+
+        try {
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            try {
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    displayName: displayName,
+                    role: role,
+                    deleted: false,
+                });
+                setCookie(null, 'alertType', 'success', { path: '/' });
+                setCookie(null, 'alertMessage', 'ユーザを登録しました。', { path: '/' })
+                router.push('/users');
+                return;
+            } catch (error1) {
+                console.log(error1);
+                try {
+                    await db.collection('delete_auth_users').add({
+                        uid: userCredential.user.uid,
+                    });
+                } catch (error2) {
+                    console.log(error2);
+                }
+                setAlertType('danger');
+                setAlertMessage('ユーザ登録に失敗しました。管理者にお問い合わせください。');
+            }
+        } catch (error) {
+            console.log(error);
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    setAlertType('danger');
+                    setAlertMessage('このメールアドレスは登録済みです。');
+                    break;
+                case 'auth/invalid-email':
+                    setAlertType('danger');
+                    setAlertMessage('このメールアドレスは不正です。');
+                    break;
+                case 'auth/operation-not-allowed':
+                    setAlertType('danger');
+                    setAlertMessage('この操作には対応していません。');
+                    break;
+                case 'auth/weak-password':
+                    setAlertType('danger');
+                    setAlertMessage('パスワードが弱すぎます。');
+                    break;
+                default:
+                    setAlertType('danger');
+                    setAlertMessage('不明なエラーが発生しました。');
+                    break;
+            }
+        }
+        setLoading(false);
+        router.push('#alert');
+        return;
     });
 
     const onClickBackButton = ((e: MouseEvent) => {
