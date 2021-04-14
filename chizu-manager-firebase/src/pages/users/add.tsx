@@ -84,7 +84,7 @@ export default function Add() {
                     deleted: false,
                 });
                 setCookie(null, 'alertType', 'success', { path: '/' });
-                setCookie(null, 'alertMessage', 'ユーザを登録しました。', { path: '/' })
+                setCookie(null, 'alertMessage', 'ユーザを登録しました。', { path: '/' });
                 router.push('/users');
                 return;
             } catch (error1) {
