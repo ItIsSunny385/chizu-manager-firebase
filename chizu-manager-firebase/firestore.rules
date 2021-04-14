@@ -7,5 +7,8 @@ service cloud.firestore {
     match /delete_auth_users/{docId} {
       allow read, write: if true;
     }
+    match /maps/{docId} {
+      allow read, write: if true;
+    }
   }
 }

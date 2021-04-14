@@ -97,7 +97,7 @@ export default function Index(props: Props) {
             setData(createNewData(snapshot));
             setLoading(false);
         });
-    }, [])
+    }, []);
 
     return (
         <AdminApp

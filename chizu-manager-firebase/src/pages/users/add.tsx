@@ -199,7 +199,7 @@ export default function Add() {
                     <FormText>パスワードは8～32文字の半角英数字にしてください。英字と数字の両方が必要です。</FormText>
                 </FormGroup>
                 <div className="text-left mb-2">
-                    <Button onClick={onClickBackButton} className="ml-auto">戻る</Button>
+                    <Button onClick={onClickBackButton}>戻る</Button>
                     <Button onClick={onClickRegisterButton} className="ml-1">登録</Button>
                 </div>
             </Form>
