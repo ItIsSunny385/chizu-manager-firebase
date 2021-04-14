@@ -1,7 +1,7 @@
 import { useState, MouseEvent, Dispatch } from 'react';
 import App from './App';
 import NavTabs from './NavTabs';
-import { Alert, Button } from 'reactstrap';
+import { Alert, Button, Col, Container, Row } from 'reactstrap';
 import { PeopleFill } from 'react-bootstrap-icons';
 
 interface Props {
@@ -32,19 +32,25 @@ export default function AdminApp(props: Props) {
 
     return (
         <App loading={props.loading}>
-            <NavTabs activeTabId={2} />
-            {
-                props.alertType
-                &&
-                props.alertMessage
-                &&
-                <Alert id="alert" color={props.alertType} className="mt-3">
-                    {props.alertMessage}
-                    <Button close onClick={onClickAlertCloseButton} />
-                </Alert>
-            }
-            <h4 className="mb-3 mt-3">{pageIcon}{props.pageTitle}</h4>
-            {props.children}
+            <Container>
+                <Row>
+                    <Col>
+                        <NavTabs activeTabId={2} />
+                        {
+                            props.alertType
+                            &&
+                            props.alertMessage
+                            &&
+                            <Alert id="alert" color={props.alertType} className="mt-3">
+                                {props.alertMessage}
+                                <Button close onClick={onClickAlertCloseButton} />
+                            </Alert>
+                        }
+                        <h4 className="mb-3 mt-3">{pageIcon}{props.pageTitle}</h4>
+                        {props.children}
+                    </Col>
+                </Row>
+            </Container>
         </App>
     );
 }

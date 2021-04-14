@@ -10,5 +10,9 @@ module.exports = {
         storageBucket: functions.config().firebase_config.storage_bucket,
         messagingSenderId: functions.config().firebase_config.messaging_sender_id,
         appId: functions.config().firebase_config.app_id,
+        googleMapsApiKey: functions.config().google_maps.api_key,
+        googleMapsCenterLat: functions.config().google_maps.center.lat,
+        googleMapsCenterLng: functions.config().google_maps.center.lng,
+        googleMapsZoom: functions.config().google_maps.zoom,
     }
 }

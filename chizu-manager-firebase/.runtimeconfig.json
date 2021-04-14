@@ -11,5 +11,13 @@
     "basic_auth": {
         "username": "username",
         "password": "password"
+    },
+    "google_maps": {
+        "api_key": "apiKey",
+        "center": {
+            "lat": "36.083526",
+            "lng": "140.076445"
+        },
+        "zoom": "17"
     }
 }
