@@ -3,6 +3,7 @@ import firebase from 'firebase';
 import { useRouter } from 'next/router';
 import '../../components/InitializeFirebase';
 import AdminApp from '../../components/AdminApp';
+import { NewMapBasicInfo } from '../../types/map';
 import { Button, Form, FormGroup, Label, Input, FormText, FormFeedback } from 'reactstrap';
 import { setCookie } from 'nookies';
 import { Router } from 'express';
@@ -16,7 +17,7 @@ export default function Add() {
     const [alertMessage, setAlertMessage] = useState(undefined);
     const [name, setName] = useState('');
     const [mapsSize, setMapsSize] = useState(0);
-    const [number, setNumber] = useState(1);
+    const [orderNumber, setNumber] = useState(1);
     const [publicFlg, setPublicFlg] = useState(0);;
     const [editableFlg, setEditableFlg] = useState(0);
     const [displayError1, setDisplayError1] = useState(false);
@@ -59,7 +60,14 @@ export default function Add() {
             return;
         }
 
-        /* エラーがなかった場合は次のページに遷移する */
+        /* エラーがなかった場合はCookieにデータを登録し、次のページに遷移する */
+        const newMapBasicInfo: NewMapBasicInfo = {
+            name: name,
+            orderNumber: orderNumber,
+            publicFlg: Boolean(publicFlg),
+            editableFlg: Boolean(editableFlg)
+        };
+        setCookie(null, 'newMapBasicInfo', JSON.stringify(newMapBasicInfo), { path: '/' });
         router.push('/maps/add_border');
         return;
     });
@@ -104,7 +112,7 @@ export default function Add() {
                     <Input
                         type="number"
                         name="number"
-                        value={number}
+                        value={orderNumber}
                         onChange={onChangeNumber}
                     />
                     <FormText>1から{mapsSize + 1}までの地図の順番を入力してください。一覧などでの順番に利用されます。</FormText>

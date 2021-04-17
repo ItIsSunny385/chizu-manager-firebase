@@ -3,11 +3,12 @@ import ReactDOM from 'react-dom';
 import firebase from 'firebase';
 import { useRouter } from 'next/router';
 import '../../components/InitializeFirebase';
-import { setCookie } from 'nookies';
+import nookies, { setCookie } from 'nookies';
 import MapApp from '../../components/MapApp';
 import { Polyline, Polygon, InfoWindow } from '@react-google-maps/api';
 import { Badge, Button, Nav, NavItem, NavLink } from 'reactstrap';
 import { CheckSquareFill, TrashFill } from 'react-bootstrap-icons';
+import { NewMapBasicInfo, NewMapBasicInfoWithBorderCoords } from '../../types/map';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -30,7 +31,11 @@ interface InfoWindowProps {
     displayCheck: boolean,
 }
 
-export default function AddBorder() {
+interface Props {
+    newMapBasicInfo: NewMapBasicInfo
+}
+
+export default function AddBorder(props: Props) {
     const [loading, setLoading] = useState(true);
     const [corners, setCorners, pushCorner] = useCorners();
     const [finished, setFinished] = useState(false);
@@ -133,7 +138,22 @@ export default function AddBorder() {
 
     const onClickNextButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
+        const newMapBasicInfoWithBorderCoords: NewMapBasicInfoWithBorderCoords = {
+            ...props.newMapBasicInfo,
+            borderCoords: corners.map(x => ({ lat: x.lat(), lng: x.lng() }))
+        };
+        setCookie(null,
+            'newMapBasicInfoWithBorderCoords',
+            JSON.stringify(newMapBasicInfoWithBorderCoords),
+            { path: '/' }
+        );
     }
+
+    useEffect(() => {
+        if (!props.newMapBasicInfo) {
+            router.push('/maps/add');
+        }
+    }, []);
 
     return (
         <React.Fragment>
@@ -186,4 +206,16 @@ export default function AddBorder() {
             </div>
         </React.Fragment>
     );
+}
+
+export async function getServerSideProps(ctx) {
+    const cookies = nookies.get(ctx);
+    const newMapBasicInfo: NewMapBasicInfo = cookies.newMapBasicInfo ?
+        JSON.parse(cookies.newMapBasicInfo) : undefined;
+    nookies.destroy(ctx, 'newMapBasicInfo', { path: '/' });
+    return {
+        props: {
+            newMapBasicInfo: newMapBasicInfo,
+        }
+    };
 }
