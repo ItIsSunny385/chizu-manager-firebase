@@ -1,14 +1,22 @@
-import React, { Dispatch } from 'react';
+import React, { Dispatch, useState } from 'react';
 import App from "./App";
 import { GoogleMap, LoadScript } from "@react-google-maps/api";
 
 interface Props {
     loading: boolean;
-    children?: JSX.Element;
-    onLoadMap?: Dispatch<any>;
+    children?: any;
+    onLoadMap?: (map: google.maps.Map<Element>) => void | Promise<void>;
+    onRightClick?: (e: google.maps.MapMouseEvent) => void;
 }
 
 export default function MapApp(props: Props) {
+    const [apiKey] = useState(process.env.googleMapsApiKey);
+    const [zoom] = useState(Number(process.env.googleMapsZoom));
+    const [center] = useState({
+        lat: Number(process.env.googleMapsCenterLat),
+        lng: Number(process.env.googleMapsCenterLng),
+    });
+
     const appStyle = {
         width: '100%',
         height: '100vh',
@@ -19,19 +27,21 @@ export default function MapApp(props: Props) {
         height: 'calc(100vh - 4rem)',
     }
 
-    const center = {
-        lat: Number(process.env.googleMapsCenterLat),
-        lng: Number(process.env.googleMapsCenterLng),
-    };
-
     return (
         <App loading={props.loading} containerStyle={appStyle}>
-            <LoadScript googleMapsApiKey={process.env.googleMapsApiKey}>
+            <LoadScript googleMapsApiKey={apiKey}>
                 <GoogleMap
                     mapContainerStyle={containerDivStyle}
                     center={center}
-                    zoom={Number(process.env.googleMapsZoom)}
+                    zoom={zoom}
                     onLoad={props.onLoadMap}
+                    onRightClick={props.onRightClick}
+                    options={{
+                        mapTypeControl: false,
+                        fullscreenControl: false,
+                        streetViewControl: false,
+                        zoomControl: false,
+                    }}
                 >
                     {props.children}
                 </GoogleMap>
