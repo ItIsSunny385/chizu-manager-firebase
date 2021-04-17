@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import firebase from 'firebase';
 import { useRouter } from 'next/router';
 import '../../components/InitializeFirebase';
 import { setCookie } from 'nookies';
 import MapApp from '../../components/MapApp';
 import { Polyline, Polygon, InfoWindow } from '@react-google-maps/api';
-import { Nav, NavItem, NavLink } from 'reactstrap';
+import { Badge, Button, Nav, NavItem, NavLink } from 'reactstrap';
 import { CheckSquareFill, TrashFill } from 'react-bootstrap-icons';
 
 const db = firebase.firestore();
@@ -36,7 +37,22 @@ export default function AddBorder() {
     const [infoWindowProps, setInfoWindowProps] = useState(undefined as InfoWindowProps);
     const router = useRouter();
 
+    const leftBottomButtons = <div className="ml-2 mb-2">
+        <Button onClick={(e) => { e.preventDefault(); document.getElementById('back').click(); }}>戻る</Button>
+        <Button className="ml-1" onClick={(e) => { e.preventDefault(); document.getElementById('next').click(); }}>次へ</Button>
+    </div>;
+
+    const topCenterTitle = <div className="mt-1">
+        <h4><Badge color="dark">境界線追加</Badge></h4>
+    </div>;
+
     const onLoadMap = (map: google.maps.Map<Element>) => {
+        const leftBottomButtonDiv = document.createElement('div');
+        ReactDOM.render(leftBottomButtons, leftBottomButtonDiv);
+        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(leftBottomButtonDiv);
+        const topCenterTitleDiv = document.createElement('div');
+        ReactDOM.render(topCenterTitle, topCenterTitleDiv);
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(topCenterTitleDiv);
         setLoading(false);
     };
 
@@ -110,48 +126,64 @@ export default function AddBorder() {
         setInfoWindowProps(undefined);
     }
 
+    const onClickBackButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault();
+        router.push('/maps/add');
+    }
+
+    const onClickNextButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault();
+    }
+
     return (
-        <MapApp
-            loading={loading}
-            onLoadMap={onLoadMap}
-            onRightClick={finished ? undefined : onRightClick}
-        >
-            {
-                finished
-                    ?
-                    <Polygon
-                        path={corners}
-                        editable={true}
-                        options={{ strokeColor: "red", fillColor: "red" }}
-                        onMouseUp={onMouseUpPolygone}
-                    />
-                    :
-                    <Polyline
-                        path={corners}
-                        editable={true}
-                        options={{ strokeColor: "red" }}
-                        onMouseUp={onMouseUpPolyline}
-                        onMouseDown={(e) => { console.log('onMouseDown', e) }}
-                    />
-            }
-            {
-                infoWindowProps
-                &&
-                <InfoWindow position={infoWindowProps.latLng} onCloseClick={() => { setInfoWindowProps(undefined) }}>
-                    <Nav style={{ fontSize: "1.5rem" }}>
-                        <NavItem>
-                            <NavLink onClick={onClickTrash}><TrashFill /></NavLink>
-                        </NavItem>
-                        {
-                            infoWindowProps.displayCheck
-                            &&
+        <React.Fragment>
+            <MapApp
+                loading={loading}
+                onLoadMap={onLoadMap}
+                onRightClick={finished ? undefined : onRightClick}
+            >
+                {
+                    finished
+                        ?
+                        <Polygon
+                            path={corners}
+                            editable={true}
+                            options={{ strokeColor: "red", fillColor: "red" }}
+                            onMouseUp={onMouseUpPolygone}
+                        />
+                        :
+                        <Polyline
+                            path={corners}
+                            editable={true}
+                            options={{ strokeColor: "red" }}
+                            onMouseUp={onMouseUpPolyline}
+                            onMouseDown={(e) => { console.log('onMouseDown', e) }}
+                        />
+                }
+                {
+                    infoWindowProps
+                    &&
+                    <InfoWindow position={infoWindowProps.latLng} onCloseClick={() => { setInfoWindowProps(undefined) }}>
+                        <Nav style={{ fontSize: "1.5rem" }}>
                             <NavItem>
-                                <NavLink onClick={onClickCheck} class="ml-1"><CheckSquareFill /></NavLink>
+                                <NavLink onClick={onClickTrash}><TrashFill /></NavLink>
                             </NavItem>
-                        }
-                    </Nav>
-                </InfoWindow>
-            }
-        </MapApp >
+                            {
+                                infoWindowProps.displayCheck
+                                &&
+                                <NavItem>
+                                    <NavLink onClick={onClickCheck} class="ml-1"><CheckSquareFill /></NavLink>
+                                </NavItem>
+                            }
+                        </Nav>
+                    </InfoWindow>
+                }
+            </MapApp >
+            {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
+            <div style={{ display: 'none' }}>
+                <Button id="back" onClick={onClickBackButton} />
+                <Button id="next" onClick={onClickNextButton} />
+            </div>
+        </React.Fragment>
     );
 }
