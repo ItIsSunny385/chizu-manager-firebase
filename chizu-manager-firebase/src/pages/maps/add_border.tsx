@@ -1,10 +1,12 @@
-import React, { useState, MouseEvent, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import firebase from 'firebase';
 import { useRouter } from 'next/router';
 import '../../components/InitializeFirebase';
 import { setCookie } from 'nookies';
 import MapApp from '../../components/MapApp';
-import { Polyline, Polygon } from '@react-google-maps/api';
+import { Polyline, Polygon, InfoWindow } from '@react-google-maps/api';
+import { Nav, NavItem, NavLink } from 'reactstrap';
+import { CheckSquareFill, TrashFill } from 'react-bootstrap-icons';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -21,10 +23,17 @@ function useCorners(): [
     return [corners, setCorners, push];
 }
 
+interface InfoWindowProps {
+    latLng: google.maps.LatLng,
+    vertex: number,
+    displayCheck: boolean,
+}
+
 export default function AddBorder() {
     const [loading, setLoading] = useState(true);
     const [corners, setCorners, pushCorner] = useCorners();
     const [finished, setFinished] = useState(false);
+    const [infoWindowProps, setInfoWindowProps] = useState(undefined as InfoWindowProps);
     const router = useRouter();
 
     const onLoadMap = (map: google.maps.Map<Element>) => {
@@ -63,7 +72,11 @@ export default function AddBorder() {
 
         /* 最初の頂点を右クリックされた場合 */
         if ((e.domEvent as globalThis.MouseEvent).button === 2 && typeof e.vertex === 'number') {
-            setFinished(true);
+            setInfoWindowProps({
+                latLng: e.latLng,
+                vertex: e.vertex,
+                displayCheck: false,
+            });
         }
     }
 
@@ -71,9 +84,30 @@ export default function AddBorder() {
         onMouseUp(e);
 
         /* 最初の頂点を右クリックされた場合 */
-        if ((e.domEvent as globalThis.MouseEvent).button === 2 && e.vertex === 0) {
-            setFinished(true);
+        if ((e.domEvent as globalThis.MouseEvent).button === 2 && typeof e.vertex === 'number') {
+            setInfoWindowProps({
+                latLng: e.latLng,
+                vertex: e.vertex,
+                displayCheck: e.vertex === 0,
+            });
         }
+    }
+
+    const onClickTrash = (e: React.MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
+        e.preventDefault();
+        const newCorners = [...corners];
+        newCorners.splice(infoWindowProps.vertex, 1);
+        setCorners(newCorners);
+        if (newCorners.length === 0) {
+            setFinished(false);
+        }
+        setInfoWindowProps(undefined);
+    }
+
+    const onClickCheck = (e: React.MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
+        e.preventDefault();
+        setFinished(true);
+        setInfoWindowProps(undefined);
     }
 
     return (
@@ -100,6 +134,24 @@ export default function AddBorder() {
                         onMouseDown={(e) => { console.log('onMouseDown', e) }}
                     />
             }
-        </MapApp>
+            {
+                infoWindowProps
+                &&
+                <InfoWindow position={infoWindowProps.latLng} onCloseClick={() => { setInfoWindowProps(undefined) }}>
+                    <Nav style={{ fontSize: "1.5rem" }}>
+                        <NavItem>
+                            <NavLink onClick={onClickTrash}><TrashFill /></NavLink>
+                        </NavItem>
+                        {
+                            infoWindowProps.displayCheck
+                            &&
+                            <NavItem>
+                                <NavLink onClick={onClickCheck} class="ml-1"><CheckSquareFill /></NavLink>
+                            </NavItem>
+                        }
+                    </Nav>
+                </InfoWindow>
+            }
+        </MapApp >
     );
 }
