@@ -18,7 +18,7 @@ export default function Add() {
     const [name, setName] = useState('');
     const [mapsSize, setMapsSize] = useState(0);
     const [orderNumber, setNumber] = useState(1);
-    const [publicFlg, setPublicFlg] = useState(0);;
+    const [publicFlg, setPublicFlg] = useState(0);
     const [editableFlg, setEditableFlg] = useState(0);
     const [displayError1, setDisplayError1] = useState(false);
     const router = useRouter();

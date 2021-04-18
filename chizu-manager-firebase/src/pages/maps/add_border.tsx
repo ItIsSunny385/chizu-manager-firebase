@@ -147,6 +147,7 @@ export default function AddBorder(props: Props) {
             JSON.stringify(newMapBasicInfoWithBorderCoords),
             { path: '/' }
         );
+        router.push('/maps/add_others');
     }
 
     useEffect(() => {
@@ -177,7 +178,6 @@ export default function AddBorder(props: Props) {
                             editable={true}
                             options={{ strokeColor: "red" }}
                             onMouseUp={onMouseUpPolyline}
-                            onMouseDown={(e) => { console.log('onMouseDown', e) }}
                         />
                 }
                 {
@@ -192,7 +192,7 @@ export default function AddBorder(props: Props) {
                                 infoWindowProps.displayCheck
                                 &&
                                 <NavItem>
-                                    <NavLink onClick={onClickCheck} class="ml-1"><CheckSquareFill /></NavLink>
+                                    <NavLink onClick={onClickCheck} className="ml-1"><CheckSquareFill /></NavLink>
                                 </NavItem>
                             }
                         </Nav>
