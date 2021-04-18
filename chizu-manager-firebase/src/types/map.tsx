@@ -1,8 +1,13 @@
+export enum MapStatus {
+    Private = 'Private',
+    Viewable = 'Viewable',
+    Editable = 'Editable',
+}
+
 export interface NewMapBasicInfo {
     name: string;
     orderNumber: number;
-    publicFlg: boolean;
-    editableFlg: boolean;
+    status: MapStatus;
 }
 
 export interface NewMapBasicInfoWithBorderCoords extends NewMapBasicInfo {

@@ -1,12 +1,14 @@
-import React, { Dispatch, useState } from 'react';
+import React, { useState } from 'react';
 import App from "./App";
 import { GoogleMap, LoadScript } from "@react-google-maps/api";
+import { MessageModalProps } from './MessageModal';
 
 interface Props {
     loading: boolean;
     children?: any;
     onLoadMap?: (map: google.maps.Map<Element>) => void | Promise<void>;
     onRightClick?: (e: google.maps.MapMouseEvent) => void;
+    messageModalProps?: MessageModalProps;
 }
 
 export default function MapApp(props: Props) {
@@ -28,7 +30,11 @@ export default function MapApp(props: Props) {
     }
 
     return (
-        <App loading={props.loading} containerStyle={appStyle}>
+        <App
+            loading={props.loading}
+            containerStyle={appStyle}
+            messageModalProps={props.messageModalProps}
+        >
             <LoadScript googleMapsApiKey={apiKey}>
                 <GoogleMap
                     mapContainerStyle={containerDivStyle}

@@ -3,7 +3,7 @@ import firebase from 'firebase';
 import { useRouter } from 'next/router';
 import '../../components/InitializeFirebase';
 import AdminApp from '../../components/AdminApp';
-import { NewMapBasicInfo } from '../../types/map';
+import { MapStatus, NewMapBasicInfo } from '../../types/map';
 import { Button, Form, FormGroup, Label, Input, FormText, FormFeedback } from 'reactstrap';
 import { setCookie } from 'nookies';
 import { Router } from 'express';
@@ -18,8 +18,7 @@ export default function Add() {
     const [name, setName] = useState('');
     const [mapsSize, setMapsSize] = useState(0);
     const [orderNumber, setNumber] = useState(1);
-    const [publicFlg, setPublicFlg] = useState(0);
-    const [editableFlg, setEditableFlg] = useState(0);
+    const [status, setStatus] = useState(MapStatus.Private);
     const [displayError1, setDisplayError1] = useState(false);
     const router = useRouter();
 
@@ -34,12 +33,9 @@ export default function Add() {
         setNumber(newNumber);
     });
 
-    const onChangePublicFlg = ((e) => {
-        setPublicFlg(Number(e.target.value));
-    });
-
-    const onChangeEditableFlg = ((e) => {
-        setEditableFlg(Number(e.target.value))
+    const onChangeStatus = ((e) => {
+        e.preventDefault();
+        setStatus(e.target.value);
     });
 
     const onClickBackButton = ((e: MouseEvent) => {
@@ -64,8 +60,7 @@ export default function Add() {
         const newMapBasicInfo: NewMapBasicInfo = {
             name: name,
             orderNumber: orderNumber,
-            publicFlg: Boolean(publicFlg),
-            editableFlg: Boolean(editableFlg)
+            status: status,
         };
         setCookie(null, 'newMapBasicInfo', JSON.stringify(newMapBasicInfo), { path: '/' });
         router.push('/maps/add_border');
@@ -118,28 +113,18 @@ export default function Add() {
                     <FormText>1から{mapsSize + 1}までの地図の順番を入力してください。一覧などでの順番に利用されます。</FormText>
                 </FormGroup>
                 <FormGroup>
-                    <Label id="publicFlgLabel" for="publicFlg">公開／非公開</Label>
+                    <Label id="statusLabel" for="statis">公開／非公開</Label>
                     <Input
                         type="select"
-                        name="publicFlg"
-                        onChange={onChangePublicFlg}
+                        name="status"
+                        value={status}
+                        onChange={onChangeStatus}
                     >
-                        <option value="0">非公開</option>
-                        <option value="1">公開</option>
+                        <option value={MapStatus.Private}>非公開</option>
+                        <option value={MapStatus.Viewable}>全員閲覧可</option>
+                        <option value={MapStatus.Editable}>全員編集可</option>
                     </Input>
-                    <FormText>全ユーザに公開する場合は「公開」を選択してください。非公開にした場合は公開するユーザを個別に設定できます。</FormText>
-                </FormGroup>
-                <FormGroup>
-                    <Label id="editableFlgLabel" for="editableFlg">編集可</Label>
-                    <Input
-                        type="select"
-                        name="editableFlg"
-                        onChange={onChangeEditableFlg}
-                    >
-                        <option value="0">編集不可</option>
-                        <option value="1">編集可</option>
-                    </Input>
-                    <FormText>編集者が編集可能かどうかを選択します。編集不可でも管理者は編集できます。</FormText>
+                    <FormText>非公開にした場合は閲覧・編集可能ユーザを個別に設定できます。全員閲覧可に設定した場合も、編集可能にするユーザを個別に設定できます。どれを選択しても管理者は編集できます。</FormText>
                 </FormGroup>
                 <div className="text-left mb-2">
                     <Button onClick={onClickBackButton}>戻る</Button>

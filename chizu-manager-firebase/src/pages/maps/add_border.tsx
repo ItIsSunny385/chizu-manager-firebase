@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import '../../components/InitializeFirebase';
 import nookies, { setCookie } from 'nookies';
 import MapApp from '../../components/MapApp';
+import MessageModal, { MessageModalProps } from '../../components/MessageModal';
 import { Polyline, Polygon, InfoWindow } from '@react-google-maps/api';
 import { Badge, Button, Nav, NavItem, NavLink } from 'reactstrap';
 import { CheckSquareFill, TrashFill } from 'react-bootstrap-icons';
@@ -40,6 +41,7 @@ export default function AddBorder(props: Props) {
     const [corners, setCorners, pushCorner] = useCorners();
     const [finished, setFinished] = useState(false);
     const [infoWindowProps, setInfoWindowProps] = useState(undefined as InfoWindowProps);
+    const [messageModalProps, setMessageModalProps] = useState(undefined as MessageModalProps);
     const router = useRouter();
 
     const leftBottomButtons = <div className="ml-2 mb-2">
@@ -138,6 +140,19 @@ export default function AddBorder(props: Props) {
 
     const onClickNextButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
+        if (!finished) {
+            const toggle = () => setMessageModalProps(undefined);
+            const newMessageModalProps: MessageModalProps = {
+                modalProps: {
+                    isOpen: true,
+                    toggle: toggle,
+                },
+                children: '境界線の作成を完了してください。ひとつめの頂点を右クリックしてチェックマークを押すと完了します。',
+                modalFooterContents: <Button onClick={toggle}>OK</Button>
+            };
+            setMessageModalProps(newMessageModalProps);
+            return;
+        }
         const newMapBasicInfoWithBorderCoords: NewMapBasicInfoWithBorderCoords = {
             ...props.newMapBasicInfo,
             borderCoords: corners.map(x => ({ lat: x.lat(), lng: x.lng() }))
@@ -162,6 +177,7 @@ export default function AddBorder(props: Props) {
                 loading={loading}
                 onLoadMap={onLoadMap}
                 onRightClick={finished ? undefined : onRightClick}
+                messageModalProps={messageModalProps}
             >
                 {
                     finished
