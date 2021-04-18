@@ -35,7 +35,7 @@ export default function AdminApp(props: Props) {
             <Container>
                 <Row>
                     <Col>
-                        <NavTabs activeTabId={2} />
+                        <NavTabs activeTabId={props.activeTabId} />
                         {
                             props.alertType
                             &&

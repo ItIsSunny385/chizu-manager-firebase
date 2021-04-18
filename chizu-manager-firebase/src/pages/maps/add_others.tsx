@@ -3,19 +3,32 @@ import ReactDOM from 'react-dom';
 import { useRouter } from 'next/router';
 import nookies from 'nookies';
 import { NewMapBasicInfoWithBorderCoords } from '../../types/map';
+import { getMarkerUrl } from '../../utils/marker'
 import MapApp from '../../components/MapApp';
-import { Marker, Polyline } from '@react-google-maps/api';
-import { Badge, Button } from 'reactstrap';
-import { InfoCircleFill } from 'react-bootstrap-icons';
+import { InfoWindow, Marker, Polyline } from '@react-google-maps/api';
+import { Badge, Button, Nav, NavItem, NavLink } from 'reactstrap';
+import { Building, House, InfoCircleFill } from 'react-bootstrap-icons';
 import { MessageModalProps } from '../../components/MessageModal';
 
 interface Props {
     newMapBasicInfoWithBorderCoords: NewMapBasicInfoWithBorderCoords
 }
 
+interface AddNewBuildingWindow {
+    latLng: google.maps.LatLng
+}
+
+interface House {
+    tmpId: number,
+    latLng: google.maps.LatLng,
+    deleted: boolean
+}
+
 export default function AddOthers(props: Props) {
     const [loading, setLoading] = useState(true);
     const [messageModalProps, setMessageModalProps] = useState(undefined as MessageModalProps);
+    const [addNewBuildingWindow, setAddNewBuildingWindow] = useState(undefined as AddNewBuildingWindow);
+    const [houses, setHouses] = useState([] as House[]);
     const name = props.newMapBasicInfoWithBorderCoords.name;
     const borderCoords = props.newMapBasicInfoWithBorderCoords.borderCoords;
     const maxLat = Math.max(...borderCoords.map(coord => coord.lat));
@@ -62,16 +75,16 @@ export default function AddOthers(props: Props) {
             lat: e.latLng.lat(),
             lng: e.latLng.lng()
         });
-    }
+    };
 
     const onClickBackButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         router.push('/maps/add_border');
-    }
+    };
 
     const onClickFinishButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
-    }
+    };
 
     const onClickShowInfoModalButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         const toggle = () => setMessageModalProps(undefined);
@@ -96,7 +109,26 @@ export default function AddOthers(props: Props) {
         };
         setMessageModalProps(newMessageModalProps);
         return;
-    }
+    };
+
+    const onClickHouse = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        e.preventDefault();
+        setAddNewBuildingWindow(undefined);
+        const newHouses = [
+            ...houses,
+            { latLng: addNewBuildingWindow.latLng, tmpId: houses.length + 1, deleted: false }
+        ];
+        setHouses(newHouses);
+    };
+
+    const onClickBuilding = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        e.preventDefault();
+        setAddNewBuildingWindow(undefined);
+    };
+
+    const onRightClickMap = (e: google.maps.MapMouseEvent) => {
+        setAddNewBuildingWindow({ latLng: e.latLng });
+    };
 
     return (
         <React.Fragment>
@@ -104,11 +136,14 @@ export default function AddOthers(props: Props) {
                 loading={loading}
                 onLoadMap={onLoadMap}
                 messageModalProps={messageModalProps}
+                onRightClick={onRightClickMap}
             >
+                {/* 境界線 */}
                 <Polyline
                     path={polylinePath}
-                    options={{ strokeColor: "red" }}
+                    options={{ strokeColor: "red", zIndex: 1 }}
                 />
+                {/* 地図名バッジ */}
                 <Marker
                     position={badgePosition}
                     icon={{
@@ -125,7 +160,54 @@ export default function AddOthers(props: Props) {
                     }}
                     draggable={true}
                     onDragEnd={onDragEndBadge}
+                    zIndex={3}
                 />
+                {/* 新規建物追加ウィンドウ */}
+                {
+                    addNewBuildingWindow
+                    &&
+                    <InfoWindow position={addNewBuildingWindow.latLng} onCloseClick={() => { setAddNewBuildingWindow(undefined) }}>
+                        <React.Fragment>
+                            <div>どちらを追加しますか？</div>
+                            <Nav style={{ fontSize: "1.5rem" }}>
+                                <NavItem className="ml-3">
+                                    <NavLink onClick={onClickHouse}><House /></NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink onClick={onClickBuilding}><Building /></NavLink>
+                                </NavItem>
+                            </Nav>
+                        </React.Fragment>
+                    </InfoWindow>
+                }
+                {/* 家 */}
+                {
+                    houses.map((x, i) => {
+                        const onDragEndHouse = (e: google.maps.MapMouseEvent) => {
+                            const newHouses = [...houses];
+                            newHouses[i].latLng = e.latLng;
+                            setHouses(newHouses);
+                        };
+                        return !x.deleted
+                            &&
+                            <Marker
+                                position={x.latLng}
+                                icon={{
+                                    url: getMarkerUrl('lightblue'),
+                                    scaledSize: new google.maps.Size(50, 50),
+                                    labelOrigin: new google.maps.Point(25, 18),
+                                }}
+                                label={{
+                                    text: '家',
+                                    color: '#000000',
+                                    fontWeight: 'bold',
+                                }}
+                                draggable={true}
+                                onDragEnd={onDragEndHouse}
+                                zIndex={2}
+                            />
+                    })
+                }
             </MapApp>
             {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
             <div style={{ display: 'none' }}>
