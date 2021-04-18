@@ -1,7 +1,7 @@
 import { useState, MouseEvent, useEffect } from 'react';
 import firebase from 'firebase';
 import { useRouter } from 'next/router';
-import '../../components/InitializeFirebase';
+import '../../utils/InitializeFirebase';
 import AdminApp from '../../components/AdminApp';
 import { MapStatus, NewMapBasicInfo } from '../../types/map';
 import { Button, Form, FormGroup, Label, Input, FormText, FormFeedback } from 'reactstrap';

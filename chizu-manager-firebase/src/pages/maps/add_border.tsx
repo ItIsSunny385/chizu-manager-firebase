@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import firebase from 'firebase';
 import { useRouter } from 'next/router';
-import '../../components/InitializeFirebase';
+import '../../utils/InitializeFirebase';
 import nookies, { setCookie } from 'nookies';
 import MapApp from '../../components/MapApp';
 import MessageModal, { MessageModalProps } from '../../components/MessageModal';

@@ -1,7 +1,7 @@
 import { useState, MouseEvent } from 'react';
 import firebase from 'firebase';
 import { useRouter } from 'next/router';
-import '../../components/InitializeFirebase';
+import '../../utils/InitializeFirebase';
 import AdminApp from '../../components/AdminApp';
 import { Button, Form, FormGroup, Label, Input, FormText, FormFeedback } from 'reactstrap';
 import { setCookie } from 'nookies';

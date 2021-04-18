@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import firebase from 'firebase';
-import '../../components/InitializeFirebase';
+import '../../utils/InitializeFirebase';
 import App from '../../components/App';
 
 const auth = firebase.auth();

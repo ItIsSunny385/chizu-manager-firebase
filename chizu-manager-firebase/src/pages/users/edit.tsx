@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { Button, Form, FormGroup, Label, Input, FormText, FormFeedback } from 'reactstrap';
 import AdminApp from '../../components/AdminApp';
 import { setCookie } from 'nookies';
-import '../../components/InitializeFirebase';
+import '../../utils/InitializeFirebase';
 
 const db = firebase.firestore();
 
