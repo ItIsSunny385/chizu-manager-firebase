@@ -169,6 +169,9 @@ export default function AddBorder(props: Props) {
     const onClickShowInfoModalButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         const toggle = () => setMessageModalProps(undefined);
         const newMessageModalProps: MessageModalProps = {
+            modalHeaderProps: {
+                toggle: toggle,
+            },
             modalHeaderContents: '境界線追加画面の使い方',
             modalProps: {
                 isOpen: true,
