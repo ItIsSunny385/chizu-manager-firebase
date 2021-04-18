@@ -8,7 +8,7 @@ import MapApp from '../../components/MapApp';
 import MessageModal, { MessageModalProps } from '../../components/MessageModal';
 import { Polyline, Polygon, InfoWindow } from '@react-google-maps/api';
 import { Badge, Button, Nav, NavItem, NavLink } from 'reactstrap';
-import { CheckSquareFill, TrashFill } from 'react-bootstrap-icons';
+import { CheckSquareFill, InfoCircleFill, TrashFill } from 'react-bootstrap-icons';
 import { NewMapBasicInfo, NewMapBasicInfoWithBorderCoords } from '../../types/map';
 
 const db = firebase.firestore();
@@ -49,9 +49,10 @@ export default function AddBorder(props: Props) {
         <Button className="ml-1" onClick={(e) => { e.preventDefault(); document.getElementById('next').click(); }}>次へ</Button>
     </div>;
 
-    const topCenterTitle = <div className="mt-1">
-        <h4><Badge color="dark">境界線追加</Badge></h4>
-    </div>;
+    const topCenterTitle = <div className="mt-1"><h4>
+        <Badge color="dark">境界線追加</Badge>
+        <a className="ml-1" onClick={(e) => { e.preventDefault(); document.getElementById('showInfoModal').click(); }}><InfoCircleFill /></a>
+    </h4></div>;
 
     const onLoadMap = (map: google.maps.Map<Element>) => {
         const leftBottomButtonDiv = document.createElement('div');
@@ -165,6 +166,28 @@ export default function AddBorder(props: Props) {
         router.push('/maps/add_others');
     }
 
+    const onClickShowInfoModalButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        const toggle = () => setMessageModalProps(undefined);
+        const newMessageModalProps: MessageModalProps = {
+            modalHeaderContents: '境界線追加画面の使い方',
+            modalProps: {
+                isOpen: true,
+                toggle: toggle,
+            },
+            children: <ol>
+                <li>境界線を作成したい場所に地図を移動させます。</li>
+                <li>地図を右クリックして、境界線の頂点を追加してきます。</li>
+                <li>頂点を追加し終わったら、最初に追加した頂点を右クリックして、チェックマークを押し、境界線を囲みます。</li>
+                <li>境界線を微修正したい場合は、頂点と辺の中間に表示される丸をドラッグアンドドロップして微調整します。</li>
+                <li>頂点を削除するときは右クリックして削除ボタンを押してください。</li>
+                <li>微修正が終わったら、左下の「次へ」ボタンを押します。</li>
+            </ol>,
+            modalFooterContents: <Button onClick={toggle}>OK</Button>
+        };
+        setMessageModalProps(newMessageModalProps);
+        return;
+    }
+
     useEffect(() => {
         if (!props.newMapBasicInfo) {
             router.push('/maps/add');
@@ -219,6 +242,7 @@ export default function AddBorder(props: Props) {
             <div style={{ display: 'none' }}>
                 <Button id="back" onClick={onClickBackButton} />
                 <Button id="next" onClick={onClickNextButton} />
+                <Button id="showInfoModal" onClick={onClickShowInfoModalButton} />
             </div>
         </React.Fragment>
     );

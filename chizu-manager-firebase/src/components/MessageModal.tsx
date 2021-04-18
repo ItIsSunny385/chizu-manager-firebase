@@ -15,7 +15,7 @@ export default function MessageModal(props: MessageModalProps) {
     return (
         <Modal {...props.modalProps}>
             {
-                props.modalHeaderProps
+                props.modalHeaderContents
                 &&
                 <ModalHeader {...props.modalHeaderProps}>{props.modalHeaderContents}</ModalHeader>
             }
