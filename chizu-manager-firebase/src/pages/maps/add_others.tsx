@@ -2,26 +2,23 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useRouter } from 'next/router';
 import nookies from 'nookies';
-import { NewMapBasicInfoWithBorderCoords } from '../../types/map';
-import { getMarkerUrl } from '../../utils/marker'
+import { NewMapBasicInfoWithBorderCoords, RoomNumberTypes, BuildingBasicInfo, BuildingBasicInfoWithFloorInfo } from '../../types/map';
+import { getMarkerUrl } from '../../utils/markerUtil'
 import MapApp from '../../components/MapApp';
 import { InfoWindow, Marker, Polyline } from '@react-google-maps/api';
 import { Badge, Button, Nav, NavItem, NavLink } from 'reactstrap';
 import { Building, House, InfoCircleFill } from 'react-bootstrap-icons';
+import { getNewBuildingBasicInfoModalProp, AddNewBuildingWindow } from '../../utils/messageModalUtil'
 import { MessageModalProps } from '../../components/MessageModal';
+
+const MAX_NUMBER_OF_FLOORS = 30;
 
 interface Props {
     newMapBasicInfoWithBorderCoords: NewMapBasicInfoWithBorderCoords
 }
 
-interface AddNewBuildingWindow {
-    latLng: google.maps.LatLng
-}
-
 interface House {
-    tmpId: number,
-    latLng: google.maps.LatLng,
-    deleted: boolean
+    latLng: google.maps.LatLng
 }
 
 export default function AddOthers(props: Props) {
@@ -29,6 +26,9 @@ export default function AddOthers(props: Props) {
     const [messageModalProps, setMessageModalProps] = useState(undefined as MessageModalProps);
     const [addNewBuildingWindow, setAddNewBuildingWindow] = useState(undefined as AddNewBuildingWindow);
     const [houses, setHouses] = useState([] as House[]);
+    const [newBuildingBasicInfo, setNewBuildingBasicInfo] = useState(undefined as BuildingBasicInfo);
+    const [newBuildingBasicInfoWithFloorInfo, setNewBuildingBasicInfoWithFloorInfo]
+        = useState(undefined as BuildingBasicInfoWithFloorInfo);
     const name = props.newMapBasicInfoWithBorderCoords.name;
     const borderCoords = props.newMapBasicInfoWithBorderCoords.borderCoords;
     const maxLat = Math.max(...borderCoords.map(coord => coord.lat));
@@ -116,19 +116,46 @@ export default function AddOthers(props: Props) {
         setAddNewBuildingWindow(undefined);
         const newHouses = [
             ...houses,
-            { latLng: addNewBuildingWindow.latLng, tmpId: houses.length + 1, deleted: false }
+            { latLng: addNewBuildingWindow.latLng }
         ];
         setHouses(newHouses);
     };
 
     const onClickBuilding = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         e.preventDefault();
-        setAddNewBuildingWindow(undefined);
+        setNewBuildingBasicInfo({
+            latLng: addNewBuildingWindow.latLng,
+            name: '',
+            numberOfFloors: 1,
+            roomNumberType: RoomNumberTypes.SerialNumber,
+        });
     };
 
     const onRightClickMap = (e: google.maps.MapMouseEvent) => {
         setAddNewBuildingWindow({ latLng: e.latLng });
     };
+
+    useEffect(() => {
+        if (!newBuildingBasicInfo) {
+            return;
+        }
+        const newMessageModalProps = getNewBuildingBasicInfoModalProp(
+            newBuildingBasicInfo,
+            MAX_NUMBER_OF_FLOORS,
+            setNewBuildingBasicInfo,
+            setAddNewBuildingWindow,
+            setMessageModalProps,
+            setNewBuildingBasicInfoWithFloorInfo
+        );
+        setMessageModalProps(newMessageModalProps);
+    }, [newBuildingBasicInfo]);
+
+    useEffect(() => {
+        if (!newBuildingBasicInfoWithFloorInfo) {
+            return;
+        }
+
+    }, [newBuildingBasicInfoWithFloorInfo]);
 
     return (
         <React.Fragment>
@@ -188,24 +215,22 @@ export default function AddOthers(props: Props) {
                             newHouses[i].latLng = e.latLng;
                             setHouses(newHouses);
                         };
-                        return !x.deleted
-                            &&
-                            <Marker
-                                position={x.latLng}
-                                icon={{
-                                    url: getMarkerUrl('lightblue'),
-                                    scaledSize: new google.maps.Size(50, 50),
-                                    labelOrigin: new google.maps.Point(25, 18),
-                                }}
-                                label={{
-                                    text: '家',
-                                    color: '#000000',
-                                    fontWeight: 'bold',
-                                }}
-                                draggable={true}
-                                onDragEnd={onDragEndHouse}
-                                zIndex={2}
-                            />
+                        return <Marker
+                            position={x.latLng}
+                            icon={{
+                                url: getMarkerUrl('lightblue'),
+                                scaledSize: new google.maps.Size(50, 50),
+                                labelOrigin: new google.maps.Point(25, 18),
+                            }}
+                            label={{
+                                text: '家',
+                                color: '#000000',
+                                fontWeight: 'bold',
+                            }}
+                            draggable={true}
+                            onDragEnd={onDragEndHouse}
+                            zIndex={2}
+                        />
                     })
                 }
             </MapApp>
