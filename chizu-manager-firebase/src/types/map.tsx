@@ -31,6 +31,10 @@ export interface BuildingBasicInfoWithFloorInfo extends BuildingBasicInfo {
     floorNumberNumberOfRoomsMap: Map<number, number>
 }
 
+export interface BuildingInfo extends BuildingBasicInfoWithFloorInfo {
+    floorNumberRoomNumbersMap: Map<number, Array<string>>
+}
+
 export interface NewMapBasicInfo {
     name: string;
     orderNumber: number;

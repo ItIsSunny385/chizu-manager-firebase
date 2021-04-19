@@ -1,17 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React, {
+    useState,
+    useEffect
+} from 'react';
 import ReactDOM from 'react-dom';
 import { useRouter } from 'next/router';
 import nookies from 'nookies';
-import { NewMapBasicInfoWithBorderCoords, RoomNumberTypes, BuildingBasicInfo, BuildingBasicInfoWithFloorInfo } from '../../types/map';
+import {
+    NewMapBasicInfoWithBorderCoords,
+    RoomNumberTypes,
+    BuildingBasicInfo,
+    BuildingBasicInfoWithFloorInfo,
+    BuildingInfo
+} from '../../types/map';
 import { getMarkerUrl } from '../../utils/markerUtil'
 import MapApp from '../../components/MapApp';
-import { InfoWindow, Marker, Polyline } from '@react-google-maps/api';
-import { Badge, Button, Nav, NavItem, NavLink } from 'reactstrap';
-import { Building, House, InfoCircleFill } from 'react-bootstrap-icons';
-import { getNewBuildingBasicInfoModalProp, AddNewBuildingWindow } from '../../utils/messageModalUtil'
+import {
+    InfoWindow,
+    Marker,
+    Polyline
+} from '@react-google-maps/api';
+import {
+    Badge,
+    Button,
+    Nav,
+    NavItem,
+    NavLink
+} from 'reactstrap';
+import {
+    Building,
+    House,
+    InfoCircleFill
+} from 'react-bootstrap-icons';
+import {
+    getNewBuildingBasicInfoModalProp,
+    getNewBuildingBasicInfoWithFloorInfoModalProp,
+    AddNewBuildingWindow
+} from '../../utils/messageModalUtil'
 import { MessageModalProps } from '../../components/MessageModal';
 
 const MAX_NUMBER_OF_FLOORS = 30;
+const MAX_NUMBER_OF_ROOMS = 30;
 
 interface Props {
     newMapBasicInfoWithBorderCoords: NewMapBasicInfoWithBorderCoords
@@ -29,6 +57,7 @@ export default function AddOthers(props: Props) {
     const [newBuildingBasicInfo, setNewBuildingBasicInfo] = useState(undefined as BuildingBasicInfo);
     const [newBuildingBasicInfoWithFloorInfo, setNewBuildingBasicInfoWithFloorInfo]
         = useState(undefined as BuildingBasicInfoWithFloorInfo);
+    const [newBuildingInfo, setNewBuildingInfo] = useState(undefined as BuildingInfo);
     const name = props.newMapBasicInfoWithBorderCoords.name;
     const borderCoords = props.newMapBasicInfoWithBorderCoords.borderCoords;
     const maxLat = Math.max(...borderCoords.map(coord => coord.lat));
@@ -46,17 +75,37 @@ export default function AddOthers(props: Props) {
     const polylinePath = [...borderCoords];
     polylinePath.push(polylinePath[0]);
 
-    const leftBottomButtons = <div className="ml-2 mb-2">
-        <Button onClick={(e) => { e.preventDefault(); document.getElementById('back').click(); }}>戻る</Button>
-        <Button className="ml-1" onClick={(e) => { e.preventDefault(); document.getElementById('finish').click(); }}>完了</Button>
-    </div>;
 
-    const topCenterTitle = <div className="mt-1"><h4>
-        <Badge color="dark">バッジ、建物追加</Badge>
-        <a className="ml-1" onClick={(e) => { e.preventDefault(); document.getElementById('showInfoModal').click(); }}><InfoCircleFill /></a>
-    </h4></div>;
 
     const onLoadMap = (map: google.maps.Map<Element>) => {
+        const leftBottomButtons = <div className="ml-2 mb-2">
+            <Button
+                onClick={(e) => {
+                    e.preventDefault(); document.getElementById('back').click();
+                }}
+            >
+                戻る
+            </Button>
+            <Button
+                className="ml-1"
+                onClick={(e) => {
+                    e.preventDefault(); document.getElementById('finish').click();
+                }}
+            >
+                完了
+            </Button>
+        </div>;
+        const topCenterTitle = <div className="mt-1"><h4>
+            <Badge color="dark">バッジ、建物追加</Badge>
+            <a
+                className="ml-1"
+                onClick={(e) => {
+                    e.preventDefault(); document.getElementById('showInfoModal').click();
+                }}
+            >
+                <InfoCircleFill />
+            </a>
+        </h4></div>;
         const leftBottomButtonDiv = document.createElement('div');
         ReactDOM.render(leftBottomButtons, leftBottomButtonDiv);
         map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(leftBottomButtonDiv);
@@ -154,7 +203,15 @@ export default function AddOthers(props: Props) {
         if (!newBuildingBasicInfoWithFloorInfo) {
             return;
         }
-
+        const newMessageModalProps = getNewBuildingBasicInfoWithFloorInfoModalProp(
+            newBuildingBasicInfoWithFloorInfo,
+            MAX_NUMBER_OF_ROOMS,
+            setNewBuildingBasicInfoWithFloorInfo,
+            setAddNewBuildingWindow,
+            setMessageModalProps,
+            setNewBuildingInfo
+        );
+        setMessageModalProps(newMessageModalProps);
     }, [newBuildingBasicInfoWithFloorInfo]);
 
     return (
