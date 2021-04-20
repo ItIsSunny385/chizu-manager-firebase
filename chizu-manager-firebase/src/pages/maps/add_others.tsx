@@ -25,6 +25,7 @@ import {
 } from 'react-bootstrap-icons';
 import { MessageModalProps } from '../../components/MessageModal';
 import SelectBuildingTypeWindow from '../../components/SelectBuildingTypeWindow';
+import MapNameBadge from '../../components/MapNameBadge';
 
 interface Props {
     newMapBasicInfoWithBorderCoords: NewMapBasicInfoWithBorderCoords
@@ -96,13 +97,6 @@ export default function AddOthers(props: Props) {
         setLoading(false);
     };
 
-    const onDragEndBadge = (e: google.maps.MapMouseEvent) => {
-        setBadgePosition({
-            lat: e.latLng.lat(),
-            lng: e.latLng.lng()
-        });
-    };
-
     const onClickBackButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         router.push('/maps/add_border');
@@ -168,23 +162,11 @@ export default function AddOthers(props: Props) {
                     options={{ strokeColor: "red", zIndex: 1 }}
                 />
                 {/* 地図名バッジ */}
-                <Marker
+                <MapNameBadge
                     position={badgePosition}
-                    icon={{
-                        url: '//:0',
-                        scaledSize: new google.maps.Size(100, 30),
-                        labelOrigin: new google.maps.Point(50, 15),
-                        anchor: new google.maps.Point(50, 15),
-                    }}
-                    label={{
-                        text: name,
-                        color: '#FF0000',
-                        fontWeight: 'bold',
-                        fontSize: '30px',
-                    }}
+                    name={name}
                     draggable={true}
-                    onDragEnd={onDragEndBadge}
-                    zIndex={3}
+                    setPosition={setBadgePosition}
                 />
                 {/* 新規建物追加ウィンドウ */}
                 {
