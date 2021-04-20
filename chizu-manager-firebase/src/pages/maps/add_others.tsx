@@ -22,6 +22,9 @@ import {
 import {
     Badge,
     Button,
+    Input,
+    InputGroup,
+    InputGroupAddon,
     Nav,
     NavItem,
     NavLink
@@ -29,7 +32,8 @@ import {
 import {
     Building,
     House,
-    InfoCircleFill
+    InfoCircleFill,
+    TrashFill
 } from 'react-bootstrap-icons';
 import {
     getNewBuildingBasicInfoModalProp,
@@ -54,6 +58,7 @@ export default function AddOthers(props: Props) {
     const [messageModalProps, setMessageModalProps] = useState(undefined as MessageModalProps);
     const [addNewBuildingWindow, setAddNewBuildingWindow] = useState(undefined as AddNewBuildingWindow);
     const [houses, setHouses] = useState([] as House[]);
+    const [buildings, setBuildings] = useState([] as BuildingInfo[]);
     const [newBuildingBasicInfo, setNewBuildingBasicInfo] = useState(undefined as BuildingBasicInfo);
     const [newBuildingBasicInfoWithFloorInfo, setNewBuildingBasicInfoWithFloorInfo]
         = useState(undefined as BuildingBasicInfoWithFloorInfo);
@@ -214,6 +219,76 @@ export default function AddOthers(props: Props) {
         setMessageModalProps(newMessageModalProps);
     }, [newBuildingBasicInfoWithFloorInfo]);
 
+    useEffect(() => {
+        if (!newBuildingInfo) {
+            return;
+        }
+        const toggle = () => {
+            setNewBuildingInfo(undefined);
+            setAddNewBuildingWindow(undefined);
+            setMessageModalProps(undefined);
+        };
+        const onClickFinishButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+            e.preventDefault();
+            setMessageModalProps(undefined);
+            setAddNewBuildingWindow(undefined);
+            setBuildings([...buildings, newBuildingInfo]);
+        };
+        setMessageModalProps({
+            modalHeaderProps: {
+                toggle: toggle,
+            },
+            modalHeaderContents: '集合住宅追加（部屋情報入力）',
+            modalProps: {
+                isOpen: true,
+                toggle: toggle,
+            },
+            children: <React.Fragment>
+                {
+                    newBuildingInfo.floors.map((floor, i) => {
+                        const onClickAddRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                            const newNewBuildingInfo = { ...newBuildingInfo };
+                            newNewBuildingInfo.floors[i].rooms.push({ number: '' });
+                            setNewBuildingInfo(newNewBuildingInfo);
+                        };
+                        return <details className="mt-1">
+                            <summary>{floor.number}階</summary>
+                            <div>
+                                {
+                                    floor.rooms.map((room, j) => {
+                                        const onChangeRoom = (e: React.ChangeEvent<HTMLInputElement>) => {
+                                            const newNewBuildingInfo = { ...newBuildingInfo };
+                                            newNewBuildingInfo.floors[i].rooms[j].number = e.target.value;
+                                            setNewBuildingInfo(newNewBuildingInfo);
+                                        };
+                                        const onClickDeleteRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                                            const newNewBuildingInfo = { ...newBuildingInfo };
+                                            newNewBuildingInfo.floors[i].rooms.splice(j, 1);
+                                            setNewBuildingInfo(newNewBuildingInfo);
+                                        };
+                                        return <InputGroup className="mt-1">
+                                            <Input value={room.number} onChange={onChangeRoom} onKeyUp={(e) => { }} />
+                                            <InputGroupAddon addonType="append">
+                                                <Button onClick={onClickDeleteRoom}><TrashFill /></Button>
+                                            </InputGroupAddon>
+                                        </InputGroup>;
+                                    })
+                                }
+                                <div className="mt-1 text-right">
+                                    <Button onClick={onClickAddRoom}>部屋追加</Button>
+                                </div>
+                            </div>
+                        </details>;
+                    })
+                }
+            </React.Fragment>,
+            modalFooterContents: <React.Fragment>
+                <Button onClick={toggle}>キャンセル</Button>
+                <Button onClick={onClickFinishButton}>完了</Button>
+            </React.Fragment>
+        });
+    }, [newBuildingInfo]);
+
     return (
         <React.Fragment>
             <MapApp
@@ -281,6 +356,32 @@ export default function AddOthers(props: Props) {
                             }}
                             label={{
                                 text: '家',
+                                color: '#000000',
+                                fontWeight: 'bold',
+                            }}
+                            draggable={true}
+                            onDragEnd={onDragEndHouse}
+                            zIndex={2}
+                        />
+                    })
+                }
+                {/* 集合住宅 */}
+                {
+                    buildings.map((x, i) => {
+                        const onDragEndHouse = (e: google.maps.MapMouseEvent) => {
+                            const newBuildings = [...buildings];
+                            newBuildings[i].latLng = e.latLng;
+                            setBuildings(newBuildings);
+                        };
+                        return <Marker
+                            position={x.latLng}
+                            icon={{
+                                url: getMarkerUrl('yellow'),
+                                scaledSize: new google.maps.Size(50, 50),
+                                labelOrigin: new google.maps.Point(25, 18),
+                            }}
+                            label={{
+                                text: '集',
                                 color: '#000000',
                                 fontWeight: 'bold',
                             }}

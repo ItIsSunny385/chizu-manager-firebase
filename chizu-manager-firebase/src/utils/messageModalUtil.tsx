@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Form, FormGroup, FormText, Input, Label } from 'reactstrap';
-import { RoomNumberTypes, BuildingBasicInfo, BuildingBasicInfoWithFloorInfo, BuildingInfo } from '../types/map';
+import { RoomNumberTypes, BuildingBasicInfo, BuildingBasicInfoWithFloorInfo, BuildingInfo, Floor, Room } from '../types/map';
 import { MessageModalProps } from '../components/MessageModal';
 
 export interface AddNewBuildingWindow {
@@ -27,10 +27,10 @@ export const getNewBuildingBasicInfoWithFloorInfoModalProp = (
     const onClickNextButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         setMessageModalProps(undefined);
-        const floorNumberRoomNumbersMap = new Map<number, Array<string>>();
+        const floors = new Array<Floor>();
         Array.from(newBuildingBasicInfoWithFloorInfo.floorNumberNumberOfRoomsMap.entries())
             .map(([floorNumber, numberOfRooms]) => {
-                const roomNumbers = new Array<string>();
+                const rooms = new Array<Room>();
                 for (let i = 1; i <= numberOfRooms; i++) {
                     if (
                         (newBuildingBasicInfoWithFloorInfo.roomNumberType === RoomNumberTypes.Except4 && i === 4)
@@ -39,12 +39,16 @@ export const getNewBuildingBasicInfoWithFloorInfoModalProp = (
                     ) {
                         continue;
                     }
-                    roomNumbers.push(`${floorNumber}${i.toString().padStart(2, '0')}`);
+                    rooms.push({ number: `${floorNumber}${i.toString().padStart(2, '0')}` });
                 }
+                floors.push({
+                    number: floorNumber,
+                    rooms: rooms
+                });
             });
         setNewBuildingInfo({
             ...newBuildingBasicInfoWithFloorInfo,
-            floorNumberRoomNumbersMap: floorNumberRoomNumbersMap
+            floors: floors
         });
         setNewBuildingBasicInfoWithFloorInfo(undefined);
     };

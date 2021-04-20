@@ -17,7 +17,7 @@ export interface Room {
 
 export interface Floor {
     number: number,
-    Rooms?: Room[]
+    rooms: Room[]
 }
 
 export interface BuildingBasicInfo {
@@ -32,7 +32,7 @@ export interface BuildingBasicInfoWithFloorInfo extends BuildingBasicInfo {
 }
 
 export interface BuildingInfo extends BuildingBasicInfoWithFloorInfo {
-    floorNumberRoomNumbersMap: Map<number, Array<string>>
+    floors: Floor[]
 }
 
 export interface NewMapBasicInfo {
