@@ -1,3 +1,5 @@
+import { FloorInfoB } from "../components/BuildingRoomInfoModal";
+
 export enum MapStatus {
     Private = 'Private',
     Viewable = 'Viewable',
@@ -11,28 +13,10 @@ export enum RoomNumberTypes {
     Other = 'Other',
 }
 
-export interface Room {
-    number: string
-}
-
-export interface Floor {
-    number: number,
-    rooms: Room[]
-}
-
 export interface BuildingBasicInfo {
-    latLng: google.maps.LatLng,
     name: string,
     numberOfFloors: number,
     roomNumberType: RoomNumberTypes,
-}
-
-export interface BuildingBasicInfoWithFloorInfo extends BuildingBasicInfo {
-    floorNumberNumberOfRoomsMap: Map<number, number>
-}
-
-export interface BuildingInfo extends BuildingBasicInfoWithFloorInfo {
-    floors: Floor[]
 }
 
 export interface NewMapBasicInfo {
@@ -43,4 +27,10 @@ export interface NewMapBasicInfo {
 
 export interface NewMapBasicInfoWithBorderCoords extends NewMapBasicInfo {
     borderCoords: google.maps.LatLngLiteral[]
+}
+
+export interface BuildingInfo {
+    name: string,
+    latLng: google.maps.LatLng,
+    floors: FloorInfoB[]
 }

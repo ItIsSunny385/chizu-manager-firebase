@@ -7,9 +7,6 @@ import { useRouter } from 'next/router';
 import nookies from 'nookies';
 import {
     NewMapBasicInfoWithBorderCoords,
-    RoomNumberTypes,
-    BuildingBasicInfo,
-    BuildingBasicInfoWithFloorInfo,
     BuildingInfo
 } from '../../types/map';
 import { getMarkerUrl } from '../../utils/markerUtil'
@@ -22,28 +19,17 @@ import {
 import {
     Badge,
     Button,
-    Input,
-    InputGroup,
-    InputGroupAddon,
     Nav,
     NavItem,
     NavLink
 } from 'reactstrap';
 import {
-    Building,
-    House,
+    Building as BuildingIcon,
+    House as HouseIcon,
     InfoCircleFill,
-    TrashFill
 } from 'react-bootstrap-icons';
-import {
-    getNewBuildingBasicInfoModalProp,
-    getNewBuildingBasicInfoWithFloorInfoModalProp,
-    AddNewBuildingWindow
-} from '../../utils/messageModalUtil'
 import { MessageModalProps } from '../../components/MessageModal';
-
-const MAX_NUMBER_OF_FLOORS = 30;
-const MAX_NUMBER_OF_ROOMS = 30;
+import AddBuildingModals from '../../components/AddBuildingModals';
 
 interface Props {
     newMapBasicInfoWithBorderCoords: NewMapBasicInfoWithBorderCoords
@@ -53,16 +39,17 @@ interface House {
     latLng: google.maps.LatLng
 }
 
+interface AddNewBuildingWindow {
+    latLng: google.maps.LatLng
+}
+
 export default function AddOthers(props: Props) {
     const [loading, setLoading] = useState(true);
     const [messageModalProps, setMessageModalProps] = useState(undefined as MessageModalProps);
     const [addNewBuildingWindow, setAddNewBuildingWindow] = useState(undefined as AddNewBuildingWindow);
     const [houses, setHouses] = useState([] as House[]);
     const [buildings, setBuildings] = useState([] as BuildingInfo[]);
-    const [newBuildingBasicInfo, setNewBuildingBasicInfo] = useState(undefined as BuildingBasicInfo);
-    const [newBuildingBasicInfoWithFloorInfo, setNewBuildingBasicInfoWithFloorInfo]
-        = useState(undefined as BuildingBasicInfoWithFloorInfo);
-    const [newBuildingInfo, setNewBuildingInfo] = useState(undefined as BuildingInfo);
+    const [displayAddBuildingModals, setDisplayAddBuildingModals] = useState(false);
     const name = props.newMapBasicInfoWithBorderCoords.name;
     const borderCoords = props.newMapBasicInfoWithBorderCoords.borderCoords;
     const maxLat = Math.max(...borderCoords.map(coord => coord.lat));
@@ -79,8 +66,6 @@ export default function AddOthers(props: Props) {
     const [badgePosition, setBadgePosition] = useState(initialBadgePosition);
     const polylinePath = [...borderCoords];
     polylinePath.push(polylinePath[0]);
-
-
 
     const onLoadMap = (map: google.maps.Map<Element>) => {
         const leftBottomButtons = <div className="ml-2 mb-2">
@@ -165,7 +150,7 @@ export default function AddOthers(props: Props) {
         return;
     };
 
-    const onClickHouse = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const onClickHouseIcon = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         e.preventDefault();
         setAddNewBuildingWindow(undefined);
         const newHouses = [
@@ -175,119 +160,27 @@ export default function AddOthers(props: Props) {
         setHouses(newHouses);
     };
 
-    const onClickBuilding = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const onClickBuildingIcon = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         e.preventDefault();
-        setNewBuildingBasicInfo({
-            latLng: addNewBuildingWindow.latLng,
-            name: '',
-            numberOfFloors: 1,
-            roomNumberType: RoomNumberTypes.SerialNumber,
-        });
+        setDisplayAddBuildingModals(true);
     };
 
     const onRightClickMap = (e: google.maps.MapMouseEvent) => {
         setAddNewBuildingWindow({ latLng: e.latLng });
     };
 
-    useEffect(() => {
-        if (!newBuildingBasicInfo) {
-            return;
-        }
-        const newMessageModalProps = getNewBuildingBasicInfoModalProp(
-            newBuildingBasicInfo,
-            MAX_NUMBER_OF_FLOORS,
-            setNewBuildingBasicInfo,
-            setAddNewBuildingWindow,
-            setMessageModalProps,
-            setNewBuildingBasicInfoWithFloorInfo
-        );
-        setMessageModalProps(newMessageModalProps);
-    }, [newBuildingBasicInfo]);
+    const toggleAddBuildingModals = () => {
+        setDisplayAddBuildingModals(false);
+        setAddNewBuildingWindow(undefined);
+    };
 
-    useEffect(() => {
-        if (!newBuildingBasicInfoWithFloorInfo) {
-            return;
-        }
-        const newMessageModalProps = getNewBuildingBasicInfoWithFloorInfoModalProp(
-            newBuildingBasicInfoWithFloorInfo,
-            MAX_NUMBER_OF_ROOMS,
-            setNewBuildingBasicInfoWithFloorInfo,
-            setAddNewBuildingWindow,
-            setMessageModalProps,
-            setNewBuildingInfo
-        );
-        setMessageModalProps(newMessageModalProps);
-    }, [newBuildingBasicInfoWithFloorInfo]);
-
-    useEffect(() => {
-        if (!newBuildingInfo) {
-            return;
-        }
-        const toggle = () => {
-            setNewBuildingInfo(undefined);
-            setAddNewBuildingWindow(undefined);
-            setMessageModalProps(undefined);
-        };
-        const onClickFinishButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-            e.preventDefault();
-            setMessageModalProps(undefined);
-            setAddNewBuildingWindow(undefined);
-            setBuildings([...buildings, newBuildingInfo]);
-        };
-        setMessageModalProps({
-            modalHeaderProps: {
-                toggle: toggle,
-            },
-            modalHeaderContents: '集合住宅追加（部屋情報入力）',
-            modalProps: {
-                isOpen: true,
-                toggle: toggle,
-            },
-            children: <React.Fragment>
-                {
-                    newBuildingInfo.floors.map((floor, i) => {
-                        const onClickAddRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                            const newNewBuildingInfo = { ...newBuildingInfo };
-                            newNewBuildingInfo.floors[i].rooms.push({ number: '' });
-                            setNewBuildingInfo(newNewBuildingInfo);
-                        };
-                        return <details className="mt-1">
-                            <summary>{floor.number}階</summary>
-                            <div>
-                                {
-                                    floor.rooms.map((room, j) => {
-                                        const onChangeRoom = (e: React.ChangeEvent<HTMLInputElement>) => {
-                                            const newNewBuildingInfo = { ...newBuildingInfo };
-                                            newNewBuildingInfo.floors[i].rooms[j].number = e.target.value;
-                                            setNewBuildingInfo(newNewBuildingInfo);
-                                        };
-                                        const onClickDeleteRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                                            const newNewBuildingInfo = { ...newBuildingInfo };
-                                            newNewBuildingInfo.floors[i].rooms.splice(j, 1);
-                                            setNewBuildingInfo(newNewBuildingInfo);
-                                        };
-                                        return <InputGroup className="mt-1">
-                                            <Input value={room.number} onChange={onChangeRoom} onKeyUp={(e) => { }} />
-                                            <InputGroupAddon addonType="append">
-                                                <Button onClick={onClickDeleteRoom}><TrashFill /></Button>
-                                            </InputGroupAddon>
-                                        </InputGroup>;
-                                    })
-                                }
-                                <div className="mt-1 text-right">
-                                    <Button onClick={onClickAddRoom}>部屋追加</Button>
-                                </div>
-                            </div>
-                        </details>;
-                    })
-                }
-            </React.Fragment>,
-            modalFooterContents: <React.Fragment>
-                <Button onClick={toggle}>キャンセル</Button>
-                <Button onClick={onClickFinishButton}>完了</Button>
-            </React.Fragment>
-        });
-    }, [newBuildingInfo]);
+    const finishAddBuildingModals = (result: BuildingInfo) => {
+        const newBuildings = [...buildings];
+        newBuildings.push(result);
+        setBuildings(newBuildings);
+        setDisplayAddBuildingModals(undefined);
+        setAddNewBuildingWindow(undefined);
+    };
 
     return (
         <React.Fragment>
@@ -330,10 +223,10 @@ export default function AddOthers(props: Props) {
                             <div>どちらを追加しますか？</div>
                             <Nav style={{ fontSize: "1.5rem" }}>
                                 <NavItem className="ml-3">
-                                    <NavLink onClick={onClickHouse}><House /></NavLink>
+                                    <NavLink onClick={onClickHouseIcon}><HouseIcon /></NavLink>
                                 </NavItem>
                                 <NavItem>
-                                    <NavLink onClick={onClickBuilding}><Building /></NavLink>
+                                    <NavLink onClick={onClickBuildingIcon}><BuildingIcon /></NavLink>
                                 </NavItem>
                             </Nav>
                         </React.Fragment>
@@ -392,6 +285,16 @@ export default function AddOthers(props: Props) {
                     })
                 }
             </MapApp>
+            {/* 建物追加モーダル表示 */}
+            {
+                displayAddBuildingModals
+                &&
+                <AddBuildingModals
+                    latLng={addNewBuildingWindow.latLng}
+                    toggle={toggleAddBuildingModals}
+                    finish={finishAddBuildingModals}
+                />
+            }
             {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
             <div style={{ display: 'none' }}>
                 <Button id="back" onClick={onClickBackButton} />
