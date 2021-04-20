@@ -12,24 +12,19 @@ import {
 import { getMarkerUrl } from '../../utils/markerUtil'
 import MapApp from '../../components/MapApp';
 import {
-    InfoWindow,
     Marker,
     Polyline
 } from '@react-google-maps/api';
 import {
     Badge,
-    Button,
-    Nav,
-    NavItem,
-    NavLink
+    Button
 } from 'reactstrap';
 import {
-    Building as BuildingIcon,
-    House as HouseIcon,
     InfoCircleFill,
 } from 'react-bootstrap-icons';
 import { MessageModalProps } from '../../components/MessageModal';
 import AddBuildingModals from '../../components/AddBuildingModals';
+import SelectBuildingTypeWindow from '../../components/SelectBuildingTypeWindow';
 
 interface Props {
     newMapBasicInfoWithBorderCoords: NewMapBasicInfoWithBorderCoords
@@ -218,19 +213,22 @@ export default function AddOthers(props: Props) {
                 {
                     addNewBuildingWindow
                     &&
-                    <InfoWindow position={addNewBuildingWindow.latLng} onCloseClick={() => { setAddNewBuildingWindow(undefined) }}>
-                        <React.Fragment>
-                            <div>どちらを追加しますか？</div>
-                            <Nav style={{ fontSize: "1.5rem" }}>
-                                <NavItem className="ml-3">
-                                    <NavLink onClick={onClickHouseIcon}><HouseIcon /></NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink onClick={onClickBuildingIcon}><BuildingIcon /></NavLink>
-                                </NavItem>
-                            </Nav>
-                        </React.Fragment>
-                    </InfoWindow>
+                    <SelectBuildingTypeWindow
+                        latLng={addNewBuildingWindow.latLng}
+                        close={() => { setAddNewBuildingWindow(undefined); }}
+                        onClickHouseIcon={onClickHouseIcon}
+                        onClickBuildingIcon={onClickBuildingIcon}
+                    />
+                }
+                {/* 建物追加モーダル表示 */}
+                {
+                    displayAddBuildingModals
+                    &&
+                    <AddBuildingModals
+                        latLng={addNewBuildingWindow.latLng}
+                        toggle={toggleAddBuildingModals}
+                        finish={finishAddBuildingModals}
+                    />
                 }
                 {/* 家 */}
                 {
@@ -285,16 +283,6 @@ export default function AddOthers(props: Props) {
                     })
                 }
             </MapApp>
-            {/* 建物追加モーダル表示 */}
-            {
-                displayAddBuildingModals
-                &&
-                <AddBuildingModals
-                    latLng={addNewBuildingWindow.latLng}
-                    toggle={toggleAddBuildingModals}
-                    finish={finishAddBuildingModals}
-                />
-            }
             {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
             <div style={{ display: 'none' }}>
                 <Button id="back" onClick={onClickBackButton} />
