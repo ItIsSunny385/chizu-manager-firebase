@@ -64,9 +64,10 @@ export default function BuildingFloorInfoModal(props: Props) {
                             id={'numberOfRooms' + x.floorNumber}
                             type="select"
                             onChange={onChangeNumberOfRooms}
+                            defaultValue={1}
                         >
                             {
-                                Array.from({ length: MAX_ROOM_NUMBER }, (v, j) => j + 1)
+                                Array.from({ length: MAX_ROOM_NUMBER + 1 }, (v, j) => j)
                                     .map(x => <option value={x}>{x}</option>)
                             }
                         </Input>

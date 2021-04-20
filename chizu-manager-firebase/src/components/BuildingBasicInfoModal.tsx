@@ -63,7 +63,8 @@ export default function BuildingBasicInfoModal(props: Props) {
     }
 
     return <MessageModal {...messageModalProps}>
-        <Form>
+        <div>おおよその基本情報を入力してください。後から細かい点を修正できます。</div>
+        <Form className="mt-3">
             <FormGroup>
                 <Label id="buildingNameLabel" for="buildingName">名前</Label>
                 <Input

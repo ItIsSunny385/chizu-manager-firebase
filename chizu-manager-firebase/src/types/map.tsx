@@ -1,5 +1,3 @@
-import { FloorInfoB } from "../components/BuildingRoomInfoModal";
-
 export enum MapStatus {
     Private = 'Private',
     Viewable = 'Viewable',
@@ -33,6 +31,15 @@ export interface BuildingInfo {
     name: string,
     latLng: google.maps.LatLng,
     floors: FloorInfoB[]
+}
+
+export interface FloorInfoB {
+    number: number,
+    rooms: RoomInfo[]
+}
+
+export interface RoomInfo {
+    number: string
 }
 
 export interface HouseInfo {

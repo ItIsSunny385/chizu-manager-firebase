@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import BuildingBasicInfoModal from './BuildingBasicInfoModal';
 import BuildingFloorInfoModal, { FloorInfoA } from './BuildingFloorInfoModal';
-import BuildingRoomInfoModal, { FloorInfoB } from './BuildingRoomInfoModal';
-import { BuildingBasicInfo, BuildingInfo } from '../types/map';
+import BuildingRoomInfoModal from './BuildingInfoModal';
+import { BuildingBasicInfo, BuildingInfo, RoomInfo, RoomNumberTypes } from '../types/map';
 
 interface Props {
     latLng: google.maps.LatLng,
@@ -14,8 +14,8 @@ export default function AddBuildingModals(props: Props) {
     const [displayBasicInfoModal, setDisplayBasicInfoModal] = useState(true);
     const [basicInfo, setBasicInfo] = useState(undefined as BuildingBasicInfo);
     const [displayFloorInfoModal, setDisplayFloorInfoModal] = useState(false);
-    const [floorInfoArray, setFloorInfoArray] = useState(undefined as FloorInfoA[]);
-    const [displayRoomInfoModal, setDisplayRoomInfoModal] = useState(false);
+    const [buildingInfo, setBuildingInfo] = useState(undefined as BuildingInfo);
+    const [displayBuildingInfoModal, setBuildingInfoModal] = useState(false);
 
     return <React.Fragment>
         {
@@ -44,29 +44,46 @@ export default function AddBuildingModals(props: Props) {
                 }}
                 next={(result: FloorInfoA[]) => {
                     setDisplayFloorInfoModal(false);
-                    setFloorInfoArray(result);
-                    setDisplayRoomInfoModal(true);
+                    const floors = result.map(x => {
+                        const rooms = Array.from({ length: x.maxRoomNumber }, (v, i) => i + 1)
+                            .filter(j => {
+                                if (j === 4 && basicInfo.roomNumberType === RoomNumberTypes.Except4) {
+                                    return false;
+                                } else if ((j === 4 || j === 9) && basicInfo.roomNumberType === RoomNumberTypes.Except4And9) {
+                                    return false;
+                                } else {
+                                    return true;
+                                }
+                            })
+                            .map(j => ({
+                                number: `${x.floorNumber}${j.toString().padStart(2, '0')}`
+                            } as RoomInfo));
+                        return {
+                            number: x.floorNumber,
+                            rooms: rooms
+                        }
+                    });
+                    const building: BuildingInfo = {
+                        name: basicInfo.name,
+                        latLng: props.latLng,
+                        floors: floors,
+                    };
+                    setBuildingInfo(building);
+                    setBuildingInfoModal(true);
                 }}
             />
         }
         {
-            displayRoomInfoModal
+            displayBuildingInfoModal
             &&
             <BuildingRoomInfoModal
-                roomNumberType={basicInfo.roomNumberType}
-                floorInfoAArray={floorInfoArray}
+                title='集合住宅追加（最終調整）'
+                data={buildingInfo}
                 toggle={() => {
-                    setDisplayRoomInfoModal(false);
+                    setBuildingInfoModal(false);
                     props.toggle();
                 }}
-                finish={(result: FloorInfoB[]) => {
-                    const building: BuildingInfo = {
-                        name: basicInfo.name,
-                        latLng: props.latLng,
-                        floors: result,
-                    };
-                    props.finish(building);
-                }}
+                finish={props.finish}
             />
         }
     </React.Fragment>;
