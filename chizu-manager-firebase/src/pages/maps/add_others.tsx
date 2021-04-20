@@ -7,7 +7,8 @@ import { useRouter } from 'next/router';
 import nookies from 'nookies';
 import {
     NewMapBasicInfoWithBorderCoords,
-    BuildingInfo
+    BuildingInfo,
+    HouseInfo
 } from '../../types/map';
 import { getMarkerUrl } from '../../utils/markerUtil'
 import MapApp from '../../components/MapApp';
@@ -23,15 +24,10 @@ import {
     InfoCircleFill,
 } from 'react-bootstrap-icons';
 import { MessageModalProps } from '../../components/MessageModal';
-import AddBuildingModals from '../../components/AddBuildingModals';
 import SelectBuildingTypeWindow from '../../components/SelectBuildingTypeWindow';
 
 interface Props {
     newMapBasicInfoWithBorderCoords: NewMapBasicInfoWithBorderCoords
-}
-
-interface House {
-    latLng: google.maps.LatLng
 }
 
 export default function AddOthers(props: Props) {
@@ -39,9 +35,8 @@ export default function AddOthers(props: Props) {
     const [messageModalProps, setMessageModalProps] = useState(undefined as MessageModalProps);
     const [displaySelectBuildingTypeWindow, setDisplySelectBuildingTypeWindow] = useState(false);
     const [newBuildingLatLng, setNewBuildingLatLng] = useState(undefined as google.maps.LatLng);
-    const [houses, setHouses] = useState([] as House[]);
+    const [houses, setHouses] = useState([] as HouseInfo[]);
     const [buildings, setBuildings] = useState([] as BuildingInfo[]);
-    const [displayAddBuildingModals, setDisplayAddBuildingModals] = useState(false);
     const name = props.newMapBasicInfoWithBorderCoords.name;
     const borderCoords = props.newMapBasicInfoWithBorderCoords.borderCoords;
     const maxLat = Math.max(...borderCoords.map(coord => coord.lat));
@@ -142,40 +137,21 @@ export default function AddOthers(props: Props) {
         return;
     };
 
-    const onClickHouseIcon = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-        e.preventDefault();
-        setDisplySelectBuildingTypeWindow(false);
-        const newHouses = [
-            ...houses,
-            { latLng: newBuildingLatLng }
-        ];
+    const addHouse = (result: HouseInfo) => {
+        const newHouses = [...houses, result];
         setHouses(newHouses);
         setNewBuildingLatLng(undefined);
     };
 
-    const onClickBuildingIcon = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-        e.preventDefault();
-        setDisplayAddBuildingModals(true);
+    const addBuilding = (result: BuildingInfo) => {
+        const newBuildings = [...buildings, result];
+        setBuildings(newBuildings);
+        setNewBuildingLatLng(undefined);
     };
 
     const onRightClickMap = (e: google.maps.MapMouseEvent) => {
         setNewBuildingLatLng(e.latLng);
         setDisplySelectBuildingTypeWindow(true);
-    };
-
-    const toggleAddBuildingModals = () => {
-        setDisplayAddBuildingModals(false);
-        setDisplySelectBuildingTypeWindow(false);
-        setNewBuildingLatLng(undefined);
-    };
-
-    const finishAddBuildingModals = (result: BuildingInfo) => {
-        const newBuildings = [...buildings];
-        newBuildings.push(result);
-        setBuildings(newBuildings);
-        setDisplayAddBuildingModals(false);
-        setDisplySelectBuildingTypeWindow(false);
-        setNewBuildingLatLng(undefined);
     };
 
     return (
@@ -220,8 +196,8 @@ export default function AddOthers(props: Props) {
                             setNewBuildingLatLng(undefined);
                             setDisplySelectBuildingTypeWindow(false);
                         }}
-                        onClickHouseIcon={onClickHouseIcon}
-                        onClickBuildingIcon={onClickBuildingIcon}
+                        addHouse={addHouse}
+                        addBuilding={addBuilding}
                     />
                 }
                 {/* 家 */}
@@ -277,16 +253,6 @@ export default function AddOthers(props: Props) {
                     })
                 }
             </MapApp>
-            {/* 建物追加モーダル表示 */}
-            {
-                displayAddBuildingModals
-                &&
-                <AddBuildingModals
-                    latLng={newBuildingLatLng}
-                    toggle={toggleAddBuildingModals}
-                    finish={finishAddBuildingModals}
-                />
-            }
             {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
             <div style={{ display: 'none' }}>
                 <Button id="back" onClick={onClickBackButton} />

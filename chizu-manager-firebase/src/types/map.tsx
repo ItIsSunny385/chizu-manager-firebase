@@ -34,3 +34,7 @@ export interface BuildingInfo {
     latLng: google.maps.LatLng,
     floors: FloorInfoB[]
 }
+
+export interface HouseInfo {
+    latLng: google.maps.LatLng
+}
