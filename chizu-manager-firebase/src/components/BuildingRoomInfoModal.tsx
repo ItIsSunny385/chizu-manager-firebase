@@ -23,9 +23,19 @@ export interface FloorInfoB {
 
 export default function BuildingRoomInfoModal(props: Props) {
     const defaultFloorInfoBArray = props.floorInfoAArray.map(x => {
-        const rooms = Array.from({ length: x.maxRoomNumber }, (v, i) => ({
-            number: `${x.floorNumber}${(i + 1).toString().padStart(2, '0')}`
-        } as RoomInfo));
+        const rooms = Array.from({ length: x.maxRoomNumber }, (v, i) => i + 1)
+            .filter(j => {
+                if (j === 4 && props.roomNumberType === RoomNumberTypes.Except4) {
+                    return false;
+                } else if ((j === 4 || j === 9) && props.roomNumberType === RoomNumberTypes.Except4And9) {
+                    return false;
+                } else {
+                    return true;
+                }
+            })
+            .map(j => ({
+                number: `${x.floorNumber}${j.toString().padStart(2, '0')}`
+            } as RoomInfo));
         return {
             number: x.floorNumber,
             rooms: rooms
