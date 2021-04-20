@@ -26,6 +26,7 @@ import {
 import { MessageModalProps } from '../../components/MessageModal';
 import SelectBuildingTypeWindow from '../../components/SelectBuildingTypeWindow';
 import MapNameBadge from '../../components/MapNameBadge';
+import HouseMarkerOfAdmin from '../../components/HouseMarkerOfAdmin';
 
 interface Props {
     newMapBasicInfoWithBorderCoords: NewMapBasicInfoWithBorderCoords
@@ -185,27 +186,15 @@ export default function AddOthers(props: Props) {
                 {/* 家 */}
                 {
                     houses.map((x, i) => {
-                        const onDragEndHouse = (e: google.maps.MapMouseEvent) => {
+                        const setHouseInfo = (newHouseInfo: HouseInfo) => {
                             const newHouses = [...houses];
-                            newHouses[i].latLng = e.latLng;
+                            newHouses[i] = newHouseInfo;
                             setHouses(newHouses);
                         };
-                        return <Marker
-                            position={x.latLng}
-                            icon={{
-                                url: getMarkerUrl('lightblue'),
-                                scaledSize: new google.maps.Size(50, 50),
-                                labelOrigin: new google.maps.Point(25, 18),
-                            }}
-                            label={{
-                                text: '家',
-                                color: '#000000',
-                                fontWeight: 'bold',
-                            }}
-                            draggable={true}
-                            onDragEnd={onDragEndHouse}
-                            zIndex={2}
-                        />
+                        return <HouseMarkerOfAdmin
+                            houseInfo={x}
+                            setHouseInfo={setHouseInfo}
+                        />;
                     })
                 }
                 {/* 集合住宅 */}
