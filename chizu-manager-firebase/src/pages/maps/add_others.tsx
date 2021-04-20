@@ -217,21 +217,11 @@ export default function AddOthers(props: Props) {
                     <SelectBuildingTypeWindow
                         latLng={newBuildingLatLng}
                         close={() => {
-                            setDisplySelectBuildingTypeWindow(false);
                             setNewBuildingLatLng(undefined);
+                            setDisplySelectBuildingTypeWindow(false);
                         }}
                         onClickHouseIcon={onClickHouseIcon}
                         onClickBuildingIcon={onClickBuildingIcon}
-                    />
-                }
-                {/* 建物追加モーダル表示 */}
-                {
-                    displayAddBuildingModals
-                    &&
-                    <AddBuildingModals
-                        latLng={newBuildingLatLng}
-                        toggle={toggleAddBuildingModals}
-                        finish={finishAddBuildingModals}
                     />
                 }
                 {/* 家 */}
@@ -287,6 +277,16 @@ export default function AddOthers(props: Props) {
                     })
                 }
             </MapApp>
+            {/* 建物追加モーダル表示 */}
+            {
+                displayAddBuildingModals
+                &&
+                <AddBuildingModals
+                    latLng={newBuildingLatLng}
+                    toggle={toggleAddBuildingModals}
+                    finish={finishAddBuildingModals}
+                />
+            }
             {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
             <div style={{ display: 'none' }}>
                 <Button id="back" onClick={onClickBackButton} />

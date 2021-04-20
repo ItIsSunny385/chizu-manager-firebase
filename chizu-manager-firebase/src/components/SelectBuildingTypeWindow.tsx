@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function SelectBuildingTypeWindow(props: Props) {
-    return <InfoWindow position={props.latLng} onCloseClick={close}>
+    return <InfoWindow position={props.latLng} onCloseClick={props.close}>
         <React.Fragment>
             <div>どちらを追加しますか？</div>
             <Nav style={{ fontSize: "1.5rem" }}>
