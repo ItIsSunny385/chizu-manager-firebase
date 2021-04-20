@@ -34,14 +34,11 @@ interface House {
     latLng: google.maps.LatLng
 }
 
-interface AddNewBuildingWindow {
-    latLng: google.maps.LatLng
-}
-
 export default function AddOthers(props: Props) {
     const [loading, setLoading] = useState(true);
     const [messageModalProps, setMessageModalProps] = useState(undefined as MessageModalProps);
-    const [addNewBuildingWindow, setAddNewBuildingWindow] = useState(undefined as AddNewBuildingWindow);
+    const [displaySelectBuildingTypeWindow, setDisplySelectBuildingTypeWindow] = useState(false);
+    const [newBuildingLatLng, setNewBuildingLatLng] = useState(undefined as google.maps.LatLng);
     const [houses, setHouses] = useState([] as House[]);
     const [buildings, setBuildings] = useState([] as BuildingInfo[]);
     const [displayAddBuildingModals, setDisplayAddBuildingModals] = useState(false);
@@ -147,12 +144,13 @@ export default function AddOthers(props: Props) {
 
     const onClickHouseIcon = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         e.preventDefault();
-        setAddNewBuildingWindow(undefined);
+        setDisplySelectBuildingTypeWindow(false);
         const newHouses = [
             ...houses,
-            { latLng: addNewBuildingWindow.latLng }
+            { latLng: newBuildingLatLng }
         ];
         setHouses(newHouses);
+        setNewBuildingLatLng(undefined);
     };
 
     const onClickBuildingIcon = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -161,20 +159,23 @@ export default function AddOthers(props: Props) {
     };
 
     const onRightClickMap = (e: google.maps.MapMouseEvent) => {
-        setAddNewBuildingWindow({ latLng: e.latLng });
+        setNewBuildingLatLng(e.latLng);
+        setDisplySelectBuildingTypeWindow(true);
     };
 
     const toggleAddBuildingModals = () => {
         setDisplayAddBuildingModals(false);
-        setAddNewBuildingWindow(undefined);
+        setDisplySelectBuildingTypeWindow(false);
+        setNewBuildingLatLng(undefined);
     };
 
     const finishAddBuildingModals = (result: BuildingInfo) => {
         const newBuildings = [...buildings];
         newBuildings.push(result);
         setBuildings(newBuildings);
-        setDisplayAddBuildingModals(undefined);
-        setAddNewBuildingWindow(undefined);
+        setDisplayAddBuildingModals(false);
+        setDisplySelectBuildingTypeWindow(false);
+        setNewBuildingLatLng(undefined);
     };
 
     return (
@@ -211,11 +212,14 @@ export default function AddOthers(props: Props) {
                 />
                 {/* 新規建物追加ウィンドウ */}
                 {
-                    addNewBuildingWindow
+                    displaySelectBuildingTypeWindow
                     &&
                     <SelectBuildingTypeWindow
-                        latLng={addNewBuildingWindow.latLng}
-                        close={() => { setAddNewBuildingWindow(undefined); }}
+                        latLng={newBuildingLatLng}
+                        close={() => {
+                            setDisplySelectBuildingTypeWindow(false);
+                            setNewBuildingLatLng(undefined);
+                        }}
                         onClickHouseIcon={onClickHouseIcon}
                         onClickBuildingIcon={onClickBuildingIcon}
                     />
@@ -225,7 +229,7 @@ export default function AddOthers(props: Props) {
                     displayAddBuildingModals
                     &&
                     <AddBuildingModals
-                        latLng={addNewBuildingWindow.latLng}
+                        latLng={newBuildingLatLng}
                         toggle={toggleAddBuildingModals}
                         finish={finishAddBuildingModals}
                     />
