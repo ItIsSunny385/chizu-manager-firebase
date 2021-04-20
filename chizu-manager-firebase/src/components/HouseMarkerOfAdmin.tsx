@@ -1,15 +1,20 @@
-import { Marker } from "@react-google-maps/api";
+import { InfoWindow, Marker } from "@react-google-maps/api";
+import { useState } from "react";
+import { TrashFill } from "react-bootstrap-icons";
 import { HouseInfo } from '../types/map';
 import { getMarkerUrl } from '../utils/markerUtil'
 
 interface Props {
-    houseInfo: HouseInfo
-    setHouseInfo: (newHouseInfo: HouseInfo) => void,
+    data: HouseInfo
+    set: (newHouseInfo: HouseInfo) => void,
+    delete: () => void,
 }
 
 export default function HouseMarkerOfAdmin(props: Props) {
+    const [openWindow, setOpenWindow] = useState(false);
+
     return <Marker
-        position={props.houseInfo.latLng}
+        position={props.data.latLng}
         icon={{
             url: getMarkerUrl('lightblue'),
             scaledSize: new google.maps.Size(50, 50),
@@ -22,10 +27,28 @@ export default function HouseMarkerOfAdmin(props: Props) {
         }}
         draggable={true}
         onDragEnd={(e) => {
-            const newHouseInfo = { ...props.houseInfo };
+            const newHouseInfo = { ...props.data };
             newHouseInfo.latLng = e.latLng;
-            props.setHouseInfo(newHouseInfo);
+            props.set(newHouseInfo);
+        }}
+        onClick={(e) => {
+            setOpenWindow(!openWindow);
         }}
         zIndex={2}
-    />;
+    >
+        {
+            openWindow
+            &&
+            <InfoWindow onCloseClick={() => { setOpenWindow(false); }}>
+                <div className="h4 ml-1 mb-0">
+                    <a
+                        href='#'
+                        onClick={(e) => { e.preventDefault(); props.delete(); }}
+                    >
+                        <TrashFill />
+                    </a>
+                </div>
+            </InfoWindow>
+        }
+    </Marker >;
 }

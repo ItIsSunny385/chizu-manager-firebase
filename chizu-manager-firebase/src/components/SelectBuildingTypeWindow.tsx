@@ -34,7 +34,7 @@ export default function SelectBuildingTypeWindow(props: Props) {
     return <InfoWindow position={props.latLng} onCloseClick={props.close}>
         <React.Fragment>
             <div>どちらを追加しますか？</div>
-            <Nav style={{ fontSize: "1.5rem" }}>
+            <Nav className="h4 mb-0">
                 <NavItem className="ml-3">
                     <NavLink onClick={onClickHouseIcon}><HouseIcon /></NavLink>
                 </NavItem>

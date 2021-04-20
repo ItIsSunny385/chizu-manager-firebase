@@ -191,9 +191,15 @@ export default function AddOthers(props: Props) {
                             newHouses[i] = newHouseInfo;
                             setHouses(newHouses);
                         };
+                        const deleteHouseInfo = () => {
+                            const newHouses = [...houses];
+                            newHouses.splice(i, 1);
+                            setHouses(newHouses);
+                        };
                         return <HouseMarkerOfAdmin
-                            houseInfo={x}
-                            setHouseInfo={setHouseInfo}
+                            data={x}
+                            set={setHouseInfo}
+                            delete={deleteHouseInfo}
                         />;
                     })
                 }
