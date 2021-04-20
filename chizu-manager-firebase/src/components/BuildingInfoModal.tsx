@@ -18,6 +18,11 @@ export default function BuildingInfoModal(props: Props) {
         newData.name = e.target.value;
         setData(newData);
     };
+    const onClickDeleteFloor = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        const newData = { ...data };
+        newData.floors.pop();
+        setData(newData);
+    };
     const onClickAddFloor = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         const newData = { ...data };
         newData.floors.push({
@@ -86,6 +91,11 @@ export default function BuildingInfoModal(props: Props) {
             })
         }
         <div className="mt-3">
+            {
+                data.floors.length > 1
+                &&
+                <Button onClick={onClickDeleteFloor} className="mr-1">フロア削除</Button>
+            }
             <Button onClick={onClickAddFloor}>フロア追加</Button>
         </div>
     </MessageModal>;

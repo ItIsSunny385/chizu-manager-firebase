@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import BuildingBasicInfoModal from './BuildingBasicInfoModal';
 import BuildingFloorInfoModal, { FloorInfoA } from './BuildingFloorInfoModal';
 import BuildingRoomInfoModal from './BuildingInfoModal';
-import { BuildingBasicInfo, BuildingInfo, RoomInfo, RoomNumberTypes } from '../types/map';
+import { BuildingBasicInfo, BuildingInfo, FloorInfoB, RoomInfo, RoomNumberTypes } from '../types/map';
 
 interface Props {
     latLng: google.maps.LatLng,
@@ -29,7 +29,21 @@ export default function AddBuildingModals(props: Props) {
                 next={(result: BuildingBasicInfo) => {
                     setDisplayBasicInfoModal(false);
                     setBasicInfo(result);
-                    setDisplayFloorInfoModal(true);
+                    if (result.roomNumberType === RoomNumberTypes.Other) {
+                        const floors = Array.from({ length: result.numberOfFloors }, (v, i) => ({
+                            number: i + 1,
+                            rooms: [{ number: '' }]
+                        } as FloorInfoB));
+                        const building: BuildingInfo = {
+                            name: result.name,
+                            latLng: props.latLng,
+                            floors: floors,
+                        };
+                        setBuildingInfo(building);
+                        setBuildingInfoModal(true);
+                    } else {
+                        setDisplayFloorInfoModal(true);
+                    }
                 }}
             />
         }
