@@ -3,7 +3,6 @@ import BuildingBasicInfoModal from './BuildingBasicInfoModal';
 import BuildingFloorInfoModal, { FloorInfoA } from './BuildingFloorInfoModal';
 import BuildingRoomInfoModal, { FloorInfoB } from './BuildingRoomInfoModal';
 import { BuildingBasicInfo, BuildingInfo } from '../types/map';
-import { Bullseye } from 'react-bootstrap-icons';
 
 interface Props {
     latLng: google.maps.LatLng,
