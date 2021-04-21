@@ -10,5 +10,8 @@ service cloud.firestore {
     match /maps/{docId} {
       allow read, write: if true;
     }
+    match /statuses/{docId} {
+      allow read, write: if true;
+    }
   }
 }

@@ -2,17 +2,17 @@ import { useState, MouseEvent, Dispatch } from 'react';
 import App from './App';
 import NavTabs from './NavTabs';
 import { Alert, Button, Col, Container, Row } from 'reactstrap';
-import { PeopleFill } from 'react-bootstrap-icons';
+import { GearFill, MapFill, PeopleFill } from 'react-bootstrap-icons';
 
 interface Props {
     children: any,
     activeTabId: number,
     pageTitle: string,
-    alertType: string | undefined,
-    alertMessage: string | undefined,
+    alertType?: string,
+    alertMessage?: string,
     loading: boolean,
-    setAlertType: Dispatch<any>,
-    setAlertMessage: Dispatch<any>,
+    setAlertType?: Dispatch<any>,
+    setAlertMessage?: Dispatch<any>,
 };
 
 export default function AdminApp(props: Props) {
@@ -25,8 +25,14 @@ export default function AdminApp(props: Props) {
 
     let pageIcon = undefined;
     switch (props.activeTabId) {
+        case 1:
+            pageIcon = <MapFill className="mb-1 mr-2" />;
+            break;
         case 2:
             pageIcon = <PeopleFill className="mb-1 mr-2" />;
+            break;
+        case 3:
+            pageIcon = <GearFill className="mb-1 mr-2" />;
             break;
     }
 
