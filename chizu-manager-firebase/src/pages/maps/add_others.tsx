@@ -27,6 +27,7 @@ import { MessageModalProps } from '../../components/MessageModal';
 import SelectBuildingTypeWindow from '../../components/SelectBuildingTypeWindow';
 import MapNameBadge from '../../components/MapNameBadge';
 import HouseMarkerOfAdmin from '../../components/HouseMarkerOfAdmin';
+import BuildingMarkerOfAdmin from '../../components/BuildingMarkerOfAdmin';
 
 interface Props {
     newMapBasicInfoWithBorderCoords: NewMapBasicInfoWithBorderCoords
@@ -206,27 +207,21 @@ export default function AddOthers(props: Props) {
                 {/* 集合住宅 */}
                 {
                     buildings.map((x, i) => {
-                        const onDragEndHouse = (e: google.maps.MapMouseEvent) => {
+                        const setBuildingInfo = (newBuildingInfo: BuildingInfo) => {
                             const newBuildings = [...buildings];
-                            newBuildings[i].latLng = e.latLng;
+                            newBuildings[i] = newBuildingInfo;
                             setBuildings(newBuildings);
                         };
-                        return <Marker
-                            position={x.latLng}
-                            icon={{
-                                url: getMarkerUrl('yellow'),
-                                scaledSize: new google.maps.Size(50, 50),
-                                labelOrigin: new google.maps.Point(25, 18),
-                            }}
-                            label={{
-                                text: '集',
-                                color: '#000000',
-                                fontWeight: 'bold',
-                            }}
-                            draggable={true}
-                            onDragEnd={onDragEndHouse}
-                            zIndex={2}
-                        />
+                        const deleteBuildingInfo = () => {
+                            const newBuilding = [...buildings];
+                            newBuilding.splice(i, 1);
+                            setBuildings(newBuilding);
+                        };
+                        return <BuildingMarkerOfAdmin
+                            data={x}
+                            set={setBuildingInfo}
+                            delete={deleteBuildingInfo}
+                        />;
                     })
                 }
             </MapApp>

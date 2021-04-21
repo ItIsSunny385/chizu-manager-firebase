@@ -2,11 +2,11 @@ import { InfoWindow, Marker } from "@react-google-maps/api";
 import { useState } from "react";
 import { TrashFill } from "react-bootstrap-icons";
 import { HouseInfo } from '../types/map';
-import { getMarkerUrl } from '../utils/markerUtil'
+import { getMarkerUrl } from '../utils/markerUtil';
 
 interface Props {
     data: HouseInfo
-    set: (newHouseInfo: HouseInfo) => void,
+    set: (newData: HouseInfo) => void,
     delete: () => void,
 }
 
@@ -27,9 +27,9 @@ export default function HouseMarkerOfAdmin(props: Props) {
         }}
         draggable={true}
         onDragEnd={(e) => {
-            const newHouseInfo = { ...props.data };
-            newHouseInfo.latLng = e.latLng;
-            props.set(newHouseInfo);
+            const newData = { ...props.data };
+            newData.latLng = e.latLng;
+            props.set(newData);
         }}
         onClick={(e) => {
             setOpenWindow(!openWindow);

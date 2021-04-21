@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TrashFill } from 'react-bootstrap-icons';
 import { Button, FormGroup, Input, InputGroup, InputGroupAddon, Label } from 'reactstrap';
-import { BuildingInfo, FloorInfoB } from '../types/map';
+import { BuildingInfo } from '../types/map';
 import MessageModal from './MessageModal';
 
 interface Props {
