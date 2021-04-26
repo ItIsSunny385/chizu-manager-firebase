@@ -22,7 +22,7 @@ const roles = {
     'Administrator': '管理者',
 }
 const columns = [
-    { dataField: 'id', text: 'ID', classes: 'd-none d-md-block', headerClasses: 'd-none d-md-block', sort: true },
+    { dataField: 'id', text: 'ID', classes: 'd-none d-md-table-cell', headerClasses: 'd-none d-md-table-cell', sort: true },
     { dataField: 'displayName', text: '表示名', sort: true },
     { dataField: 'role', text: '権限', sort: true },
     { dataField: 'action', text: '' },

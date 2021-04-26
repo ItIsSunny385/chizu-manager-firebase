@@ -6,6 +6,7 @@ import { Button } from 'reactstrap';
 import '../../utils/InitializeFirebase';
 import AddStatusModal from '../../components/AddStatusModal';
 import { Status } from '../../types/model';
+import { getMarkerUrl } from '../../utils/markerUtil';
 import Link from 'next/link';
 
 const db = firebase.firestore();
@@ -48,8 +49,7 @@ export default function Index() {
                             fullId: id,
                             id: id.substr(0, 10) + '...',
                             name: status.name,
-                            pin: status.pin,
-                            label: status.label,
+                            pin: status.label,
                             statusAfterReseting: status.statusAfterResetingRef
                                 ?
                                 statusMap.get(status.statusAfterResetingRef.id).name
@@ -63,11 +63,27 @@ export default function Index() {
                         };
                     })}
                     columns={[
-                        { dataField: 'id', text: 'ID' },
+                        {
+                            dataField: 'id',
+                            text: 'ID',
+                            classes: 'd-none d-md-table-cell',
+                            headerClasses: 'd-none d-md-table-cell'
+                        },
                         { dataField: 'name', text: '名前' },
-                        { dataField: 'pin', text: 'ピン' },
-                        { dataField: 'label', text: 'ラベル' },
-                        { dataField: 'statusAfterReseting', text: 'リセット後' },
+                        {
+                            dataField: 'pin',
+                            text: 'ピン',
+                            classes: 'text-center font-weight-bold',
+                            style: (cell, row, rowIndex, colIndex) => {
+                                return {
+                                    backgroundImage: `url(${getMarkerUrl(Array.from(statusMap.values())[rowIndex].pin)}`,
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundPosition: 'bottom',
+                                    backgroundSize: '38px',
+                                };
+                            }
+                        },
+                        { dataField: 'statusAfterReseting', text: 'リセット後', classes: 'd-none d-md-table-cell', headerClasses: 'd-none d-md-table-cell' },
                         { dataField: 'action', text: '' },
                     ]}
                     noDataIndication={() => (<div className="text-center">データがありません</div>)}

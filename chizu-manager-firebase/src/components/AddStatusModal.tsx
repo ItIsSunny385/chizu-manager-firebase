@@ -1,8 +1,9 @@
 import { Fragment, useState } from "react";
 import firebase from 'firebase';
-import { Button, Form, FormGroup, FormText, Input, Label } from "reactstrap";
+import { Button, Form, FormGroup, FormText, Input, InputGroup, InputGroupAddon, InputGroupText, Label } from "reactstrap";
 import MessageModal from "./MessageModal";
 import { Status, Pins } from '../types/model';
+import { getMarkerUrl } from '../utils/markerUtil';
 
 export interface Props {
     statusMap: Map<string, Status>,
@@ -29,8 +30,9 @@ export default function AddStatusModal(props: Props) {
                 });
             }
         });
+        const newStatusRef = db.collection('statuses').doc();
+        batch.set(newStatusRef, data);
         await batch.commit();
-        await db.collection('statuses').add(data);
         props.toggle();
     };
 
@@ -82,19 +84,26 @@ export default function AddStatusModal(props: Props) {
             </FormGroup>
             <FormGroup>
                 <Label for="pin">ピン</Label>
-                <Input id="pin" type="select"
-                    defaultValue={data.pin}
-                    onChange={(e) => {
-                        const newData = { ...data };
-                        newData.pin = e.target.value;
-                        setData(newData);
-                    }}
-                >
-                    {
-                        Object.keys(Pins).map(x => <option value={Pins[x]}>{Pins[x]}</option>)
-                    }
-                </Input>
-                <FormText>ピンの種類を入力してください。</FormText>
+                <InputGroup>
+                    <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                            <img src={getMarkerUrl(Pins[data.pin])} height="24px" />
+                        </InputGroupText>
+                    </InputGroupAddon>
+                    <Input id="pin" type="select"
+                        defaultValue={data.pin}
+                        onChange={(e) => {
+                            const newData = { ...data };
+                            newData.pin = e.target.value;
+                            setData(newData);
+                        }}
+                    >
+                        {
+                            Object.keys(Pins).map(x => <option value={Pins[x]}>{Pins[x]}</option>)
+                        }
+                    </Input>
+                </InputGroup>
+                <FormText>ピンの種類を選択してください。</FormText>
             </FormGroup>
             <FormGroup>
                 <Label for="label">ラベル</Label>
@@ -106,7 +115,7 @@ export default function AddStatusModal(props: Props) {
                         setData(newData);
                     }}
                 />
-                <FormText>4文字以内で入力してください。</FormText>
+                <FormText>4文字以内で入力してください。ピン上に表示されます。</FormText>
             </FormGroup>
             <FormGroup>
                 <Label for="statusAfterReseting">リセット後ステータス</Label>
@@ -126,6 +135,7 @@ export default function AddStatusModal(props: Props) {
                         Array.from(props.statusMap).map(([id, x]) => <option value={id}>{x.name}</option>)
                     }
                 </Input>
+                <FormText>地図をリセットした時に、どのステータスに変更するか設定してください。</FormText>
             </FormGroup>
         </Form>
     </MessageModal>;
