@@ -2,10 +2,11 @@ import { Fragment, useState } from "react";
 import firebase from 'firebase';
 import { Button, Form, FormGroup, FormText, Input, InputGroup, InputGroupAddon, InputGroupText, Label } from "reactstrap";
 import MessageModal from "./MessageModal";
-import { Status, Pins } from '../types/model';
+import { Status, Pins, StatusType, StatusCollectionName } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
 
 export interface Props {
+    type: StatusType,
     statusMap: Map<string, Status>,
     toggle: () => void
 }
@@ -21,16 +22,19 @@ export default function AddStatusModal(props: Props) {
         statusAfterResetingRef: null
     } as Status);
 
+    const collectionName = StatusCollectionName[props.type];
+    const title = props.type === StatusType.HouseOrRoom ? '家・部屋ステータス追加' : '集合住宅ステータス追加';
+
     const onClickSaveButton = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         const batch = firebase.firestore().batch();
         Array.from(props.statusMap.entries()).forEach(([id, status]) => {
             if (status.number >= data.number) {
-                batch.update(db.collection('statuses').doc(id), {
+                batch.update(db.collection(collectionName).doc(id), {
                     number: firebase.firestore.FieldValue.increment(1)
                 });
             }
         });
-        const newStatusRef = db.collection('statuses').doc();
+        const newStatusRef = db.collection(collectionName).doc();
         batch.set(newStatusRef, data);
         await batch.commit();
         props.toggle();
@@ -40,7 +44,7 @@ export default function AddStatusModal(props: Props) {
         modalHeaderProps: {
             toggle: props.toggle,
         },
-        modalHeaderContents: '家・部屋用ステータス追加',
+        modalHeaderContents: title,
         modalProps: {
             isOpen: true,
             toggle: props.toggle,
@@ -124,7 +128,7 @@ export default function AddStatusModal(props: Props) {
                     onChange={(e) => {
                         const newData = { ...data };
                         newData.statusAfterResetingRef = e.target.value ?
-                            db.collection('statuses').doc(e.target.value)
+                            db.collection(collectionName).doc(e.target.value)
                             :
                             null;
                         setData(newData);

@@ -13,5 +13,8 @@ service cloud.firestore {
     match /statuses/{docId} {
       allow read, write: if true;
     }
+    match /building_statuses/{docId} {
+      allow read, write: if true;
+    }
   }
 }

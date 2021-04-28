@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import AdminApp from '../../components/AdminApp';
 import StatusList from '../../components/StatusList';
+import { StatusType } from '../../types/model';
 import '../../utils/InitializeFirebase';
 
 export default function Index() {
@@ -12,7 +13,12 @@ export default function Index() {
             pageTitle="設定"
             loading={statusListLoading}
         >
-            <StatusList setLoading={setStatusListLoading} />
+            <div className="mt-4">
+                <StatusList setLoading={setStatusListLoading} type={StatusType.HouseOrRoom} />
+            </div>
+            <div className="mt-5">
+                <StatusList setLoading={setStatusListLoading} type={StatusType.Building} />
+            </div>
         </AdminApp>
     );
 }

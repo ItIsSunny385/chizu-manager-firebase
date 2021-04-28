@@ -5,12 +5,13 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import { Button } from 'reactstrap';
 import AddStatusModal from './AddStatusModal';
 import EditStatusModal from './EditStatusModal';
-import { Status } from '../types/model';
+import { Status, StatusCollectionName, StatusType } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
 
 const db = firebase.firestore();
 
 interface Props {
+    type: StatusType,
     setLoading: Dispatch<SetStateAction<boolean>>
 }
 
@@ -19,8 +20,11 @@ export default function StatusList(props: Props) {
     const [displayAddStatusModal, setDisplayAddStatusModal] = useState(false);
     const [editStatusId, setEditStatusId] = useState(undefined as string);
 
+    const collectionName = StatusCollectionName[props.type];
+    const title = props.type === StatusType.HouseOrRoom ? '家・部屋ステータス' : '集合住宅ステータス';
+
     useEffect(() => {
-        db.collection('statuses').orderBy('number', 'asc').onSnapshot((snapshot) => {
+        db.collection(collectionName).orderBy('number', 'asc').onSnapshot((snapshot) => {
             const newStatusMap = new Map<string, Status>();
             snapshot.forEach((x) => {
                 newStatusMap.set(x.id, {
@@ -37,8 +41,8 @@ export default function StatusList(props: Props) {
     }, []);
 
     return (
-        <div>
-            <h5 className="mb-3">家・部屋用ステータス</h5>
+        <Fragment>
+            <h5 className="mb-3">{title}</h5>
             <BootstrapTable
                 bootstrap4
                 keyField='fullId'
@@ -100,6 +104,7 @@ export default function StatusList(props: Props) {
                 displayAddStatusModal
                 &&
                 <AddStatusModal
+                    type={props.type}
                     statusMap={statusMap}
                     toggle={() => { setDisplayAddStatusModal(false); }}
                 />
@@ -108,11 +113,12 @@ export default function StatusList(props: Props) {
                 editStatusId
                 &&
                 <EditStatusModal
+                    type={props.type}
                     id={editStatusId}
                     statusMap={statusMap}
                     toggle={() => { setEditStatusId(undefined); }}
                 />
             }
-        </div>
+        </Fragment>
     );
 }
