@@ -5,9 +5,9 @@ import AdminApp from '../../components/AdminApp';
 import { Button } from 'reactstrap';
 import '../../utils/InitializeFirebase';
 import AddStatusModal from '../../components/AddStatusModal';
+import EditStatusModal from '../../components/EditStatusModal';
 import { Status } from '../../types/model';
 import { getMarkerUrl } from '../../utils/markerUtil';
-import Link from 'next/link';
 
 const db = firebase.firestore();
 
@@ -15,6 +15,7 @@ export default function Index() {
     const [loading, setLoading] = useState(true);
     const [statusMap, setStatusMap] = useState(new Map<string, Status>());
     const [displayAddStatusModal, setDisplayAddStatusModal] = useState(false);
+    const [editStatusId, setEditStatusId] = useState(undefined as string);
 
     useEffect(() => {
         db.collection('statuses').orderBy('number', 'asc').onSnapshot((snapshot) => {
@@ -57,8 +58,17 @@ export default function Index() {
                                 '',
                             action:
                                 <Fragment>
-                                    <Link href="#"><a className="mr-1">編集</a></Link>
-                                    <Link href="#"><a>削除</a></Link>
+                                    <a
+                                        className="mr-1"
+                                        href="#"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setEditStatusId(id);
+                                        }}
+                                    >
+                                        編集
+                                    </a>
+                                    <a>削除</a>
                                 </Fragment>,
                         };
                     })}
@@ -79,7 +89,7 @@ export default function Index() {
                                     backgroundImage: `url(${getMarkerUrl(Array.from(statusMap.values())[rowIndex].pin)}`,
                                     backgroundRepeat: 'no-repeat',
                                     backgroundPosition: 'bottom',
-                                    backgroundSize: '38px',
+                                    backgroundSize: '37px',
                                 };
                             }
                         },
@@ -95,6 +105,15 @@ export default function Index() {
                     <AddStatusModal
                         statusMap={statusMap}
                         toggle={() => { setDisplayAddStatusModal(false); }}
+                    />
+                }
+                {
+                    editStatusId
+                    &&
+                    <EditStatusModal
+                        id={editStatusId}
+                        statusMap={statusMap}
+                        toggle={() => { setEditStatusId(undefined); }}
                     />
                 }
             </div>
