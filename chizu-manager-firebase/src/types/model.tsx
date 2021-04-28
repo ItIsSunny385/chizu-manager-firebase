@@ -10,6 +10,16 @@ export enum Pins {
     red = 'red',
 }
 
+export enum StatusType {
+    HouseOrRoom = 'HouseOrRoom',
+    Building = 'Building'
+}
+
+export const StatusCollectionName = {
+    [StatusType.HouseOrRoom]: 'statuses',
+    [StatusType.Building]: 'building_statuses',
+}
+
 export interface Status {
     name: string,
     number: number,

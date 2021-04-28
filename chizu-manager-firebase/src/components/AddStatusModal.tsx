@@ -120,7 +120,7 @@ export default function AddStatusModal(props: Props) {
             <FormGroup>
                 <Label for="statusAfterReseting">リセット後ステータス</Label>
                 <Input id="statusAfterReseting" type="select"
-                    defaultValue={data.pin}
+                    defaultValue={data.statusAfterResetingRef ? data.statusAfterResetingRef.id : ''}
                     onChange={(e) => {
                         const newData = { ...data };
                         newData.statusAfterResetingRef = e.target.value ?
