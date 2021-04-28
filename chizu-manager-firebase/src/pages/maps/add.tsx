@@ -13,8 +13,6 @@ const auth = firebase.auth();
 
 export default function Add() {
     const [loading, setLoading] = useState(true);
-    const [alertType, setAlertType] = useState(undefined);
-    const [alertMessage, setAlertMessage] = useState(undefined);
     const [name, setName] = useState('');
     const [mapsSize, setMapsSize] = useState(0);
     const [orderNumber, setNumber] = useState(1);
@@ -80,11 +78,7 @@ export default function Add() {
         <AdminApp
             activeTabId={1}
             pageTitle="地図登録"
-            alertType={alertType}
-            alertMessage={alertMessage}
             loading={loading}
-            setAlertType={setAlertType}
-            setAlertMessage={setAlertMessage}
         >
             <Form>
                 <FormGroup>

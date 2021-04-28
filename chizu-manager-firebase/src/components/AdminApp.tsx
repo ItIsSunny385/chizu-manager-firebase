@@ -1,28 +1,18 @@
-import { useState, MouseEvent, Dispatch } from 'react';
 import App from './App';
 import NavTabs from './NavTabs';
-import { Alert, Button, Col, Container, Row } from 'reactstrap';
+import FlashMessage, { Props as FlashMessageProps } from './FlashMessage';
+import { Col, Container, Row } from 'reactstrap';
 import { GearFill, MapFill, PeopleFill } from 'react-bootstrap-icons';
 
 interface Props {
     children: any,
     activeTabId: number,
     pageTitle: string,
-    alertType?: string,
-    alertMessage?: string,
     loading: boolean,
-    setAlertType?: Dispatch<any>,
-    setAlertMessage?: Dispatch<any>,
+    flashMessageProps?: FlashMessageProps
 };
 
 export default function AdminApp(props: Props) {
-
-    const onClickAlertCloseButton = ((e: MouseEvent) => {
-        e.preventDefault();
-        props.setAlertType(undefined);
-        props.setAlertMessage(undefined);
-    });
-
     let pageIcon = undefined;
     switch (props.activeTabId) {
         case 1:
@@ -43,14 +33,9 @@ export default function AdminApp(props: Props) {
                     <Col>
                         <NavTabs activeTabId={props.activeTabId} />
                         {
-                            props.alertType
+                            props.flashMessageProps
                             &&
-                            props.alertMessage
-                            &&
-                            <Alert id="alert" color={props.alertType} className="mt-3">
-                                {props.alertMessage}
-                                <Button close onClick={onClickAlertCloseButton} />
-                            </Alert>
+                            <FlashMessage {...props.flashMessageProps} />
                         }
                         <h4 className="mb-3 mt-3">{pageIcon}{props.pageTitle}</h4>
                         {props.children}

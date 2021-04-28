@@ -5,7 +5,7 @@ import MessageModal from "./MessageModal";
 import { Status, Pins, StatusType, StatusCollectionName } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
 
-export interface Props {
+interface Props {
     type: StatusType,
     statusMap: Map<string, Status>,
     toggle: () => void

@@ -128,11 +128,7 @@ export default function Edit(props: Props) {
         <AdminApp
             activeTabId={2}
             pageTitle="ユーザ編集"
-            alertType={alertType}
-            alertMessage={alertMessage}
             loading={loading}
-            setAlertType={setAlertType}
-            setAlertMessage={setAlertMessage}
         >
             <Form>
                 <FormGroup>

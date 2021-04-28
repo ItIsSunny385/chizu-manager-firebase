@@ -27,3 +27,9 @@ export interface Status {
     label: string,
     statusAfterResetingRef: firebase.firestore.DocumentReference | null,
 }
+
+export interface User {
+    displayName: string,
+    isAdmin: boolean,
+    deleted: boolean,
+}

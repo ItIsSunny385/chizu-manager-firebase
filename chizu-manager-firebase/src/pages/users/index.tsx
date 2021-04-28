@@ -2,99 +2,35 @@ import { useState, useEffect, MouseEvent, Fragment } from 'react';
 import firebase from 'firebase';
 import { useRouter } from 'next/router';
 import AdminApp from '../../components/AdminApp';
+import AddUserModal from '../../components/AddUserModal';
 import { Button } from 'reactstrap';
-import Link from 'next/link'
-import nookies from 'nookies';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
 import '../../utils/InitializeFirebase';
+import { User } from '../../types/model';
+import { Props as FlashMessageProps } from '../../components/FlashMessage';
 
-interface Props {
-    alertType: string;
-    alertMessage: string;
-}
-
-const roles = {
-    'GeneralUser': '一般ユーザ',
-    'Editor': '編集者',
-    'Administrator': '管理者',
-}
-const columns = [
-    { dataField: 'id', text: 'ID', classes: 'd-none d-md-table-cell', headerClasses: 'd-none d-md-table-cell', sort: true },
-    { dataField: 'displayName', text: '表示名', sort: true },
-    { dataField: 'role', text: '権限', sort: true },
-    { dataField: 'action', text: '' },
-]
 const db = firebase.firestore();
 
-interface UserRow {
-    fullId: string;
-    id: string;
-    displayName: string;
-    role: string;
-    action: JSX.Element;
-}
-
-export default function Index(props: Props) {
-    const router = useRouter();
-    const [alertType, setAlertType] = useState(props.alertType);
-    const [alertMessage, setAlertMessage] = useState(props.alertMessage);
+export default function Index() {
     const [loading, setLoading] = useState(true);
-    const [data, setData] = useState([] as UserRow[]);
-
-    const onClickAddButton = ((e: MouseEvent) => {
-        e.preventDefault();
-        router.push('/users/add');
-    });
-
-    const onClickDeleteLink = (async (e: MouseEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        const targetId = (e.target as HTMLAnchorElement).dataset.id;
-        const batch = db.batch();
-        const userRef = db.collection('users').doc(targetId);
-        batch.update(userRef, { deleted: true });
-        const deleteAuthUserRef = db.collection('delete_auth_users').doc(targetId);
-        batch.set(deleteAuthUserRef, { uid: targetId });
-        try {
-            await batch.commit();
-            setAlertType('success');
-            setAlertMessage('削除しました。');
-            /* ローディングアニメーションは リアルタイムリスナーで消去 */
-            return;
-        } catch (error) {
-            console.log(error);
-            setAlertType('danger');
-            setAlertType('削除に失敗しました。');
-            setLoading(false);
-            return;
-        }
-    });
-
-    const createNewData = (snapshot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>) => {
-        let newData = [];
-        snapshot.forEach((user) => {
-            const userData = user.data();
-            newData.push({
-                fullId: user.id,
-                id: user.id.substr(0, 10) + '...',
-                displayName: userData.displayName,
-                role: roles[userData.role],
-                action:
-                    <Fragment>
-                        <Link href={'/users/edit?id=' + user.id}><a className="mr-1">編集</a></Link>
-                        <Link href="#alert"><a onClick={onClickDeleteLink} data-id={user.id}>削除</a></Link>
-                    </Fragment>,
-            });
-        });
-        return newData;
-    }
+    const [userMap, setUserMap] = useState(new Map<string, User>());
+    const [displayAddModal, setDisplayAddModal] = useState(false);
+    const [flashMessageProps, setFlashMessageProps] = useState(undefined as FlashMessageProps);
 
     useEffect(() => {
-        db.collection('users').where('deleted', '!=', true).onSnapshot((snapshot) => {
-            setData(createNewData(snapshot));
+        db.collection('users').where('deleted', '==', false).onSnapshot((snapshot) => {
+            const newUserMap = new Map<string, User>();
+            snapshot.forEach((x) => {
+                newUserMap.set(x.id, {
+                    displayName: x.data().displayName,
+                    isAdmin: x.data().isAdmin,
+                    deleted: x.data().deleted,
+                });
+            });
+            setUserMap(newUserMap);
             setLoading(false);
         });
     }, []);
@@ -103,36 +39,68 @@ export default function Index(props: Props) {
         <AdminApp
             activeTabId={2}
             pageTitle="ユーザ一覧"
-            alertType={alertType}
-            alertMessage={alertMessage}
             loading={loading}
-            setAlertType={setAlertType}
-            setAlertMessage={setAlertMessage}
+            flashMessageProps={flashMessageProps}
         >
             <BootstrapTable
                 bootstrap4
                 keyField='fullId'
-                data={data}
-                columns={columns}
+                data={Array.from(userMap.entries()).map(([id, user]) => {
+                    const onClickDeleteLink = async (e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
+                        e.preventDefault();
+                        setLoading(true);
+                        const batch = db.batch();
+                        const userRef = db.collection('users').doc(id);
+                        batch.update(userRef, { deleted: true });
+                        const deleteAuthUserRef = db.collection('delete_auth_users').doc(id);
+                        batch.set(deleteAuthUserRef, { uid: id });
+                        try {
+                            await batch.commit();
+                            return;
+                        } catch (error) {
+                            console.log(error);
+                            return;
+                        }
+                    };
+                    return {
+                        fullId: id,
+                        id: id.substr(0, 10) + '...',
+                        displayName: user.displayName,
+                        role: user.isAdmin ? '管理者' : '一般ユーザ',
+                        action:
+                            <Fragment>
+                                <a className="mr-1" href="#">編集</a>
+                                <a href="#" onClick={onClickDeleteLink}>削除</a>
+                            </Fragment>,
+                    };
+                })}
+                columns={[
+                    { dataField: 'id', text: 'ID', classes: 'd-none d-md-table-cell', headerClasses: 'd-none d-md-table-cell', sort: true },
+                    { dataField: 'displayName', text: '表示名', sort: true },
+                    { dataField: 'role', text: '権限', sort: true },
+                    { dataField: 'action', text: '' },
+                ]}
                 pagination={paginationFactory()}
+                noDataIndication={() => (<div className="text-center">データがありません</div>)}
             />
             <div className="text-left mb-2 mt-2">
-                <Button onClick={onClickAddButton} className="ml-1">追加</Button>
+                <Button onClick={() => { setDisplayAddModal(true); }} className="ml-1">追加</Button>
             </div>
+            {
+                displayAddModal
+                &&
+                <AddUserModal
+                    setLoading={setLoading}
+                    toggle={() => { setDisplayAddModal(false); }}
+                    setFlashMessage={(color, message) => {
+                        setFlashMessageProps({
+                            color: color,
+                            message: message,
+                            close: () => { setFlashMessageProps(undefined); }
+                        });
+                    }}
+                />
+            }
         </AdminApp>
     );
-}
-
-export async function getServerSideProps(ctx) {
-    const cookies = nookies.get(ctx);
-    const alertType = cookies.alertType;
-    const alertMessage = cookies.alertMessage;
-    nookies.destroy(ctx, 'alertType', { path: '/' });
-    nookies.destroy(ctx, 'alertMessage', { path: '/' });
-    return {
-        props: {
-            alertType: alertType,
-            alertMessage: alertMessage
-        }
-    };
 }
