@@ -12,7 +12,7 @@ export default function SpinnerWithBack() {
                     bottom: 0,
                     right: 0,
                     margin: 0,
-                    zIndex: 1,
+                    zIndex: 3000,
                     background: 'white'
                 }}
             />
@@ -24,7 +24,7 @@ export default function SpinnerWithBack() {
                     bottom: 0,
                     right: 0,
                     margin: 'auto',
-                    zIndex: 2
+                    zIndex: 3001
                 }}
             />
         </Fragment>

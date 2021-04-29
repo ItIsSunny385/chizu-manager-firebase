@@ -1,8 +1,8 @@
 import { useState, useEffect, MouseEvent, Fragment } from 'react';
 import firebase from 'firebase';
-import { useRouter } from 'next/router';
 import AdminApp from '../../components/AdminApp';
 import AddUserModal from '../../components/AddUserModal';
+import EditUserModal from '../../components/EditUserModal';
 import { Button } from 'reactstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
@@ -11,13 +11,16 @@ import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.m
 import '../../utils/InitializeFirebase';
 import { User } from '../../types/model';
 import { Props as FlashMessageProps } from '../../components/FlashMessage';
+import { Colors } from '../../types/bootstrap';
 
 const db = firebase.firestore();
 
 export default function Index() {
+    const [initialSetting, setInitialSetting] = useState(true);
     const [loading, setLoading] = useState(true);
     const [userMap, setUserMap] = useState(new Map<string, User>());
     const [displayAddModal, setDisplayAddModal] = useState(false);
+    const [editId, setEditId] = useState(undefined as string);
     const [flashMessageProps, setFlashMessageProps] = useState(undefined as FlashMessageProps);
 
     useEffect(() => {
@@ -31,9 +34,15 @@ export default function Index() {
                 });
             });
             setUserMap(newUserMap);
-            setLoading(false);
         });
     }, []);
+
+    useEffect(() => {
+        if (initialSetting) {
+            setInitialSetting(false);
+            setLoading(false);
+        }
+    }, [userMap]);
 
     return (
         <AdminApp
@@ -56,11 +65,25 @@ export default function Index() {
                         batch.set(deleteAuthUserRef, { uid: id });
                         try {
                             await batch.commit();
-                            return;
+                            setFlashMessageProps({
+                                color: Colors.Success,
+                                message: 'ユーザを削除しました。',
+                                close: () => { setFlashMessageProps(undefined); }
+                            });
                         } catch (error) {
                             console.log(error);
-                            return;
+                            setFlashMessageProps({
+                                color: Colors.Danger,
+                                message: 'ユーザの削除に失敗しました。',
+                                close: () => { setFlashMessageProps(undefined); }
+                            });
                         }
+                        document.scrollingElement.scrollTop = 0;
+                        setLoading(false);
+                    };
+                    const onClickEditLink = (e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
+                        e.preventDefault();
+                        setEditId(id);
                     };
                     return {
                         fullId: id,
@@ -69,7 +92,7 @@ export default function Index() {
                         role: user.isAdmin ? '管理者' : '一般ユーザ',
                         action:
                             <Fragment>
-                                <a className="mr-1" href="#">編集</a>
+                                <a className="mr-1" href="#" onClick={onClickEditLink}>編集</a>
                                 <a href="#" onClick={onClickDeleteLink}>削除</a>
                             </Fragment>,
                     };
@@ -90,8 +113,34 @@ export default function Index() {
                 displayAddModal
                 &&
                 <AddUserModal
+                    userMap={userMap}
                     setLoading={setLoading}
-                    toggle={() => { setDisplayAddModal(false); }}
+                    toggle={() => {
+                        setDisplayAddModal(false);
+                        document.scrollingElement.scrollTop = 0;
+                        setLoading(false);
+                    }}
+                    setFlashMessage={(color, message) => {
+                        setFlashMessageProps({
+                            color: color,
+                            message: message,
+                            close: () => { setFlashMessageProps(undefined); }
+                        });
+                    }}
+                />
+            }
+            {
+                editId
+                &&
+                <EditUserModal
+                    id={editId}
+                    userMap={userMap}
+                    setLoading={setLoading}
+                    toggle={() => {
+                        setEditId(undefined);
+                        document.scrollingElement.scrollTop = 0;
+                        setLoading(false);
+                    }}
                     setFlashMessage={(color, message) => {
                         setFlashMessageProps({
                             color: color,

@@ -7,6 +7,7 @@ import { Colors } from '../types/bootstrap';
 import { User } from '../types/model';
 
 interface Props {
+    userMap: Map<string, User>,
     setLoading: (loading: boolean) => void,
     setFlashMessage: (color: Colors, message: any) => void,
     toggle: () => void
@@ -37,6 +38,9 @@ export default function AddUserModal(props: Props) {
             newDisplayNameError = '表示名を入力してください。';
         } else if (data.displayName.length > 16) {
             newDisplayNameError = '表示名が長すぎます。'
+        } else if (Array.from(props.userMap.entries())
+            .some(([id, x]) => x.displayName === data.displayName)) {
+            newDisplayNameError = 'この表示名は既に使われています。';
         }
         setDisplayNameError(newDisplayNameError);
 
@@ -83,7 +87,6 @@ export default function AddUserModal(props: Props) {
                 }
                 props.setFlashMessage(Colors.Danger, 'ユーザの登録に失敗しました。');
             }
-            props.setLoading(false);
             props.toggle();
             return;
         } catch (error) {
@@ -99,7 +102,6 @@ export default function AddUserModal(props: Props) {
                     return;
                 case 'auth/operation-not-allowed':
                     props.setFlashMessage(Colors.Danger, 'この操作には対応していません。');
-                    props.setLoading(false);
                     props.toggle();
                     return;
                 case 'auth/weak-password':
@@ -108,7 +110,6 @@ export default function AddUserModal(props: Props) {
                     return;
                 default:
                     props.setFlashMessage(Colors.Danger, '不明なエラーが発生しました。');
-                    props.setLoading(false);
                     props.toggle();
                     return;
             }
