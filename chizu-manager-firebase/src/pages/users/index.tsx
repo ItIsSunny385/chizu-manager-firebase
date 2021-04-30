@@ -3,7 +3,7 @@ import firebase from 'firebase';
 import AdminApp from '../../components/AdminApp';
 import AddUserModal from '../../components/AddUserModal';
 import EditUserModal from '../../components/EditUserModal';
-import { Button } from 'reactstrap';
+import { Button, Col, Form, FormGroup, Input, Label } from 'reactstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -22,6 +22,7 @@ export default function Index() {
     const [displayAddModal, setDisplayAddModal] = useState(false);
     const [editId, setEditId] = useState(undefined as string);
     const [flashMessageProps, setFlashMessageProps] = useState(undefined as FlashMessageProps);
+    const [keyword, setKeyword] = useState('');
 
     useEffect(() => {
         db.collection('users').where('deleted', '==', false).onSnapshot((snapshot) => {
@@ -51,52 +52,60 @@ export default function Index() {
             loading={loading}
             flashMessageProps={flashMessageProps}
         >
+            <Form inline className="mb-2">
+                <FormGroup>
+                    <Label className="mr-2">表示名検索</Label>
+                    <Input type="text" onChange={(e) => { setKeyword(e.target.value); }} />
+                </FormGroup>
+            </Form>
             <BootstrapTable
                 bootstrap4
                 keyField='fullId'
-                data={Array.from(userMap.entries()).map(([id, user]) => {
-                    const onClickDeleteLink = async (e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
-                        e.preventDefault();
-                        setLoading(true);
-                        const batch = db.batch();
-                        const userRef = db.collection('users').doc(id);
-                        batch.update(userRef, { deleted: true });
-                        const deleteAuthUserRef = db.collection('delete_auth_users').doc(id);
-                        batch.set(deleteAuthUserRef, { uid: id });
-                        try {
-                            await batch.commit();
-                            setFlashMessageProps({
-                                color: Colors.Success,
-                                message: 'ユーザを削除しました。',
-                                close: () => { setFlashMessageProps(undefined); }
-                            });
-                        } catch (error) {
-                            console.log(error);
-                            setFlashMessageProps({
-                                color: Colors.Danger,
-                                message: 'ユーザの削除に失敗しました。',
-                                close: () => { setFlashMessageProps(undefined); }
-                            });
-                        }
-                        document.scrollingElement.scrollTop = 0;
-                        setLoading(false);
-                    };
-                    const onClickEditLink = (e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
-                        e.preventDefault();
-                        setEditId(id);
-                    };
-                    return {
-                        fullId: id,
-                        id: id.substr(0, 10) + '...',
-                        displayName: user.displayName,
-                        role: user.isAdmin ? '管理者' : '一般ユーザ',
-                        action:
-                            <Fragment>
-                                <a className="mr-1" href="#" onClick={onClickEditLink}>編集</a>
-                                <a href="#" onClick={onClickDeleteLink}>削除</a>
-                            </Fragment>,
-                    };
-                })}
+                data={Array.from(userMap.entries())
+                    .filter(([id, user]) => user.displayName.includes(keyword))
+                    .map(([id, user]) => {
+                        const onClickDeleteLink = async (e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
+                            e.preventDefault();
+                            setLoading(true);
+                            const batch = db.batch();
+                            const userRef = db.collection('users').doc(id);
+                            batch.update(userRef, { deleted: true });
+                            const deleteAuthUserRef = db.collection('delete_auth_users').doc(id);
+                            batch.set(deleteAuthUserRef, { uid: id });
+                            try {
+                                await batch.commit();
+                                setFlashMessageProps({
+                                    color: Colors.Success,
+                                    message: 'ユーザを削除しました。',
+                                    close: () => { setFlashMessageProps(undefined); }
+                                });
+                            } catch (error) {
+                                console.log(error);
+                                setFlashMessageProps({
+                                    color: Colors.Danger,
+                                    message: 'ユーザの削除に失敗しました。',
+                                    close: () => { setFlashMessageProps(undefined); }
+                                });
+                            }
+                            document.scrollingElement.scrollTop = 0;
+                            setLoading(false);
+                        };
+                        const onClickEditLink = (e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
+                            e.preventDefault();
+                            setEditId(id);
+                        };
+                        return {
+                            fullId: id,
+                            id: id.substr(0, 10) + '...',
+                            displayName: user.displayName,
+                            role: user.isAdmin ? '管理者' : '一般ユーザ',
+                            action:
+                                <Fragment>
+                                    <a className="mr-1" href="#" onClick={onClickEditLink}>編集</a>
+                                    <a href="#" onClick={onClickDeleteLink}>削除</a>
+                                </Fragment>,
+                        };
+                    })}
                 columns={[
                     { dataField: 'id', text: 'ID', classes: 'd-none d-md-table-cell', headerClasses: 'd-none d-md-table-cell', sort: true },
                     { dataField: 'displayName', text: '表示名', sort: true },
