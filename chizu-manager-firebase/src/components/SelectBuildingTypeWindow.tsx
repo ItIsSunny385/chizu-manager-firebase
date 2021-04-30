@@ -29,7 +29,7 @@ export default function SelectBuildingTypeWindow(props: Props) {
     };
     const onClickHouseIcon = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         const newHouse: House = {
-            latLng: props.latLng,
+            latLng: new firebase.firestore.GeoPoint(props.latLng.lat(), props.latLng.lng()),
             statusRef: props.defaultStatusRef,
         };
         props.addHouse(newHouse);

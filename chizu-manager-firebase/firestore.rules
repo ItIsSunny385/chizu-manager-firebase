@@ -4,16 +4,28 @@ service cloud.firestore {
     match /users/{uid} {
       allow read, write: if true;
     }
-    match /delete_auth_users/{docId} {
+    match /delete_auth_users/{deleteAuthUserId} {
       allow read, write: if true;
     }
-    match /maps/{docId} {
+    match /maps/{mapId} {
+      allow read, write: if true;
+      match /houses/{houseId} {
+        allow read, write: if true;
+      }
+      match /buildings/{buildingId} {
+        allow read, write: if true;
+        match /floors/{floorId} {
+          allow read, write: if true;
+          match /rooms/{roomId} {
+            allow read, write: if true;
+          }
+        }
+      }
+    }
+    match /statuses/{statusId} {
       allow read, write: if true;
     }
-    match /statuses/{docId} {
-      allow read, write: if true;
-    }
-    match /building_statuses/{docId} {
+    match /building_statuses/{buildingStatusId} {
       allow read, write: if true;
     }
   }

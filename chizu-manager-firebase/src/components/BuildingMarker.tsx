@@ -27,7 +27,7 @@ export default function BuildingMarker(props: Props) {
     const defaultStatusRef = db.collection('statuses').doc(defaultStatusId);
 
     return <Marker
-        position={props.data.latLng}
+        position={{ lat: props.data.latLng.latitude, lng: props.data.latLng.longitude }}
         icon={{
             url: getMarkerUrl(buildingStatus.pin),
             scaledSize: new google.maps.Size(50, 50),
@@ -41,7 +41,7 @@ export default function BuildingMarker(props: Props) {
         draggable={true}
         onDragEnd={(e) => {
             const newData = { ...props.data };
-            newData.latLng = e.latLng;
+            newData.latLng = new firebase.firestore.GeoPoint(e.latLng.lat(), e.latLng.lng());
             props.set(newData);
         }}
         onClick={(e) => {

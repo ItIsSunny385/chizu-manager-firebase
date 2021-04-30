@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useRouter } from 'next/router';
 import nookies from 'nookies';
-import { NewMapBasicInfoWithBorderCoords, Building, House } from '../../types/map';
+import { MapBasicInfoWithBorderCoords, Building, House } from '../../types/map';
 import MapApp from '../../components/MapApp';
 import { Polyline } from '@react-google-maps/api';
 import { Badge, Button } from 'reactstrap';
@@ -17,7 +17,7 @@ import BuildingMarker from '../../components/BuildingMarker';
 import { Status } from '../../types/model';
 
 interface Props {
-    data: NewMapBasicInfoWithBorderCoords
+    data: MapBasicInfoWithBorderCoords
 }
 
 const db = firebase.firestore();
@@ -95,8 +95,49 @@ export default function AddOthers(props: Props) {
         router.push('/maps/add_border');
     };
 
-    const onClickFinishButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const onClickFinishButton = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
+        const batch = firebase.firestore().batch();
+        const mapRef = db.collection('maps').doc();
+        batch.set(mapRef, props.data);
+        houses.forEach(x => {
+            const houseRef = mapRef.collection('houses').doc();
+            batch.set(houseRef, x);
+        });
+        buildings.forEach(x => {
+            const buildingRef = mapRef.collection('buildings').doc();
+            const building = { ...x };
+            delete building.floors;
+            batch.set(buildingRef, building);
+            x.floors.forEach(y => {
+                const floorRef = buildingRef.collection('floors').doc();
+                const floor = { ...y };
+                delete floor.rooms;
+                batch.set(floorRef, floor);
+                y.rooms.forEach(z => {
+                    const roomRef = floorRef.collection('rooms').doc();
+                    batch.set(roomRef, z);
+                });
+            });
+        });
+        try {
+            await batch.commit();
+            router.push('/maps');
+        } catch (error) {
+            const toggle = () => setMessageModalProps(undefined);
+            const newMessageModalProps: MessageModalProps = {
+                modalHeaderProps: {
+                    toggle: toggle,
+                },
+                modalProps: {
+                    isOpen: true,
+                    toggle: toggle,
+                },
+                children: 'エラーが発生しました！',
+                modalFooterContents: <Button onClick={toggle}>OK</Button>
+            };
+            setMessageModalProps(newMessageModalProps);
+        }
     };
 
     const onClickShowInfoModalButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -269,12 +310,12 @@ export default function AddOthers(props: Props) {
 
 export async function getServerSideProps(ctx) {
     const cookies = nookies.get(ctx);
-    const newMapBasicInfoWithBorderCoords = cookies.newMapBasicInfoWithBorderCoords ?
-        JSON.parse(cookies.newMapBasicInfoWithBorderCoords) : undefined;
-    nookies.destroy(ctx, 'newMapBasicInfoWithBorderCoords', { path: '/' });
+    const mapBasicInfoWithBorderCoords = cookies.mapBasicInfoWithBorderCoords ?
+        JSON.parse(cookies.mapBasicInfoWithBorderCoords) : undefined;
+    nookies.destroy(ctx, 'mapBasicInfoWithBorderCoords', { path: '/' });
     return {
         props: {
-            data: newMapBasicInfoWithBorderCoords,
+            data: mapBasicInfoWithBorderCoords,
         }
     };
 }

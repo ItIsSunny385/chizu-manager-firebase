@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import BuildingBasicInfoModal from './BuildingBasicInfoModal';
 import BuildingFloorInfoModal, { FloorInfoA } from './BuildingFloorInfoModal';
 import BuildingInfoModal from './BuildingInfoModal';
-import { BuildingBasicInfo, Building, FloorInfoB, Room, RoomNumberTypes } from '../types/map';
+import { BuildingBasicInfo, Building, Floor, Room, RoomNumberTypes } from '../types/map';
 
 interface Props {
     latLng: google.maps.LatLng,
@@ -36,11 +36,11 @@ export default function AddBuildingModals(props: Props) {
                         const floors = Array.from({ length: result.numberOfFloors }, (v, i) => ({
                             number: i + 1,
                             rooms: [{ number: '', statusRef: props.defaultStatusRef }]
-                        } as FloorInfoB));
+                        } as Floor));
                         const building: Building = {
                             statusRef: props.defaultBuildingStatusRef,
                             name: result.name,
-                            latLng: props.latLng,
+                            latLng: new firebase.firestore.GeoPoint(props.latLng.lat(), props.latLng.lng()),
                             floors: floors,
                         };
                         setBuilding(building);
@@ -85,7 +85,7 @@ export default function AddBuildingModals(props: Props) {
                     const building: Building = {
                         statusRef: props.defaultBuildingStatusRef,
                         name: basicInfo.name,
-                        latLng: props.latLng,
+                        latLng: new firebase.firestore.GeoPoint(props.latLng.lat(), props.latLng.lng()),
                         floors: floors,
                     };
                     setBuilding(building);

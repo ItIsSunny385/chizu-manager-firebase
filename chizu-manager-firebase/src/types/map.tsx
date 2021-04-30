@@ -19,24 +19,24 @@ export interface BuildingBasicInfo {
     roomNumberType: RoomNumberTypes,
 }
 
-export interface NewMapBasicInfo {
+export interface MapBasicInfo {
     name: string;
     orderNumber: number;
     status: MapStatus;
 }
 
-export interface NewMapBasicInfoWithBorderCoords extends NewMapBasicInfo {
+export interface MapBasicInfoWithBorderCoords extends MapBasicInfo {
     borderCoords: google.maps.LatLngLiteral[]
 }
 
 export interface Building {
     name: string,
-    latLng: google.maps.LatLng,
-    floors: FloorInfoB[],
+    latLng: firebase.firestore.GeoPoint,
+    floors: Floor[],
     statusRef: firebase.firestore.DocumentReference
 }
 
-export interface FloorInfoB {
+export interface Floor {
     number: number,
     rooms: Room[]
 }
@@ -47,6 +47,6 @@ export interface Room {
 }
 
 export interface House {
-    latLng: google.maps.LatLng,
+    latLng: firebase.firestore.GeoPoint,
     statusRef: firebase.firestore.DocumentReference
 }

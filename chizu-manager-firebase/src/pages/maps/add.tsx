@@ -3,7 +3,7 @@ import firebase from 'firebase';
 import { useRouter } from 'next/router';
 import '../../utils/InitializeFirebase';
 import AdminApp from '../../components/AdminApp';
-import { MapStatus, NewMapBasicInfo } from '../../types/map';
+import { MapStatus, MapBasicInfo } from '../../types/map';
 import { Button, Form, FormGroup, Label, Input, FormText, FormFeedback } from 'reactstrap';
 import { setCookie } from 'nookies';
 
@@ -54,12 +54,12 @@ export default function Add() {
         }
 
         /* エラーがなかった場合はCookieにデータを登録し、次のページに遷移する */
-        const newMapBasicInfo: NewMapBasicInfo = {
+        const mapBasicInfo: MapBasicInfo = {
             name: name,
             orderNumber: orderNumber,
             status: status,
         };
-        setCookie(null, 'newMapBasicInfo', JSON.stringify(newMapBasicInfo), { path: '/' });
+        setCookie(null, 'mapBasicInfo', JSON.stringify(mapBasicInfo), { path: '/' });
         router.push('/maps/add_border');
         return;
     });
