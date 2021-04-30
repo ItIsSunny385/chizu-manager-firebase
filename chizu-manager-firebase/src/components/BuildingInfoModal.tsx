@@ -1,3 +1,4 @@
+import firebase from 'firebase';
 import React, { useState } from 'react';
 import { TrashFill } from 'react-bootstrap-icons';
 import { Button, FormGroup, Input, InputGroup, InputGroupAddon, Label } from 'reactstrap';
@@ -7,6 +8,7 @@ import MessageModal from './MessageModal';
 interface Props {
     title: string,
     data: Building,
+    defaultStatusRef: firebase.firestore.DocumentReference,
     toggle: () => void,
     finish: (result: Building) => void,
 }
@@ -27,7 +29,7 @@ export default function BuildingInfoModal(props: Props) {
         const newData = { ...data };
         newData.floors.push({
             number: newData.floors.length + 1,
-            rooms: [{ number: '' }],
+            rooms: [{ number: '', statusRef: props.defaultStatusRef }],
         });
         setData(newData);
     };
@@ -57,7 +59,7 @@ export default function BuildingInfoModal(props: Props) {
             data.floors.map((floor, i) => {
                 const onClickAddRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
                     const newData = { ...data };
-                    newData.floors[i].rooms.push({ number: '' });
+                    newData.floors[i].rooms.push({ number: '', statusRef: props.defaultStatusRef });
                     setData(newData);
                 };
                 return <details className="mt-1">

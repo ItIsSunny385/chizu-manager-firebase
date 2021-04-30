@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import BuildingBasicInfoModal from './BuildingBasicInfoModal';
 import BuildingFloorInfoModal, { FloorInfoA } from './BuildingFloorInfoModal';
 import BuildingInfoModal from './BuildingInfoModal';
-import { BuildingBasicInfo, Building, FloorInfoB, RoomInfo, RoomNumberTypes } from '../types/map';
+import { BuildingBasicInfo, Building, FloorInfoB, Room, RoomNumberTypes } from '../types/map';
 
 interface Props {
     latLng: google.maps.LatLng,
+    defaultStatusRef: firebase.firestore.DocumentReference,
     defaultBuildingStatusRef: firebase.firestore.DocumentReference,
     toggle: () => void,
     finish: (result: Building) => void,
@@ -34,7 +35,7 @@ export default function AddBuildingModals(props: Props) {
                     if (result.roomNumberType === RoomNumberTypes.Other) {
                         const floors = Array.from({ length: result.numberOfFloors }, (v, i) => ({
                             number: i + 1,
-                            rooms: [{ number: '' }]
+                            rooms: [{ number: '', statusRef: props.defaultStatusRef }]
                         } as FloorInfoB));
                         const building: Building = {
                             statusRef: props.defaultBuildingStatusRef,
@@ -73,8 +74,9 @@ export default function AddBuildingModals(props: Props) {
                                 }
                             })
                             .map(j => ({
-                                number: `${x.floorNumber}${j.toString().padStart(2, '0')}`
-                            } as RoomInfo));
+                                number: `${x.floorNumber}${j.toString().padStart(2, '0')}`,
+                                statusRef: props.defaultStatusRef
+                            } as Room));
                         return {
                             number: x.floorNumber,
                             rooms: rooms
@@ -97,6 +99,7 @@ export default function AddBuildingModals(props: Props) {
             <BuildingInfoModal
                 title='集合住宅追加（最終調整）'
                 data={building}
+                defaultStatusRef={props.defaultStatusRef}
                 toggle={() => {
                     setBuildingInfoModal(false);
                     props.toggle();

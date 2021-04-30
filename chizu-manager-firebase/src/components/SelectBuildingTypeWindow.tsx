@@ -39,7 +39,7 @@ export default function SelectBuildingTypeWindow(props: Props) {
     };
     return <InfoWindow position={props.latLng} onCloseClick={props.close}>
         {
-            props.defaultStatusRef
+            props.defaultStatusRef && props.defaultBuildingStatusRef
                 ?
                 <Fragment>
                     <div>どちらを追加しますか？</div>
@@ -57,6 +57,7 @@ export default function SelectBuildingTypeWindow(props: Props) {
                         &&
                         <AddBuildingModals
                             latLng={props.latLng}
+                            defaultStatusRef={props.defaultStatusRef}
                             defaultBuildingStatusRef={props.defaultBuildingStatusRef}
                             toggle={toggleAddBuildingModals}
                             finish={finishAddBuildingModals}

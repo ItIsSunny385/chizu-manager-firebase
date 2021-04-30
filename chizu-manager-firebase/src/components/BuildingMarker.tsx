@@ -1,7 +1,7 @@
 import firebase from 'firebase';
 import { InfoWindow, Marker } from '@react-google-maps/api';
 import React, { useState } from 'react';
-import { Button, Input } from 'reactstrap';
+import { Button, Input, InputGroup, InputGroupAddon, InputGroupText } from 'reactstrap';
 import { Building, } from '../types/map';
 import { Status } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
@@ -9,6 +9,7 @@ import BuildingInfoModal from './BuildingInfoModal';
 
 interface Props {
     data: Building,
+    statusMap: Map<string, Status>,
     buildingStatusMap: Map<string, Status>,
     set: (newData: Building) => void,
     delete: () => void,
@@ -21,6 +22,8 @@ export default function BuildingMarker(props: Props) {
     const [displayBuildingInfoModal, setDisplayBuildingInfoModal] = useState(false);
     const buildingStatusId = props.data.statusRef.id;
     const buildingStatus = props.buildingStatusMap.get(buildingStatusId);
+    const defaultStatusId = props.statusMap.keys().next().value as string;
+    const defaultStatusRef = db.collection('statuses').doc(defaultStatusId);
 
     return <Marker
         position={props.data.latLng}
@@ -66,16 +69,37 @@ export default function BuildingMarker(props: Props) {
                                 .map(([id, x]) => <option value={id}>{x.name}</option>)
                         }
                     </Input>
-                    {
-                        props.data.floors.map(x => {
-                            return <details>
-                                <summary>{x.number}階</summary>
-                                {
-                                    x.rooms.map(y => <div>{y.number}</div>)
-                                }
-                            </details>;
-                        })
-                    }
+                    <div className="mt-1">
+                        {
+                            props.data.floors.map((x, i) => {
+                                return <details className="mt-1">
+                                    <summary>{x.number}階</summary>
+                                    {
+                                        x.rooms.map((y, j) => <InputGroup size="sm">
+                                            <InputGroupAddon addonType="prepend">
+                                                <InputGroupText>{y.number}</InputGroupText>
+                                            </InputGroupAddon>
+                                            <Input
+                                                type="select"
+                                                defaultValue={y.statusRef.id}
+                                                onChange={(e) => {
+                                                    const newData = { ...props.data };
+                                                    newData.floors[i].rooms[j].statusRef
+                                                        = db.collection('statuses').doc(e.target.value);
+                                                    props.set(newData);
+                                                }}
+                                            >
+                                                {
+                                                    Array.from(props.statusMap.entries())
+                                                        .map(([id, y]) => <option value={id}>{y.name}</option>)
+                                                }
+                                            </Input>
+                                        </InputGroup>)
+                                    }
+                                </details>;
+                            })
+                        }
+                    </div>
                     <div>
                         <Button
                             size="sm"
@@ -97,6 +121,7 @@ export default function BuildingMarker(props: Props) {
                         <BuildingInfoModal
                             title='建物情報編集'
                             data={props.data}
+                            defaultStatusRef={defaultStatusRef}
                             toggle={() => {
                                 setDisplayBuildingInfoModal(false);
                             }}

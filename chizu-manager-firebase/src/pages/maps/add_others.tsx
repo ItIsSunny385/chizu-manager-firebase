@@ -247,6 +247,7 @@ export default function AddOthers(props: Props) {
                         };
                         return <BuildingMarker
                             data={x}
+                            statusMap={statusMap}
                             buildingStatusMap={buildingStatusMap}
                             set={setBuilding}
                             delete={deleteBuilding}

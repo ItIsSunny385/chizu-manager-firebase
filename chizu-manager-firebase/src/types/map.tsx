@@ -38,11 +38,12 @@ export interface Building {
 
 export interface FloorInfoB {
     number: number,
-    rooms: RoomInfo[]
+    rooms: Room[]
 }
 
-export interface RoomInfo {
-    number: string
+export interface Room {
+    number: string,
+    statusRef: firebase.firestore.DocumentReference
 }
 
 export interface House {
