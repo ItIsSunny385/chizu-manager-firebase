@@ -62,7 +62,7 @@ export default function BuildingInfoModal(props: Props) {
                     newData.floors[i].rooms.push({ number: '', statusRef: props.defaultStatusRef });
                     setData(newData);
                 };
-                return <details className="mt-1">
+                return <details key={floor.number} className="mt-1">
                     <summary>{floor.number}階</summary>
                     <div>
                         {
@@ -77,7 +77,7 @@ export default function BuildingInfoModal(props: Props) {
                                     newData.floors[i].rooms.splice(j, 1);
                                     setData(newData);
                                 };
-                                return <InputGroup className="mt-1">
+                                return <InputGroup key={j} className="mt-1">
                                     <Input defaultValue={room.number} onChange={onChangeRoom} />
                                     <InputGroupAddon addonType="append">
                                         <Button onClick={onClickDeleteRoom}><TrashFill /></Button>

@@ -68,7 +68,7 @@ export default function BuildingFloorInfoModal(props: Props) {
                         >
                             {
                                 Array.from({ length: MAX_ROOM_NUMBER + 1 }, (v, j) => j)
-                                    .map(x => <option value={x}>{x}</option>)
+                                    .map(x => <option key={x} value={x}>{x}</option>)
                             }
                         </Input>
                     </FormGroup>;

@@ -225,6 +225,7 @@ export default function AddOthers(props: Props) {
                             setHouses(newHouses);
                         };
                         return <HouseMarker
+                            key={i}
                             data={x}
                             statusMap={statusMap}
                             set={setHouseInfo}
@@ -246,6 +247,7 @@ export default function AddOthers(props: Props) {
                             setBuildings(newBuildings);
                         };
                         return <BuildingMarker
+                            key={i}
                             data={x}
                             statusMap={statusMap}
                             buildingStatusMap={buildingStatusMap}

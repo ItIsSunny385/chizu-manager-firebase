@@ -80,7 +80,7 @@ export default function BuildingMarker(props: Props) {
                         >
                             {
                                 Array.from(props.buildingStatusMap.entries())
-                                    .map(([id, x]) => <option value={id}>{x.name}</option>)
+                                    .map(([id, x]) => <option key={id} value={id}>{x.name}</option>)
                             }
                         </Input>
                         <InputGroupAddon addonType="append">
@@ -90,7 +90,7 @@ export default function BuildingMarker(props: Props) {
                     <div className="mt-1">
                         {
                             props.data.floors.map((x, i) => {
-                                return <details className="mt-1">
+                                return <details key={i} className="mt-1">
                                     <summary>{x.number}階（{x.rooms.length}部屋）</summary>
                                     {
                                         x.rooms.map((y, j) => <InputGroup size="sm">
@@ -109,7 +109,7 @@ export default function BuildingMarker(props: Props) {
                                             >
                                                 {
                                                     Array.from(props.statusMap.entries())
-                                                        .map(([id, y]) => <option value={id}>{y.name}</option>)
+                                                        .map(([id, y]) => <option key={id} value={id}>{y.name}</option>)
                                                 }
                                             </Input>
                                             <InputGroupAddon addonType="append">

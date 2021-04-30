@@ -84,7 +84,7 @@ export default function BuildingBasicInfoModal(props: Props) {
                     onChange={onChangeNumberOfFloors}
                 >
                     {
-                        floorNumberOptions.map(x => <option value={x}>{x}</option>)
+                        floorNumberOptions.map(x => <option key={x} value={x}>{x}</option>)
                     }
                 </Input>
                 <FormText>集合住宅の階数を選択してください。</FormText>

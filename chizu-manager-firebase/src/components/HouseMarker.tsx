@@ -60,7 +60,7 @@ export default function HouseMarker(props: Props) {
                     >
                         {
                             Array.from(props.statusMap.entries())
-                                .map(([id, x]) => <option value={id}>{x.name}</option>)
+                                .map(([id, x]) => <option key={id} value={id}>{x.name}</option>)
                         }
                     </Input>
                     <InputGroupAddon addonType="append">

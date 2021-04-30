@@ -81,7 +81,7 @@ export default function AddStatusModal(props: Props) {
                 >
                     {
                         Array.from({ length: props.statusMap.size + 1 }, (v, i) => i + 1)
-                            .map(x => <option value={x}>{x}</option>)
+                            .map(x => <option key={x} value={x}>{x}</option>)
                     }
                 </Input>
                 <FormText>表示順として使用されます。1を選んだ場合は、家などを追加した時のデフォルトステータスとなります。</FormText>
@@ -103,7 +103,7 @@ export default function AddStatusModal(props: Props) {
                         }}
                     >
                         {
-                            Object.keys(Pins).map(x => <option value={Pins[x]}>{Pins[x]}</option>)
+                            Object.keys(Pins).map((x, i) => <option key={i} value={Pins[x]}>{Pins[x]}</option>)
                         }
                     </Input>
                 </InputGroup>
@@ -136,7 +136,7 @@ export default function AddStatusModal(props: Props) {
                 >
                     <option value=''></option>
                     {
-                        Array.from(props.statusMap).map(([id, x]) => <option value={id}>{x.name}</option>)
+                        Array.from(props.statusMap).map(([id, x]) => <option key={id} value={id}>{x.name}</option>)
                     }
                 </Input>
                 <FormText>地図をリセットした時に、どのステータスに変更するか設定してください。</FormText>
