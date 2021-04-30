@@ -1,47 +1,37 @@
-import React, {
-    useState,
-    useEffect
-} from 'react';
+import '../../utils/InitializeFirebase';
+import firebase from 'firebase';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useRouter } from 'next/router';
 import nookies from 'nookies';
-import {
-    NewMapBasicInfoWithBorderCoords,
-    BuildingInfo,
-    HouseInfo
-} from '../../types/map';
-import { getMarkerUrl } from '../../utils/markerUtil'
+import { NewMapBasicInfoWithBorderCoords, BuildingInfo, House } from '../../types/map';
 import MapApp from '../../components/MapApp';
-import {
-    Marker,
-    Polyline
-} from '@react-google-maps/api';
-import {
-    Badge,
-    Button
-} from 'reactstrap';
-import {
-    InfoCircleFill,
-} from 'react-bootstrap-icons';
+import { Polyline } from '@react-google-maps/api';
+import { Badge, Button } from 'reactstrap';
+import { InfoCircleFill } from 'react-bootstrap-icons';
 import { MessageModalProps } from '../../components/MessageModal';
 import SelectBuildingTypeWindow from '../../components/SelectBuildingTypeWindow';
 import MapNameBadge from '../../components/MapNameBadge';
-import HouseMarkerOfAdmin from '../../components/HouseMarkerOfAdmin';
+import HouseMarker from '../../components/HouseMarker';
 import BuildingMarkerOfAdmin from '../../components/BuildingMarkerOfAdmin';
+import { Status } from '../../types/model';
 
 interface Props {
-    newMapBasicInfoWithBorderCoords: NewMapBasicInfoWithBorderCoords
+    data: NewMapBasicInfoWithBorderCoords
 }
+
+const db = firebase.firestore();
 
 export default function AddOthers(props: Props) {
     const [loading, setLoading] = useState(true);
     const [messageModalProps, setMessageModalProps] = useState(undefined as MessageModalProps);
     const [displaySelectBuildingTypeWindow, setDisplySelectBuildingTypeWindow] = useState(false);
     const [newBuildingLatLng, setNewBuildingLatLng] = useState(undefined as google.maps.LatLng);
-    const [houses, setHouses] = useState([] as HouseInfo[]);
+    const [houses, setHouses] = useState([] as House[]);
     const [buildings, setBuildings] = useState([] as BuildingInfo[]);
-    const name = props.newMapBasicInfoWithBorderCoords.name;
-    const borderCoords = props.newMapBasicInfoWithBorderCoords.borderCoords;
+    const [statusMap, setStatusMap] = useState(new Map<string, Status>());
+    const name = props.data.name;
+    const borderCoords = props.data.borderCoords;
     const maxLat = Math.max(...borderCoords.map(coord => coord.lat));
     const maxLng = Math.max(...borderCoords.map(coord => coord.lng));
     const minLat = Math.min(...borderCoords.map(coord => coord.lat));
@@ -133,7 +123,7 @@ export default function AddOthers(props: Props) {
         return;
     };
 
-    const addHouse = (result: HouseInfo) => {
+    const addHouse = (result: House) => {
         const newHouses = [...houses, result];
         setHouses(newHouses);
         setNewBuildingLatLng(undefined);
@@ -149,6 +139,22 @@ export default function AddOthers(props: Props) {
         setNewBuildingLatLng(e.latLng);
         setDisplySelectBuildingTypeWindow(true);
     };
+
+    useEffect(() => {
+        db.collection('statuses').orderBy('number', 'asc').onSnapshot((snapshot) => {
+            const newStatusMap = new Map<string, Status>();
+            snapshot.forEach((x) => {
+                newStatusMap.set(x.id, {
+                    name: x.data().name,
+                    number: x.data().number,
+                    pin: x.data().pin,
+                    label: x.data().label,
+                    statusAfterResetingRef: x.data().statusAfterResetingRef,
+                });
+            });
+            setStatusMap(newStatusMap);
+        });
+    }, []);
 
     return (
         <React.Fragment>
@@ -175,6 +181,7 @@ export default function AddOthers(props: Props) {
                     displaySelectBuildingTypeWindow
                     &&
                     <SelectBuildingTypeWindow
+                        defaultStatusRef={db.collection('statuses').doc(Array.from(statusMap.keys())[0])}
                         latLng={newBuildingLatLng}
                         close={() => {
                             setNewBuildingLatLng(undefined);
@@ -187,7 +194,7 @@ export default function AddOthers(props: Props) {
                 {/* 家 */}
                 {
                     houses.map((x, i) => {
-                        const setHouseInfo = (newHouseInfo: HouseInfo) => {
+                        const setHouseInfo = (newHouseInfo: House) => {
                             const newHouses = [...houses];
                             newHouses[i] = newHouseInfo;
                             setHouses(newHouses);
@@ -197,8 +204,9 @@ export default function AddOthers(props: Props) {
                             newHouses.splice(i, 1);
                             setHouses(newHouses);
                         };
-                        return <HouseMarkerOfAdmin
+                        return <HouseMarker
                             data={x}
+                            statusMap={statusMap}
                             set={setHouseInfo}
                             delete={deleteHouseInfo}
                         />;
@@ -242,7 +250,7 @@ export async function getServerSideProps(ctx) {
     nookies.destroy(ctx, 'newMapBasicInfoWithBorderCoords', { path: '/' });
     return {
         props: {
-            newMapBasicInfoWithBorderCoords: newMapBasicInfoWithBorderCoords,
+            data: newMapBasicInfoWithBorderCoords,
         }
     };
 }

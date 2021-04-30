@@ -6,7 +6,6 @@ import AdminApp from '../../components/AdminApp';
 import { MapStatus, NewMapBasicInfo } from '../../types/map';
 import { Button, Form, FormGroup, Label, Input, FormText, FormFeedback } from 'reactstrap';
 import { setCookie } from 'nookies';
-import { Router } from 'express';
 
 const db = firebase.firestore();
 const auth = firebase.auth();

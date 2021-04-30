@@ -11,23 +11,23 @@ export default function NavTabs({ activeTabId }: Props) {
     return (
         <Nav tabs className="mt-2">
             <NavItem>
-                <NavLink className={classnames({ active: activeTabId === 1 })}>
+                <NavLink className={classnames({ active: activeTabId === 1 })} href="/maps">
                     <MapFill className="mr-1 mb-1" />
                     地図
                 </NavLink>
             </NavItem>
             <NavItem>
-                <NavLink className={classnames({ active: activeTabId === 2 })}>
+                <NavLink className={classnames({ active: activeTabId === 2 })} href="/users">
                     <PeopleFill className="mr-1 mb-1" />
                     ユーザ
                 </NavLink>
             </NavItem>
             <NavItem>
-                <NavLink className={classnames({ active: activeTabId === 3 })}>
+                <NavLink className={classnames({ active: activeTabId === 3 })} href="/settings">
                     <GearFill className="mr-1 mb-1" />
                     設定
                 </NavLink>
             </NavItem>
-        </Nav>
+        </Nav >
     );
 }

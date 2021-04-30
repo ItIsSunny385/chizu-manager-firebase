@@ -1,3 +1,5 @@
+import firebase from 'firebase';
+
 export enum MapStatus {
     Private = 'Private',
     Viewable = 'Viewable',
@@ -42,6 +44,7 @@ export interface RoomInfo {
     number: string
 }
 
-export interface HouseInfo {
-    latLng: google.maps.LatLng
+export interface House {
+    latLng: google.maps.LatLng,
+    statusRef: firebase.firestore.DocumentReference
 }

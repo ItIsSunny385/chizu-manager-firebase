@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
+import firebase from 'firebase';
 import { InfoWindow } from '@react-google-maps/api';
-import { Building as BuildingIcon, House, House as HouseIcon } from 'react-bootstrap-icons';
+import { Building as BuildingIcon, House as HouseIcon } from 'react-bootstrap-icons';
 import { Nav, NavItem, NavLink } from 'reactstrap';
 import AddBuildingModals from './AddBuildingModals';
-import { BuildingInfo, HouseInfo } from '../types/map';
+import { BuildingInfo, House } from '../types/map';
 
 interface Props {
     latLng: google.maps.LatLng,
+    defaultStatusRef: firebase.firestore.DocumentReference,
     close: () => void,
-    addHouse: (result: HouseInfo) => void,
+    addHouse: (result: House) => void,
     addBuilding: (result: BuildingInfo) => void,
 }
+
+const db = firebase.firestore();
 
 export default function SelectBuildingTypeWindow(props: Props) {
     const [displayAddBuildingModals, setDisplayAddBuildingModals] = useState(false);
@@ -23,35 +27,42 @@ export default function SelectBuildingTypeWindow(props: Props) {
         props.addBuilding(result);
     };
     const onClickHouseIcon = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-        const houseInfo: HouseInfo = {
-            latLng: props.latLng
+        const newHouse: House = {
+            latLng: props.latLng,
+            statusRef: props.defaultStatusRef,
         };
-        props.addHouse(houseInfo);
+        props.addHouse(newHouse);
     };
     const onClickBuildingIcon = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         setDisplayAddBuildingModals(true);
     };
     return <InfoWindow position={props.latLng} onCloseClick={props.close}>
-        <React.Fragment>
-            <div>どちらを追加しますか？</div>
-            <Nav className="h4 mb-0">
-                <NavItem className="ml-3">
-                    <NavLink onClick={onClickHouseIcon}><HouseIcon /></NavLink>
-                </NavItem>
-                <NavItem>
-                    <NavLink onClick={onClickBuildingIcon}><BuildingIcon /></NavLink>
-                </NavItem>
-            </Nav>
-            {/* 建物追加モーダル表示 */}
-            {
-                displayAddBuildingModals
-                &&
-                <AddBuildingModals
-                    latLng={props.latLng}
-                    toggle={toggleAddBuildingModals}
-                    finish={finishAddBuildingModals}
-                />
-            }
-        </React.Fragment>
+        {
+            props.defaultStatusRef
+                ?
+                <Fragment>
+                    <div>どちらを追加しますか？</div>
+                    <Nav className="h4 mb-0">
+                        <NavItem className="ml-3">
+                            <NavLink onClick={onClickHouseIcon}><HouseIcon /></NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink onClick={onClickBuildingIcon}><BuildingIcon /></NavLink>
+                        </NavItem>
+                    </Nav>
+                    {/* 建物追加モーダル表示 */}
+                    {
+                        displayAddBuildingModals
+                        &&
+                        <AddBuildingModals
+                            latLng={props.latLng}
+                            toggle={toggleAddBuildingModals}
+                            finish={finishAddBuildingModals}
+                        />
+                    }
+                </Fragment>
+                :
+                <div>ステータス設定がされていないため、建物を追加できません。</div>
+        }
     </InfoWindow >;
 }
