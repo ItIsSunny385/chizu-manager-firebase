@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useRouter } from 'next/router';
 import nookies from 'nookies';
-import { NewMapBasicInfoWithBorderCoords, BuildingInfo, House } from '../../types/map';
+import { NewMapBasicInfoWithBorderCoords, Building, House } from '../../types/map';
 import MapApp from '../../components/MapApp';
 import { Polyline } from '@react-google-maps/api';
 import { Badge, Button } from 'reactstrap';
@@ -28,8 +28,9 @@ export default function AddOthers(props: Props) {
     const [displaySelectBuildingTypeWindow, setDisplySelectBuildingTypeWindow] = useState(false);
     const [newBuildingLatLng, setNewBuildingLatLng] = useState(undefined as google.maps.LatLng);
     const [houses, setHouses] = useState([] as House[]);
-    const [buildings, setBuildings] = useState([] as BuildingInfo[]);
+    const [buildings, setBuildings] = useState([] as Building[]);
     const [statusMap, setStatusMap] = useState(new Map<string, Status>());
+    const [buildingStatusMap, setBuildingStatusMap] = useState(new Map<string, Status>());
     const name = props.data.name;
     const borderCoords = props.data.borderCoords;
     const maxLat = Math.max(...borderCoords.map(coord => coord.lat));
@@ -129,7 +130,7 @@ export default function AddOthers(props: Props) {
         setNewBuildingLatLng(undefined);
     };
 
-    const addBuilding = (result: BuildingInfo) => {
+    const addBuilding = (result: Building) => {
         const newBuildings = [...buildings, result];
         setBuildings(newBuildings);
         setNewBuildingLatLng(undefined);
@@ -153,6 +154,20 @@ export default function AddOthers(props: Props) {
                 });
             });
             setStatusMap(newStatusMap);
+        });
+
+        db.collection('building_statuses').orderBy('number', 'asc').onSnapshot((snapshot) => {
+            const newBuildingStatusMap = new Map<string, Status>();
+            snapshot.forEach((x) => {
+                newBuildingStatusMap.set(x.id, {
+                    name: x.data().name,
+                    number: x.data().number,
+                    pin: x.data().pin,
+                    label: x.data().label,
+                    statusAfterResetingRef: x.data().statusAfterResetingRef,
+                });
+            });
+            setBuildingStatusMap(newBuildingStatusMap);
         });
     }, []);
 
@@ -181,7 +196,12 @@ export default function AddOthers(props: Props) {
                     displaySelectBuildingTypeWindow
                     &&
                     <SelectBuildingTypeWindow
-                        defaultStatusRef={db.collection('statuses').doc(Array.from(statusMap.keys())[0])}
+                        defaultStatusRef={
+                            db.collection('statuses').doc(Array.from(statusMap.keys())[0])
+                        }
+                        defaultBuildingStatusRef={
+                            db.collection('building_statuses').doc(Array.from(buildingStatusMap.keys())[0])
+                        }
                         latLng={newBuildingLatLng}
                         close={() => {
                             setNewBuildingLatLng(undefined);
@@ -215,20 +235,21 @@ export default function AddOthers(props: Props) {
                 {/* 集合住宅 */}
                 {
                     buildings.map((x, i) => {
-                        const setBuildingInfo = (newBuildingInfo: BuildingInfo) => {
+                        const setBuilding = (newBuilding: Building) => {
                             const newBuildings = [...buildings];
-                            newBuildings[i] = newBuildingInfo;
+                            newBuildings[i] = newBuilding;
                             setBuildings(newBuildings);
                         };
-                        const deleteBuildingInfo = () => {
+                        const deleteBuilding = () => {
                             const newBuilding = [...buildings];
                             newBuilding.splice(i, 1);
                             setBuildings(newBuilding);
                         };
                         return <BuildingMarker
                             data={x}
-                            set={setBuildingInfo}
-                            delete={deleteBuildingInfo}
+                            buildingStatusMap={buildingStatusMap}
+                            set={setBuilding}
+                            delete={deleteBuilding}
                         />;
                     })
                 }

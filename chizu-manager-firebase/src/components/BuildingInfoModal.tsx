@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { TrashFill } from 'react-bootstrap-icons';
 import { Button, FormGroup, Input, InputGroup, InputGroupAddon, Label } from 'reactstrap';
-import { BuildingInfo } from '../types/map';
+import { Building } from '../types/map';
 import MessageModal from './MessageModal';
 
 interface Props {
     title: string,
-    data: BuildingInfo,
+    data: Building,
     toggle: () => void,
-    finish: (result: BuildingInfo) => void,
+    finish: (result: Building) => void,
 }
 
 export default function BuildingInfoModal(props: Props) {

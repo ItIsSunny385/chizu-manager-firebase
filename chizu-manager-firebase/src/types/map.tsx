@@ -29,10 +29,11 @@ export interface NewMapBasicInfoWithBorderCoords extends NewMapBasicInfo {
     borderCoords: google.maps.LatLngLiteral[]
 }
 
-export interface BuildingInfo {
+export interface Building {
     name: string,
     latLng: google.maps.LatLng,
-    floors: FloorInfoB[]
+    floors: FloorInfoB[],
+    statusRef: firebase.firestore.DocumentReference
 }
 
 export interface FloorInfoB {

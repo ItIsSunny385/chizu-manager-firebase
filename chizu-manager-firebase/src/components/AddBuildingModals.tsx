@@ -1,20 +1,22 @@
+import firebase from 'firebase';
 import React, { useState } from 'react';
 import BuildingBasicInfoModal from './BuildingBasicInfoModal';
 import BuildingFloorInfoModal, { FloorInfoA } from './BuildingFloorInfoModal';
-import BuildingRoomInfoModal from './BuildingInfoModal';
-import { BuildingBasicInfo, BuildingInfo, FloorInfoB, RoomInfo, RoomNumberTypes } from '../types/map';
+import BuildingInfoModal from './BuildingInfoModal';
+import { BuildingBasicInfo, Building, FloorInfoB, RoomInfo, RoomNumberTypes } from '../types/map';
 
 interface Props {
     latLng: google.maps.LatLng,
+    defaultBuildingStatusRef: firebase.firestore.DocumentReference,
     toggle: () => void,
-    finish: (result: BuildingInfo) => void,
+    finish: (result: Building) => void,
 }
 
 export default function AddBuildingModals(props: Props) {
     const [displayBasicInfoModal, setDisplayBasicInfoModal] = useState(true);
     const [basicInfo, setBasicInfo] = useState(undefined as BuildingBasicInfo);
     const [displayFloorInfoModal, setDisplayFloorInfoModal] = useState(false);
-    const [buildingInfo, setBuildingInfo] = useState(undefined as BuildingInfo);
+    const [building, setBuilding] = useState(undefined as Building);
     const [displayBuildingInfoModal, setBuildingInfoModal] = useState(false);
 
     return <React.Fragment>
@@ -34,12 +36,13 @@ export default function AddBuildingModals(props: Props) {
                             number: i + 1,
                             rooms: [{ number: '' }]
                         } as FloorInfoB));
-                        const building: BuildingInfo = {
+                        const building: Building = {
+                            statusRef: props.defaultBuildingStatusRef,
                             name: result.name,
                             latLng: props.latLng,
                             floors: floors,
                         };
-                        setBuildingInfo(building);
+                        setBuilding(building);
                         setBuildingInfoModal(true);
                     } else {
                         setDisplayFloorInfoModal(true);
@@ -77,12 +80,13 @@ export default function AddBuildingModals(props: Props) {
                             rooms: rooms
                         }
                     });
-                    const building: BuildingInfo = {
+                    const building: Building = {
+                        statusRef: props.defaultBuildingStatusRef,
                         name: basicInfo.name,
                         latLng: props.latLng,
                         floors: floors,
                     };
-                    setBuildingInfo(building);
+                    setBuilding(building);
                     setBuildingInfoModal(true);
                 }}
             />
@@ -90,9 +94,9 @@ export default function AddBuildingModals(props: Props) {
         {
             displayBuildingInfoModal
             &&
-            <BuildingRoomInfoModal
+            <BuildingInfoModal
                 title='集合住宅追加（最終調整）'
-                data={buildingInfo}
+                data={building}
                 toggle={() => {
                     setBuildingInfoModal(false);
                     props.toggle();

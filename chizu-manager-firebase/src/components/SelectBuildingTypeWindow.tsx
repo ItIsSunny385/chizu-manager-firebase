@@ -4,14 +4,15 @@ import { InfoWindow } from '@react-google-maps/api';
 import { Building as BuildingIcon, House as HouseIcon } from 'react-bootstrap-icons';
 import { Nav, NavItem, NavLink } from 'reactstrap';
 import AddBuildingModals from './AddBuildingModals';
-import { BuildingInfo, House } from '../types/map';
+import { Building, House } from '../types/map';
 
 interface Props {
     latLng: google.maps.LatLng,
     defaultStatusRef: firebase.firestore.DocumentReference,
+    defaultBuildingStatusRef: firebase.firestore.DocumentReference,
     close: () => void,
     addHouse: (result: House) => void,
-    addBuilding: (result: BuildingInfo) => void,
+    addBuilding: (result: Building) => void,
 }
 
 const db = firebase.firestore();
@@ -22,7 +23,7 @@ export default function SelectBuildingTypeWindow(props: Props) {
         setDisplayAddBuildingModals(false);
         props.close();
     };
-    const finishAddBuildingModals = (result: BuildingInfo) => {
+    const finishAddBuildingModals = (result: Building) => {
         setDisplayAddBuildingModals(false);
         props.addBuilding(result);
     };
@@ -56,6 +57,7 @@ export default function SelectBuildingTypeWindow(props: Props) {
                         &&
                         <AddBuildingModals
                             latLng={props.latLng}
+                            defaultBuildingStatusRef={props.defaultBuildingStatusRef}
                             toggle={toggleAddBuildingModals}
                             finish={finishAddBuildingModals}
                         />
