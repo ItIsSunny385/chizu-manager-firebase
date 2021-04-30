@@ -13,7 +13,7 @@ import { MessageModalProps } from '../../components/MessageModal';
 import SelectBuildingTypeWindow from '../../components/SelectBuildingTypeWindow';
 import MapNameBadge from '../../components/MapNameBadge';
 import HouseMarker from '../../components/HouseMarker';
-import BuildingMarkerOfAdmin from '../../components/BuildingMarkerOfAdmin';
+import BuildingMarker from '../../components/BuildingMarker';
 import { Status } from '../../types/model';
 
 interface Props {
@@ -225,7 +225,7 @@ export default function AddOthers(props: Props) {
                             newBuilding.splice(i, 1);
                             setBuildings(newBuilding);
                         };
-                        return <BuildingMarkerOfAdmin
+                        return <BuildingMarker
                             data={x}
                             set={setBuildingInfo}
                             delete={deleteBuildingInfo}
