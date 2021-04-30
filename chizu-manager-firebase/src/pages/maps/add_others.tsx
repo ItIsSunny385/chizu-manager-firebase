@@ -241,9 +241,9 @@ export default function AddOthers(props: Props) {
                             setBuildings(newBuildings);
                         };
                         const deleteBuilding = () => {
-                            const newBuilding = [...buildings];
-                            newBuilding.splice(i, 1);
-                            setBuildings(newBuilding);
+                            const newBuildings = [...buildings];
+                            newBuildings.splice(i, 1);
+                            setBuildings(newBuildings);
                         };
                         return <BuildingMarker
                             data={x}

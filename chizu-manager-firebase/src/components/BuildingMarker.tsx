@@ -1,11 +1,12 @@
 import firebase from 'firebase';
 import { InfoWindow, Marker } from '@react-google-maps/api';
 import React, { useState } from 'react';
-import { Button, Input, InputGroup, InputGroupAddon, InputGroupText } from 'reactstrap';
+import { Button, ButtonGroup, Input, InputGroup, InputGroupAddon, InputGroupText } from 'reactstrap';
 import { Building, } from '../types/map';
 import { Status } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
 import BuildingInfoModal from './BuildingInfoModal';
+import { ChatTextFill, PencilFill, TrashFill } from 'react-bootstrap-icons';
 
 interface Props {
     data: Building,
@@ -52,28 +53,45 @@ export default function BuildingMarker(props: Props) {
             openWindow
             &&
             <InfoWindow onCloseClick={() => { setOpenWindow(false); }}>
-                <React.Fragment>
-                    <h6>{props.data.name}</h6>
-                    <Input
-                        bsSize="sm"
-                        type="select"
-                        defaultValue={props.data.statusRef.id}
-                        onChange={(e) => {
-                            const newData = { ...props.data };
-                            newData.statusRef = db.collection('building_statuses').doc(e.target.value);
-                            props.set(newData);
-                        }}
-                    >
-                        {
-                            Array.from(props.buildingStatusMap.entries())
-                                .map(([id, x]) => <option value={id}>{x.name}</option>)
-                        }
-                    </Input>
+                <div>
+                    <ButtonGroup size="sm" className="text-right d-block">
+                        <Button
+                            outline
+                            onClick={(e) => { setDisplayBuildingInfoModal(true); }}
+                        >
+                            <PencilFill />
+                        </Button>
+                        <Button
+                            outline
+                            onClick={(e) => { props.delete(); }}>
+                            <TrashFill />
+                        </Button>
+                    </ButtonGroup>
+                    <h6 className="mt-2">{props.data.name}</h6>
+                    <InputGroup size="sm">
+                        <Input
+                            type="select"
+                            defaultValue={props.data.statusRef.id}
+                            onChange={(e) => {
+                                const newData = { ...props.data };
+                                newData.statusRef = db.collection('building_statuses').doc(e.target.value);
+                                props.set(newData);
+                            }}
+                        >
+                            {
+                                Array.from(props.buildingStatusMap.entries())
+                                    .map(([id, x]) => <option value={id}>{x.name}</option>)
+                            }
+                        </Input>
+                        <InputGroupAddon addonType="append">
+                            <Button><ChatTextFill /></Button>
+                        </InputGroupAddon>
+                    </InputGroup>
                     <div className="mt-1">
                         {
                             props.data.floors.map((x, i) => {
                                 return <details className="mt-1">
-                                    <summary>{x.number}階</summary>
+                                    <summary>{x.number}階（{x.rooms.length}部屋）</summary>
                                     {
                                         x.rooms.map((y, j) => <InputGroup size="sm">
                                             <InputGroupAddon addonType="prepend">
@@ -94,26 +112,14 @@ export default function BuildingMarker(props: Props) {
                                                         .map(([id, y]) => <option value={id}>{y.name}</option>)
                                                 }
                                             </Input>
+                                            <InputGroupAddon addonType="append">
+                                                <Button><ChatTextFill /></Button>
+                                            </InputGroupAddon>
                                         </InputGroup>)
                                     }
                                 </details>;
                             })
                         }
-                    </div>
-                    <div>
-                        <Button
-                            size="sm"
-                            onClick={(e) => { setDisplayBuildingInfoModal(true); }}
-                        >
-                            編集
-                        </Button>
-                        <Button
-                            size="sm"
-                            className="ml-1"
-                            onClick={props.delete}
-                        >
-                            削除
-                        </Button>
                     </div>
                     {
                         displayBuildingInfoModal
@@ -131,7 +137,7 @@ export default function BuildingMarker(props: Props) {
                             }}
                         />
                     }
-                </React.Fragment>
+                </div>
             </InfoWindow>
         }
     </Marker>;

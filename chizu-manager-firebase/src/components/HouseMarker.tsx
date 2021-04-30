@@ -1,7 +1,7 @@
 import firebase from 'firebase';
 import { InfoWindow, Marker } from "@react-google-maps/api";
 import { useState } from "react";
-import { TrashFill } from "react-bootstrap-icons";
+import { ChatTextFill, TrashFill } from "react-bootstrap-icons";
 import { Button, Input, InputGroup, InputGroupAddon } from "reactstrap";
 import { House } from '../types/map';
 import { Status } from "../types/model";
@@ -63,6 +63,9 @@ export default function HouseMarker(props: Props) {
                                 .map(([id, x]) => <option value={id}>{x.name}</option>)
                         }
                     </Input>
+                    <InputGroupAddon addonType="append">
+                        <Button><ChatTextFill /></Button>
+                    </InputGroupAddon>
                     <InputGroupAddon addonType="append">
                         <Button onClick={(e) => { props.delete(); }}><TrashFill /></Button>
                     </InputGroupAddon>
