@@ -26,7 +26,7 @@ export interface MapBasicInfo {
 }
 
 export interface MapBasicInfoWithBorderCoords extends MapBasicInfo {
-    borderCoords: google.maps.LatLngLiteral[]
+    borderCoords: firebase.firestore.GeoPoint[]
 }
 
 export interface Building {

@@ -33,10 +33,10 @@ export default function AddOthers(props: Props) {
     const [buildingStatusMap, setBuildingStatusMap] = useState(new Map<string, Status>());
     const name = props.data.name;
     const borderCoords = props.data.borderCoords;
-    const maxLat = Math.max(...borderCoords.map(coord => coord.lat));
-    const maxLng = Math.max(...borderCoords.map(coord => coord.lng));
-    const minLat = Math.min(...borderCoords.map(coord => coord.lat));
-    const minLng = Math.min(...borderCoords.map(coord => coord.lng));
+    const maxLat = Math.max(...borderCoords.map(coord => coord.latitude));
+    const maxLng = Math.max(...borderCoords.map(coord => coord.longitude));
+    const minLat = Math.min(...borderCoords.map(coord => coord.latitude));
+    const minLng = Math.min(...borderCoords.map(coord => coord.longitude));
     const router = useRouter();
 
     const initialBadgePosition: google.maps.LatLngLiteral = {
@@ -45,7 +45,7 @@ export default function AddOthers(props: Props) {
     };
 
     const [badgePosition, setBadgePosition] = useState(initialBadgePosition);
-    const polylinePath = [...borderCoords];
+    const polylinePath = [...borderCoords.map(x => ({ lat: x.latitude, lng: x.longitude }))];
     polylinePath.push(polylinePath[0]);
 
     const onLoadMap = (map: google.maps.Map<Element>) => {

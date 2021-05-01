@@ -30,3 +30,15 @@ exports.onCreateDeleteAuthUser = functions.firestore
     .onCreate(async (snapshot, { params }) => {
         admin.auth().deleteUser(snapshot.get('uid'))
     })
+
+/* map作成時にMap形式になってしまうデータをGeoPointに変更する */
+exports.onCreateMap = functions.firestore
+    .document('maps/{mapId}')
+    .onWrite(async (snapshot, { params }) => {
+        const data = snapshot.data()
+        const newBorderCoords = []
+        data.borderCoords.map(x => {
+            newBorderCoords.push(new admin.firestore.GeoPoint(x.latitude, x.longitude))
+        })
+        return snapshot.ref.set({ borderCoords: newBorderCoords }, { merge: true })
+    })

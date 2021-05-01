@@ -156,7 +156,7 @@ export default function AddBorder(props: Props) {
         }
         const mapBasicInfoWithBorderCoords: MapBasicInfoWithBorderCoords = {
             ...props.data,
-            borderCoords: corners.map(x => ({ lat: x.lat(), lng: x.lng() }))
+            borderCoords: corners.map(x => new firebase.firestore.GeoPoint(x.lat(), x.lng()))
         };
         setCookie(null,
             'mapBasicInfoWithBorderCoords',
