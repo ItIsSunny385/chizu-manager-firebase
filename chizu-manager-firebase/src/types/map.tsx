@@ -48,6 +48,7 @@ export interface Room {
 }
 
 export interface House {
+    id?: string,
     latLng: firebase.firestore.GeoPoint,
     statusRef: firebase.firestore.DocumentReference
 }

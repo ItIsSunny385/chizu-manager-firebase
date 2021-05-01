@@ -8,6 +8,7 @@ import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
 import { MapStatus } from '../../types/map';
+import Link from 'next/link';
 
 const db = firebase.firestore();
 
@@ -57,7 +58,7 @@ export default function Index() {
                         name: x.name,
                         status: status,
                         action: <Fragment>
-                            <a className="mr-1">詳細</a>
+                            <Link href={`/maps/edit?id=${x.id}`}><a className="mr-1">編集</a></Link>
                             <a>削除</a>
                         </Fragment>
                     };
