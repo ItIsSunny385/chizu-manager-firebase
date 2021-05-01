@@ -39,12 +39,10 @@ export default function AddOthers(props: Props) {
     const minLng = Math.min(...borderCoords.map(coord => coord.longitude));
     const router = useRouter();
 
-    const initialBadgePosition: google.maps.LatLngLiteral = {
-        lat: (maxLat + minLat) / 2,
-        lng: (maxLng + minLng) / 2
-    };
+    const initialBadgeLatLng =
+        new firebase.firestore.GeoPoint((maxLat + minLat) / 2, (maxLng + minLng) / 2);
 
-    const [badgePosition, setBadgePosition] = useState(initialBadgePosition);
+    const [badgeLatLng, setBadgeLatLng] = useState(initialBadgeLatLng);
     const polylinePath = [...borderCoords.map(x => ({ lat: x.latitude, lng: x.longitude }))];
     polylinePath.push(polylinePath[0]);
 
@@ -99,7 +97,7 @@ export default function AddOthers(props: Props) {
         e.preventDefault();
         const batch = firebase.firestore().batch();
         const mapRef = db.collection('maps').doc();
-        batch.set(mapRef, props.data);
+        batch.set(mapRef, { ...props.data, badgeLatLng: badgeLatLng });
         houses.forEach(x => {
             const houseRef = mapRef.collection('houses').doc();
             batch.set(houseRef, x);
@@ -227,10 +225,10 @@ export default function AddOthers(props: Props) {
                 />
                 {/* 地図名バッジ */}
                 <MapNameBadge
-                    position={badgePosition}
+                    latLng={badgeLatLng}
                     name={name}
                     draggable={true}
-                    setPosition={setBadgePosition}
+                    setLatLng={setBadgeLatLng}
                 />
                 {/* 新規建物追加ウィンドウ */}
                 {

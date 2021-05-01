@@ -34,7 +34,7 @@ exports.onCreateDeleteAuthUser = functions.firestore
 /* map作成時にMap形式になってしまうデータをGeoPointに変更する */
 exports.onCreateMap = functions.firestore
     .document('maps/{mapId}')
-    .onWrite(async (snapshot, { params }) => {
+    .onCreate(async (snapshot, { params }) => {
         const data = snapshot.data()
         const newBorderCoords = []
         data.borderCoords.map(x => {

@@ -1,15 +1,16 @@
+import firebase from 'firebase';
 import { Marker } from '@react-google-maps/api';
 
 interface Props {
-    position: google.maps.LatLngLiteral,
+    latLng: firebase.firestore.GeoPoint,
     name: string,
     draggable: boolean,
-    setPosition: (value: React.SetStateAction<google.maps.LatLngLiteral>) => void | undefined,
+    setLatLng: (value: React.SetStateAction<firebase.firestore.GeoPoint>) => void | undefined,
 }
 
 export default function MapNameBadge(props: Props) {
     return <Marker
-        position={props.position}
+        position={{ lat: props.latLng.latitude, lng: props.latLng.longitude }}
         icon={{
             url: '//:0',
             scaledSize: new google.maps.Size(100, 30),
@@ -24,10 +25,7 @@ export default function MapNameBadge(props: Props) {
         }}
         draggable={props.draggable}
         onDragEnd={(e) => {
-            props.setPosition({
-                lat: e.latLng.lat(),
-                lng: e.latLng.lng()
-            });
+            props.setLatLng(new firebase.firestore.GeoPoint(e.latLng.lat(), e.latLng.lng()));
         }}
         zIndex={3}
     />;
