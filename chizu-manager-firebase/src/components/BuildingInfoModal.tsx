@@ -29,7 +29,7 @@ export default function BuildingInfoModal(props: Props) {
         const newData = { ...data };
         newData.floors.push({
             number: newData.floors.length + 1,
-            rooms: [{ number: '', statusRef: props.defaultStatusRef }],
+            rooms: [{ orderNumber: 1, roomNumber: '', statusRef: props.defaultStatusRef }],
         });
         setData(newData);
     };
@@ -59,7 +59,13 @@ export default function BuildingInfoModal(props: Props) {
             data.floors.map((floor, i) => {
                 const onClickAddRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
                     const newData = { ...data };
-                    newData.floors[i].rooms.push({ number: '', statusRef: props.defaultStatusRef });
+                    const nextOrderNumber = newData.floors[i].rooms.length ?
+                        Math.max(...newData.floors[i].rooms.map(x => x.orderNumber)) + 1 : 1;
+                    newData.floors[i].rooms.push({
+                        orderNumber: nextOrderNumber,
+                        roomNumber: '',
+                        statusRef: props.defaultStatusRef
+                    });
                     setData(newData);
                 };
                 return <details key={floor.number} className="mt-1">
@@ -69,7 +75,7 @@ export default function BuildingInfoModal(props: Props) {
                             floor.rooms.map((room, j) => {
                                 const onChangeRoom = (e: React.ChangeEvent<HTMLInputElement>) => {
                                     const newData = { ...data };
-                                    newData.floors[i].rooms[j].number = e.target.value;
+                                    newData.floors[i].rooms[j].roomNumber = e.target.value;
                                     setData(newData);
                                 };
                                 const onClickDeleteRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -78,7 +84,7 @@ export default function BuildingInfoModal(props: Props) {
                                     setData(newData);
                                 };
                                 return <InputGroup key={j} className="mt-1">
-                                    <Input defaultValue={room.number} onChange={onChangeRoom} />
+                                    <Input defaultValue={room.roomNumber} onChange={onChangeRoom} />
                                     <InputGroupAddon addonType="append">
                                         <Button onClick={onClickDeleteRoom}><TrashFill /></Button>
                                     </InputGroupAddon>

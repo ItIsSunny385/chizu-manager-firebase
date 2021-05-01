@@ -34,7 +34,7 @@ export default function BuildingBasicInfoModal(props: Props) {
 
     const onChangeRoomNumberType = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newBasicInfo = { ...basicInfo };
-        newBasicInfo.roomNumberType = RoomNumberTypes[e.target.value];
+        newBasicInfo.roomNumberType = e.target.value as RoomNumberTypes;
         setBasicInfo(newBasicInfo);
     };
 

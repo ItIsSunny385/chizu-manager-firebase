@@ -15,9 +15,9 @@ interface Props {
 
 export default function AddBuildingModals(props: Props) {
     const [displayBasicInfoModal, setDisplayBasicInfoModal] = useState(true);
-    const [basicInfo, setBasicInfo] = useState(undefined as BuildingBasicInfo);
+    const [basicInfo, setBasicInfo] = useState(undefined as BuildingBasicInfo | undefined);
     const [displayFloorInfoModal, setDisplayFloorInfoModal] = useState(false);
-    const [building, setBuilding] = useState(undefined as Building);
+    const [building, setBuilding] = useState(undefined as Building | undefined);
     const [displayBuildingInfoModal, setBuildingInfoModal] = useState(false);
 
     return <React.Fragment>
@@ -35,7 +35,11 @@ export default function AddBuildingModals(props: Props) {
                     if (result.roomNumberType === RoomNumberTypes.Other) {
                         const floors = Array.from({ length: result.numberOfFloors }, (v, i) => ({
                             number: i + 1,
-                            rooms: [{ number: '', statusRef: props.defaultStatusRef }]
+                            rooms: [{
+                                orderNumber: 1,
+                                roomNumber: '',
+                                statusRef: props.defaultStatusRef
+                            } as Room]
                         } as Floor));
                         const building: Building = {
                             statusRef: props.defaultBuildingStatusRef,
@@ -52,7 +56,7 @@ export default function AddBuildingModals(props: Props) {
             />
         }
         {
-            displayFloorInfoModal
+            displayFloorInfoModal && basicInfo
             &&
             <BuildingFloorInfoModal
                 numberOfFloors={basicInfo.numberOfFloors}
@@ -74,7 +78,8 @@ export default function AddBuildingModals(props: Props) {
                                 }
                             })
                             .map(j => ({
-                                number: `${x.floorNumber}${j.toString().padStart(2, '0')}`,
+                                orderNumber: j,
+                                roomNumber: `${x.floorNumber}${j.toString().padStart(2, '0')}`,
                                 statusRef: props.defaultStatusRef
                             } as Room));
                         return {
@@ -94,7 +99,7 @@ export default function AddBuildingModals(props: Props) {
             />
         }
         {
-            displayBuildingInfoModal
+            displayBuildingInfoModal && building
             &&
             <BuildingInfoModal
                 title='集合住宅追加（最終調整）'

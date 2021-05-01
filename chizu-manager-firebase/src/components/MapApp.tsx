@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function MapApp(props: Props) {
-    const [apiKey] = useState(process.env.googleMapsApiKey);
+    const [apiKey] = useState(process.env.googleMapsApiKey!);
     const [zoom] = useState(Number(process.env.googleMapsZoom));
     const [center] = useState({
         lat: Number(process.env.googleMapsCenterLat),

@@ -22,7 +22,7 @@ export default function BuildingMarker(props: Props) {
     const [openWindow, setOpenWindow] = useState(false);
     const [displayBuildingInfoModal, setDisplayBuildingInfoModal] = useState(false);
     const buildingStatusId = props.data.statusRef.id;
-    const buildingStatus = props.buildingStatusMap.get(buildingStatusId);
+    const buildingStatus = props.buildingStatusMap.get(buildingStatusId)!;
     const defaultStatusId = props.statusMap.keys().next().value as string;
     const defaultStatusRef = db.collection('statuses').doc(defaultStatusId);
 
@@ -95,7 +95,7 @@ export default function BuildingMarker(props: Props) {
                                     {
                                         x.rooms.map((y, j) => <InputGroup size="sm">
                                             <InputGroupAddon addonType="prepend">
-                                                <InputGroupText>{y.number}</InputGroupText>
+                                                <InputGroupText>{y.roomNumber}</InputGroupText>
                                             </InputGroupAddon>
                                             <Input
                                                 type="select"

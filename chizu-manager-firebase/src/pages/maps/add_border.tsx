@@ -40,18 +40,18 @@ export default function AddBorder(props: Props) {
     const [loading, setLoading] = useState(true);
     const [corners, setCorners, pushCorner] = useCorners();
     const [finished, setFinished] = useState(false);
-    const [infoWindowProps, setInfoWindowProps] = useState(undefined as InfoWindowProps);
-    const [messageModalProps, setMessageModalProps] = useState(undefined as MessageModalProps);
+    const [infoWindowProps, setInfoWindowProps] = useState(undefined as InfoWindowProps | undefined);
+    const [messageModalProps, setMessageModalProps] = useState(undefined as MessageModalProps | undefined);
     const router = useRouter();
 
     const leftBottomButtons = <div className="ml-2 mb-2">
-        <Button onClick={(e) => { e.preventDefault(); document.getElementById('back').click(); }}>戻る</Button>
-        <Button className="ml-1" onClick={(e) => { e.preventDefault(); document.getElementById('next').click(); }}>次へ</Button>
+        <Button onClick={(e) => { e.preventDefault(); document.getElementById('back')!.click(); }}>戻る</Button>
+        <Button className="ml-1" onClick={(e) => { e.preventDefault(); document.getElementById('next')!.click(); }}>次へ</Button>
     </div>;
 
     const topCenterTitle = <div className="mt-1"><h4>
         <Badge color="dark">境界線追加</Badge>
-        <a className="ml-1" onClick={(e) => { e.preventDefault(); document.getElementById('showInfoModal').click(); }}><InfoCircleFill /></a>
+        <a className="ml-1" onClick={(e) => { e.preventDefault(); document.getElementById('showInfoModal')!.click(); }}><InfoCircleFill /></a>
     </h4></div>;
 
     const onLoadMap = (map: google.maps.Map<Element>) => {
@@ -120,7 +120,7 @@ export default function AddBorder(props: Props) {
     const onClickTrash = (e: React.MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
         e.preventDefault();
         const newCorners = [...corners];
-        newCorners.splice(infoWindowProps.vertex, 1);
+        newCorners.splice(infoWindowProps!.vertex, 1);
         setCorners(newCorners);
         if (newCorners.length === 0) {
             setFinished(false);
@@ -251,7 +251,7 @@ export default function AddBorder(props: Props) {
     );
 }
 
-export async function getServerSideProps(ctx) {
+export async function getServerSideProps(ctx: any) {
     const cookies = nookies.get(ctx);
     const mapBasicInfo: MapBasicInfo = cookies.mapBasicInfo ?
         JSON.parse(cookies.mapBasicInfo) : undefined;

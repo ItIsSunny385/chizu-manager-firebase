@@ -19,7 +19,7 @@ const db = firebase.firestore();
 export default function HouseMarker(props: Props) {
     const [openWindow, setOpenWindow] = useState(false);
     const statusId = props.data.statusRef.id;
-    const status = props.statusMap.get(statusId);
+    const status = props.statusMap.get(statusId)!;
 
     return <Marker
         position={{ lat: props.data.latLng.latitude, lng: props.data.latLng.longitude }}

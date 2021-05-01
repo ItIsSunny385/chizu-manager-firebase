@@ -1,8 +1,5 @@
 import '../../utils/InitializeFirebase';
-import firebase from 'firebase';
-import { useState, useEffect, MouseEvent, Fragment } from 'react';
-import BootstrapTable from 'react-bootstrap-table-next';
-import paginationFactory from 'react-bootstrap-table2-paginator';
+import { useState } from 'react';
 import AdminApp from '../../components/AdminApp';
 
 export default function Index() {

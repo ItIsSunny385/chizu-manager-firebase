@@ -18,7 +18,7 @@ interface Props {
 export default function StatusList(props: Props) {
     const [statusMap, setStatusMap] = useState(new Map<string, Status>());
     const [displayAddStatusModal, setDisplayAddStatusModal] = useState(false);
-    const [editStatusId, setEditStatusId] = useState(undefined as string);
+    const [editStatusId, setEditStatusId] = useState(undefined as string | undefined);
 
     const collectionName = StatusCollectionName[props.type];
     const title = props.type === StatusType.HouseOrRoom ? '家・部屋ステータス' : '集合住宅ステータス';
@@ -54,7 +54,7 @@ export default function StatusList(props: Props) {
                         pin: status.label,
                         statusAfterReseting: status.statusAfterResetingRef
                             ?
-                            statusMap.get(status.statusAfterResetingRef.id).name
+                            statusMap.get(status.statusAfterResetingRef.id)!.name
                             :
                             '',
                         action:

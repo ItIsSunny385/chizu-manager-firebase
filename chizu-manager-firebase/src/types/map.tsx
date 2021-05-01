@@ -42,7 +42,8 @@ export interface Floor {
 }
 
 export interface Room {
-    number: string,
+    orderNumber: number,
+    roomNumber: string,
     statusRef: firebase.firestore.DocumentReference
 }
 

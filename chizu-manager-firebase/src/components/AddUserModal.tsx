@@ -24,9 +24,9 @@ export default function AddUserModal(props: Props) {
     } as User);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [displayNameError, setDisplayNameError] = useState(undefined as string);
-    const [emailError, setEmailError] = useState(undefined as string);
-    const [passwordError, setPasswordError] = useState(undefined as string);
+    const [displayNameError, setDisplayNameError] = useState(undefined as string | undefined);
+    const [emailError, setEmailError] = useState(undefined as string | undefined);
+    const [passwordError, setPasswordError] = useState(undefined as string | undefined);
 
     const onClickSaveButton = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         /* Spinnerを表示 */
@@ -73,6 +73,9 @@ export default function AddUserModal(props: Props) {
         // ユーザ登録を実施
         try {
             const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            if (!userCredential.user) {
+                return;
+            }
             try {
                 await db.collection('users').doc(userCredential.user.uid).set(data);
                 props.setFlashMessage(Colors.Success, 'ユーザを登録しました。');

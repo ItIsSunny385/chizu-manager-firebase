@@ -19,22 +19,6 @@ export default function Add() {
     const [displayError1, setDisplayError1] = useState(false);
     const router = useRouter();
 
-    const onChangeName = ((e) => {
-        setName(e.target.value);
-    });
-
-    const onChangeNumber = ((e) => {
-        e.preventDefault();
-        const settedNumber = Number(e.target.value);
-        const newNumber = 0 < settedNumber && settedNumber <= mapsSize + 1 ? settedNumber : mapsSize + 1;
-        setNumber(newNumber);
-    });
-
-    const onChangeStatus = ((e) => {
-        e.preventDefault();
-        setStatus(e.target.value);
-    });
-
     const onClickBackButton = ((e: MouseEvent) => {
         e.preventDefault();
     });
@@ -86,7 +70,7 @@ export default function Add() {
                         type="text"
                         name="name"
                         className={displayError1 ? 'is-invalid' : ''}
-                        onChange={onChangeName}
+                        onChange={(e) => { setName(e.target.value); }}
                     />
                     {
                         displayError1
@@ -101,7 +85,12 @@ export default function Add() {
                         type="number"
                         name="number"
                         value={orderNumber}
-                        onChange={onChangeNumber}
+                        onChange={(e) => {
+                            e.preventDefault();
+                            const settedNumber = Number(e.target.value);
+                            const newNumber = 0 < settedNumber && settedNumber <= mapsSize + 1 ? settedNumber : mapsSize + 1;
+                            setNumber(newNumber);
+                        }}
                     />
                     <FormText>1から{mapsSize + 1}までの地図の順番を入力してください。一覧などでの順番に利用されます。</FormText>
                 </FormGroup>
@@ -111,7 +100,10 @@ export default function Add() {
                         type="select"
                         name="status"
                         value={status}
-                        onChange={onChangeStatus}
+                        onChange={(e) => {
+                            e.preventDefault();
+                            setStatus(e.target.value as MapStatus);
+                        }}
                     >
                         <option value={MapStatus.Private}>非公開</option>
                         <option value={MapStatus.Viewable}>全員閲覧可</option>

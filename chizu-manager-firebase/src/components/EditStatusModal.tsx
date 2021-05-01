@@ -22,7 +22,7 @@ export default function AddStatusModal(props: Props) {
 
 
     const onClickSaveButton = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        const originalData = props.statusMap.get(props.id);
+        const originalData = props.statusMap.get(props.id)!;
         if (JSON.stringify(originalData) !== JSON.stringify(data)) {
             const batch = firebase.firestore().batch();
             if (originalData.number < data.number) {
@@ -103,7 +103,7 @@ export default function AddStatusModal(props: Props) {
                 <InputGroup>
                     <InputGroupAddon addonType="prepend">
                         <InputGroupText>
-                            <img src={getMarkerUrl(Pins[data.pin])} height="24px" />
+                            <img src={getMarkerUrl(data.pin)} height="24px" />
                         </InputGroupText>
                     </InputGroupAddon>
                     <Input id="pin" type="select"
@@ -115,7 +115,7 @@ export default function AddStatusModal(props: Props) {
                         }}
                     >
                         {
-                            Object.keys(Pins).map(x => <option key={Pins[x]} value={Pins[x]}>{Pins[x]}</option>)
+                            Object.keys(Pins).map(x => <option key={x} value={x}>{x}</option>)
                         }
                     </Input>
                 </InputGroup>

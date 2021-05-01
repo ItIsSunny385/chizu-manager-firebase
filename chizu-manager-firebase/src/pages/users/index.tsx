@@ -20,8 +20,8 @@ export default function Index() {
     const [loading, setLoading] = useState(true);
     const [userMap, setUserMap] = useState(new Map<string, User>());
     const [displayAddModal, setDisplayAddModal] = useState(false);
-    const [editId, setEditId] = useState(undefined as string);
-    const [flashMessageProps, setFlashMessageProps] = useState(undefined as FlashMessageProps);
+    const [editId, setEditId] = useState(undefined as string | undefined);
+    const [flashMessageProps, setFlashMessageProps] = useState(undefined as FlashMessageProps | undefined);
     const [keyword, setKeyword] = useState('');
 
     useEffect(() => {
@@ -87,7 +87,7 @@ export default function Index() {
                                     close: () => { setFlashMessageProps(undefined); }
                                 });
                             }
-                            document.scrollingElement.scrollTop = 0;
+                            document.scrollingElement!.scrollTop = 0;
                             setLoading(false);
                         };
                         const onClickEditLink = (e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
@@ -112,7 +112,7 @@ export default function Index() {
                     { dataField: 'role', text: '権限', sort: true },
                     { dataField: 'action', text: '' },
                 ]}
-                pagination={paginationFactory()}
+                pagination={paginationFactory({})}
                 noDataIndication={() => (<div className="text-center">データがありません</div>)}
             />
             <div className="text-left mb-2 mt-2">
@@ -126,7 +126,7 @@ export default function Index() {
                     setLoading={setLoading}
                     toggle={() => {
                         setDisplayAddModal(false);
-                        document.scrollingElement.scrollTop = 0;
+                        document.scrollingElement!.scrollTop = 0;
                         setLoading(false);
                     }}
                     setFlashMessage={(color, message) => {
@@ -147,7 +147,7 @@ export default function Index() {
                     setLoading={setLoading}
                     toggle={() => {
                         setEditId(undefined);
-                        document.scrollingElement.scrollTop = 0;
+                        document.scrollingElement!.scrollTop = 0;
                         setLoading(false);
                     }}
                     setFlashMessage={(color, message) => {

@@ -16,8 +16,8 @@ export interface Props {
 const db = firebase.firestore();
 
 export default function EditUserModal(props: Props) {
-    const [data, setData] = useState(props.userMap.get(props.id));
-    const [displayNameError, setDisplayNameError] = useState(undefined as string);
+    const [data, setData] = useState(props.userMap.get(props.id)!);
+    const [displayNameError, setDisplayNameError] = useState(undefined as string | undefined);
 
     const onClickSaveButton = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();

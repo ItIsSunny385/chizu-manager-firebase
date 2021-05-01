@@ -24,9 +24,9 @@ const db = firebase.firestore();
 
 export default function AddOthers(props: Props) {
     const [loading, setLoading] = useState(true);
-    const [messageModalProps, setMessageModalProps] = useState(undefined as MessageModalProps);
+    const [messageModalProps, setMessageModalProps] = useState(undefined as MessageModalProps | undefined);
     const [displaySelectBuildingTypeWindow, setDisplySelectBuildingTypeWindow] = useState(false);
-    const [newBuildingLatLng, setNewBuildingLatLng] = useState(undefined as google.maps.LatLng);
+    const [newBuildingLatLng, setNewBuildingLatLng] = useState(undefined as google.maps.LatLng | undefined);
     const [houses, setHouses] = useState([] as House[]);
     const [buildings, setBuildings] = useState([] as Building[]);
     const [statusMap, setStatusMap] = useState(new Map<string, Status>());
@@ -50,7 +50,7 @@ export default function AddOthers(props: Props) {
         const leftBottomButtons = <div className="ml-2 mb-2">
             <Button
                 onClick={(e) => {
-                    e.preventDefault(); document.getElementById('back').click();
+                    e.preventDefault(); document.getElementById('back')!.click();
                 }}
             >
                 戻る
@@ -58,7 +58,7 @@ export default function AddOthers(props: Props) {
             <Button
                 className="ml-1"
                 onClick={(e) => {
-                    e.preventDefault(); document.getElementById('finish').click();
+                    e.preventDefault(); document.getElementById('finish')!.click();
                 }}
             >
                 完了
@@ -69,7 +69,7 @@ export default function AddOthers(props: Props) {
             <a
                 className="ml-1"
                 onClick={(e) => {
-                    e.preventDefault(); document.getElementById('showInfoModal').click();
+                    e.preventDefault(); document.getElementById('showInfoModal')!.click();
                 }}
             >
                 <InfoCircleFill />
@@ -104,12 +104,12 @@ export default function AddOthers(props: Props) {
         });
         buildings.forEach(x => {
             const buildingRef = mapRef.collection('buildings').doc();
-            const building = { ...x };
+            const building = { ...x } as any;
             delete building.floors;
             batch.set(buildingRef, building);
             x.floors.forEach(y => {
                 const floorRef = buildingRef.collection('floors').doc();
-                const floor = { ...y };
+                const floor = { ...y } as any;
                 delete floor.rooms;
                 batch.set(floorRef, floor);
                 y.rooms.forEach(z => {
@@ -232,7 +232,7 @@ export default function AddOthers(props: Props) {
                 />
                 {/* 新規建物追加ウィンドウ */}
                 {
-                    displaySelectBuildingTypeWindow
+                    displaySelectBuildingTypeWindow && newBuildingLatLng
                     &&
                     <SelectBuildingTypeWindow
                         defaultStatusRef={
@@ -306,7 +306,7 @@ export default function AddOthers(props: Props) {
     );
 }
 
-export async function getServerSideProps(ctx) {
+export async function getServerSideProps(ctx: any) {
     const cookies = nookies.get(ctx);
     const mapBasicInfoWithBorderCoords = cookies.mapBasicInfoWithBorderCoords ?
         JSON.parse(cookies.mapBasicInfoWithBorderCoords) : undefined;

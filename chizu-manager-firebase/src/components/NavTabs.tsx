@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Nav, NavItem, NavLink } from 'reactstrap';
-import classnames from 'classnames';
 import { GearFill, MapFill, PeopleFill } from 'react-bootstrap-icons';
 
 interface Props {
@@ -11,19 +10,19 @@ export default function NavTabs({ activeTabId }: Props) {
     return (
         <Nav tabs className="mt-2">
             <NavItem>
-                <NavLink className={classnames({ active: activeTabId === 1 })} href="/maps">
+                <NavLink active={activeTabId === 1} href="/maps">
                     <MapFill className="mr-1 mb-1" />
                     地図
                 </NavLink>
             </NavItem>
             <NavItem>
-                <NavLink className={classnames({ active: activeTabId === 2 })} href="/users">
+                <NavLink active={activeTabId === 2} href="/users">
                     <PeopleFill className="mr-1 mb-1" />
                     ユーザ
                 </NavLink>
             </NavItem>
             <NavItem>
-                <NavLink className={classnames({ active: activeTabId === 3 })} href="/settings">
+                <NavLink active={activeTabId === 3} href="/settings">
                     <GearFill className="mr-1 mb-1" />
                     設定
                 </NavLink>
