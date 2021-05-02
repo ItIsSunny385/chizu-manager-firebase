@@ -2,23 +2,22 @@ import '../../utils/InitializeFirebase';
 import firebase from 'firebase';
 import { useState, useEffect, Fragment } from 'react';
 import AdminApp from '../../components/AdminApp';
-import { Map } from '../../types/model';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
-import { MapStatus } from '../../types/map';
+import { MapStatus, MapData } from '../../types/map';
 import Link from 'next/link';
 
 const db = firebase.firestore();
 
 export default function Index() {
     const [loading, setLoading] = useState(true);
-    const [maps, setMaps] = useState([] as Array<Map>)
+    const [maps, setMaps] = useState([] as Array<MapData>)
 
     useEffect(() => {
         db.collection('maps').orderBy('orderNumber', 'asc').onSnapshot((snapshot) => {
-            const newMaps = [] as Array<Map>;
+            const newMaps = [] as Array<MapData>;
             snapshot.forEach(x => {
                 newMaps.push({
                     id: x.id,

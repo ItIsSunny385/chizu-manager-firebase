@@ -6,9 +6,12 @@ import { useRouter } from 'next/router';
 import MapApp from '../../components/MapApp';
 import { Badge, Button, ButtonGroup } from 'reactstrap';
 import { GearFill, GeoAltFill, HeptagonFill, InfoCircleFill, PeopleFill } from 'react-bootstrap-icons';
-import { Map } from '../../types/model';
+import { Status } from '../../types/model';
 import { Polygon, Polyline } from '@react-google-maps/api';
 import MapNameBadge from '../../components/MapNameBadge';
+import HouseMarkers from '../../components/HouseMarkers';
+import { Building, House, MapData } from '../../types/map';
+import BuildingMarkers from '../../components/BuildingMarkers';
 
 interface Props {
     query: any
@@ -25,16 +28,19 @@ const db = firebase.firestore();
 
 export default function Edit(props: Props) {
     const [loading, setLoading] = useState(true);
+    const [controllerSetted, setControllerSetted] = useState(false);
     const [id] = useState(props.query.id);
-    const [fetchedData, setFetchedData] = useState(undefined as Map | undefined);
-    const [clientData, setClientData] = useState(undefined as Map | undefined);
+    const [fetchedData, setFetchedData] = useState(undefined as MapData | undefined);
+    const [clientData, setClientData] = useState(undefined as MapData | undefined);
     const [map, setMap] = useState(undefined as google.maps.Map<Element> | undefined);
     const [polylinePath, setPolylinePath] = useState([] as google.maps.LatLngLiteral[]);
     const [pageMode, setPageMode] = useState(PageMode.Marker);
+    const [statusMap, setStatusMap] = useState(new Map<string, Status>());
+    const [buildingStatusMap, setBuildingStatusMap] = useState(new Map<string, Status>());
     const router = useRouter();
 
     useEffect(() => {
-        if (map && clientData) {
+        if (map && clientData && !controllerSetted) {
             /* 地図上のボタンの配置 */
             const topLeftTitle = <div className="mt-1 ml-1 d-block d-md-none"><h4>
                 <Badge color="dark">地図編集</Badge>
@@ -120,6 +126,7 @@ export default function Edit(props: Props) {
             newPolyLinePath.push(newPolyLinePath[0]);
             setPolylinePath(newPolyLinePath);
             setLoading(false);
+            setControllerSetted(true);
         }
     }, [map, clientData])
 
@@ -150,21 +157,56 @@ export default function Edit(props: Props) {
 
     useEffect(() => {
         const getData = async () => {
-            const x = await db.collection('maps').doc(id).get();
-            const xData = x.data();
-            if (!xData) {
+            /* ステータス情報を取得 */
+            const statusesSnap = await db.collection('statuses').orderBy('number', 'asc').get();
+            const newStatusMap = new Map<string, Status>();
+            statusesSnap.forEach((x) => {
+                newStatusMap.set(x.id, {
+                    name: x.data().name,
+                    number: x.data().number,
+                    pin: x.data().pin,
+                    label: x.data().label,
+                    statusAfterResetingRef: x.data().statusAfterResetingRef,
+                });
+            });
+            setStatusMap(newStatusMap);
+            const bStatusesSnap = await db.collection('building_statuses').orderBy('number', 'asc').get();
+            const newBuildingStatusMap = new Map<string, Status>();
+            bStatusesSnap.forEach((x) => {
+                newBuildingStatusMap.set(x.id, {
+                    name: x.data().name,
+                    number: x.data().number,
+                    pin: x.data().pin,
+                    label: x.data().label,
+                    statusAfterResetingRef: x.data().statusAfterResetingRef,
+                });
+            });
+            setBuildingStatusMap(newBuildingStatusMap);
+
+            /* 地図情報を取得 */
+            const mapSnap = await db.collection('maps').doc(id).get();
+            const mapData = mapSnap.data();
+            if (!mapData) {
                 return;
             }
-            const newData: Map = {
-                id: x.id,
-                orderNumber: xData.orderNumber,
-                name: xData.name,
-                status: xData.status,
-                borderCoords: xData.borderCoords,
-                badgeLatLng: xData.badgeLatLng,
+            const newData: MapData = {
+                id: mapSnap.id,
+                orderNumber: mapData.orderNumber,
+                name: mapData.name,
+                status: mapData.status,
+                borderCoords: mapData.borderCoords,
+                badgeLatLng: mapData.badgeLatLng,
                 buildings: [],
                 houses: [],
             };
+            const housesSnap = await mapSnap.ref.collection('houses').get();
+            housesSnap.forEach(x => {
+                newData.houses.push({
+                    id: x.id,
+                    latLng: x.data().latLng,
+                    statusRef: x.data().statusRef,
+                });
+            });
             setClientData(newData);
             setFetchedData(newData);
         };
@@ -205,6 +247,27 @@ export default function Edit(props: Props) {
                             latLng={clientData.badgeLatLng}
                             name={clientData.name}
                             draggable={true}
+                        />
+                        {/* 家 */}
+                        <HouseMarkers
+                            data={clientData.houses}
+                            statusMap={statusMap}
+                            setData={(houses: Array<House>) => {
+                                const newClientData = { ...clientData };
+                                newClientData.houses = houses;
+                                setClientData(newClientData);
+                            }}
+                        />
+                        {/* 集合住宅 */}
+                        <BuildingMarkers
+                            data={clientData.buildings}
+                            statusMap={statusMap}
+                            buildingStatusMap={buildingStatusMap}
+                            setData={(buildings: Array<Building>) => {
+                                const newClientData = { ...clientData };
+                                newClientData.buildings = buildings;
+                                setClientData(newClientData);
+                            }}
                         />
                     </Fragment>
                 }

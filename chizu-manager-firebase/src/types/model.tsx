@@ -1,5 +1,4 @@
 import firebase from 'firebase';
-import { Building, House } from './map';
 
 export enum Pins {
     yellow = 'yellow',
@@ -33,15 +32,4 @@ export interface User {
     displayName: string,
     isAdmin: boolean,
     deleted: boolean,
-}
-
-export interface Map {
-    id?: string,
-    orderNumber: number,
-    name: string,
-    status: string,
-    borderCoords: firebase.firestore.GeoPoint[],
-    badgeLatLng: firebase.firestore.GeoPoint,
-    buildings: Building[],
-    houses: House[],
 }

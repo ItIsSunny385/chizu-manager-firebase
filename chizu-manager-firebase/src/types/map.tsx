@@ -52,3 +52,14 @@ export interface House {
     latLng: firebase.firestore.GeoPoint,
     statusRef: firebase.firestore.DocumentReference
 }
+
+export interface MapData {
+    id?: string,
+    orderNumber: number,
+    name: string,
+    status: string,
+    borderCoords: firebase.firestore.GeoPoint[],
+    badgeLatLng: firebase.firestore.GeoPoint,
+    buildings: Building[],
+    houses: House[],
+}
