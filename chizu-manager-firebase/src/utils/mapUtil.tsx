@@ -1,7 +1,20 @@
 import firebase from 'firebase';
 import { MapData } from '../types/map';
 
-export async function getMapData(db: firebase.firestore.Firestore, id: string) {
+export function getMapDataArrayWithNoChildFromQuerySnapshot(snapshot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>) {
+    return snapshot.docs.map(x => ({
+        id: x.id,
+        orderNumber: x.data().orderNumber,
+        name: x.data().name,
+        status: x.data().status,
+        borderCoords: x.data().borderCoords,
+        badgeLatLng: x.data().badgeLatLng,
+        buildings: [],
+        houses: [],
+    }));
+}
+
+export async function getMapDataWithChildrenFromId(db: firebase.firestore.Firestore, id: string) {
     const mapSnap = await db.collection('maps').doc(id).get();
     const mapData = mapSnap.data();
     if (!mapData) {

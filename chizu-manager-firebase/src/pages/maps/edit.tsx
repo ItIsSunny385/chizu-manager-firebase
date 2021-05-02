@@ -12,8 +12,8 @@ import MapNameBadge from '../../components/MapNameBadge';
 import HouseMarkers from '../../components/HouseMarkers';
 import { Building, House, MapData } from '../../types/map';
 import BuildingMarkers from '../../components/BuildingMarkers';
-import { getStatusMap, getBuildingStatusMap } from '../../utils/statusUtil';
-import { getMapData } from '../../utils/mapUtil';
+import { getStatusMap } from '../../utils/statusUtil';
+import { getMapDataWithChildrenFromId } from '../../utils/mapUtil';
 
 interface Props {
     query: any
@@ -160,11 +160,11 @@ export default function Edit(props: Props) {
     useEffect(() => {
         const setData = async () => {
             /* ステータス情報を取得 */
-            setStatusMap(await getStatusMap(db));
-            setBuildingStatusMap(await getBuildingStatusMap(db));
+            setStatusMap(await getStatusMap(db, 'statuses'));
+            setBuildingStatusMap(await getStatusMap(db, 'building_statuses'));
 
             /* 地図情報を取得 */
-            const newData = await getMapData(db, id);
+            const newData = await getMapDataWithChildrenFromId(db, id);
             setClientData(newData);
             setFetchedData(newData);
         };

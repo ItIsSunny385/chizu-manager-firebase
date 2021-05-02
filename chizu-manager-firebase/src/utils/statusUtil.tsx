@@ -1,24 +1,17 @@
 import firebase from 'firebase';
 import { Status } from '../types/model';
 
-export async function getStatusMap(db: firebase.firestore.Firestore) {
-    const statusesSnap = await db.collection('statuses').orderBy('number', 'asc').get();
-    return new Map<string, Status>(statusesSnap.docs.map((x) => [x.id, {
-        name: x.data().name,
-        number: x.data().number,
-        pin: x.data().pin,
-        label: x.data().label,
-        statusAfterResetingRef: x.data().statusAfterResetingRef,
-    }]));
+export async function getStatusMap(db: firebase.firestore.Firestore, collectionName: string) {
+    const snapshot = await db.collection(collectionName).orderBy('number', 'asc').get();
+    return getStatusMapFromQuerySnapshot(snapshot);
 };
 
-export async function getBuildingStatusMap(db: firebase.firestore.Firestore) {
-    const statusesSnap = await db.collection('building_statuses').orderBy('number', 'asc').get();
-    return new Map<string, Status>(statusesSnap.docs.map((x) => [x.id, {
+export function getStatusMapFromQuerySnapshot(snapshot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>) {
+    return new Map<string, Status>(snapshot.docs.map((x) => [x.id, {
         name: x.data().name,
         number: x.data().number,
         pin: x.data().pin,
         label: x.data().label,
         statusAfterResetingRef: x.data().statusAfterResetingRef,
     }]));
-};
+}

@@ -7,6 +7,7 @@ import AddStatusModal from './AddStatusModal';
 import EditStatusModal from './EditStatusModal';
 import { Status, StatusCollectionName, StatusType } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
+import { getStatusMapFromQuerySnapshot } from '../utils/statusUtil';
 
 const db = firebase.firestore();
 
@@ -25,17 +26,7 @@ export default function StatusList(props: Props) {
 
     useEffect(() => {
         db.collection(collectionName).orderBy('number', 'asc').onSnapshot((snapshot) => {
-            const newStatusMap = new Map<string, Status>();
-            snapshot.forEach((x) => {
-                newStatusMap.set(x.id, {
-                    name: x.data().name,
-                    number: x.data().number,
-                    pin: x.data().pin,
-                    label: x.data().label,
-                    statusAfterResetingRef: x.data().statusAfterResetingRef,
-                });
-            });
-            setStatusMap(newStatusMap);
+            setStatusMap(getStatusMapFromQuerySnapshot(snapshot));
             props.setLoading(false);
         });
     }, []);
