@@ -5,7 +5,7 @@ interface Props {
     latLng: firebase.firestore.GeoPoint,
     name: string,
     draggable: boolean,
-    setLatLng?: (value: React.SetStateAction<firebase.firestore.GeoPoint>) => void,
+    setLatLng?: (value: firebase.firestore.GeoPoint) => void,
 }
 
 export default function MapNameBadge(props: Props) {

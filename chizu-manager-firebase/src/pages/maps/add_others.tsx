@@ -68,6 +68,7 @@ export default function AddOthers(props: Props) {
             <Badge color="dark">バッジ、建物追加</Badge>
             <a
                 className="ml-1"
+                href="#"
                 onClick={(e) => {
                     e.preventDefault(); document.getElementById('showInfoModal')!.click();
                 }}

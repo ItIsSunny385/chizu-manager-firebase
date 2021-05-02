@@ -21,6 +21,7 @@ export default function Add() {
 
     const onClickBackButton = ((e: MouseEvent) => {
         e.preventDefault();
+        router.push('/maps');
     });
 
     const onClickNextButton = ((e: MouseEvent) => {

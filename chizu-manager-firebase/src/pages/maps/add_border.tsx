@@ -51,7 +51,7 @@ export default function AddBorder(props: Props) {
 
     const topCenterTitle = <div className="mt-1"><h4>
         <Badge color="dark">境界線追加</Badge>
-        <a className="ml-1" onClick={(e) => { e.preventDefault(); document.getElementById('showInfoModal')!.click(); }}><InfoCircleFill /></a>
+        <a className="ml-1" href="#" onClick={(e) => { e.preventDefault(); document.getElementById('showInfoModal')!.click(); }}><InfoCircleFill /></a>
     </h4></div>;
 
     const onLoadMap = (map: google.maps.Map<Element>) => {
