@@ -30,6 +30,7 @@ export interface MapBasicInfoWithBorderCoords extends MapBasicInfo {
 }
 
 export interface Building {
+    id?: string,
     name: string,
     latLng: firebase.firestore.GeoPoint,
     floors: Floor[],
@@ -37,11 +38,13 @@ export interface Building {
 }
 
 export interface Floor {
+    id?: string,
     number: number,
     rooms: Room[]
 }
 
 export interface Room {
+    id?: string,
     orderNumber: number,
     roomNumber: string,
     statusRef: firebase.firestore.DocumentReference

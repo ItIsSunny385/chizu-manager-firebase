@@ -10,7 +10,7 @@ import { Status } from '../../types/model';
 import { Polygon, Polyline } from '@react-google-maps/api';
 import MapNameBadge from '../../components/MapNameBadge';
 import HouseMarkers from '../../components/HouseMarkers';
-import { Building, House, MapData } from '../../types/map';
+import { Building, Floor, House, MapData, Room } from '../../types/map';
 import BuildingMarkers from '../../components/BuildingMarkers';
 
 interface Props {
@@ -207,6 +207,35 @@ export default function Edit(props: Props) {
                     statusRef: x.data().statusRef,
                 });
             });
+            const buildingsSnap = await mapSnap.ref.collection('buildings').get();
+            for (const x of buildingsSnap.docs) {
+                const floorsSnap = await x.ref.collection('floors').orderBy('number', 'asc').get();
+                const floors = new Array<Floor>();
+                for (const y of floorsSnap.docs) {
+                    const roomsSnap = await y.ref.collection('rooms').orderBy('orderNumber', 'asc').get();
+                    const rooms = new Array<Room>();
+                    roomsSnap.forEach(z => {
+                        rooms.push({
+                            id: z.id,
+                            orderNumber: z.data().orderNumber,
+                            roomNumber: z.data().roomNumber,
+                            statusRef: z.data().statusRef,
+                        });
+                    });
+                    floors.push({
+                        id: y.id,
+                        number: y.data().number,
+                        rooms: rooms,
+                    });
+                }
+                newData.buildings.push({
+                    id: x.id,
+                    name: x.data().name,
+                    latLng: x.data().latLng,
+                    statusRef: x.data().statusRef,
+                    floors: floors,
+                });
+            }
             setClientData(newData);
             setFetchedData(newData);
         };
