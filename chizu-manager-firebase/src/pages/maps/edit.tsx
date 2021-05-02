@@ -10,8 +10,10 @@ import { Status } from '../../types/model';
 import { Polygon, Polyline } from '@react-google-maps/api';
 import MapNameBadge from '../../components/MapNameBadge';
 import HouseMarkers from '../../components/HouseMarkers';
-import { Building, Floor, House, MapData, Room } from '../../types/map';
+import { Building, House, MapData } from '../../types/map';
 import BuildingMarkers from '../../components/BuildingMarkers';
+import { getStatusMap, getBuildingStatusMap } from '../../utils/statusUtil';
+import { getMapData } from '../../utils/mapUtil';
 
 interface Props {
     query: any
@@ -156,84 +158,17 @@ export default function Edit(props: Props) {
     }, [pageMode]);
 
     useEffect(() => {
-        const getData = async () => {
+        const setData = async () => {
             /* ステータス情報を取得 */
-            const statusesSnap = await db.collection('statuses').orderBy('number', 'asc').get();
-            const newStatusMap = new Map<string, Status>();
-            statusesSnap.forEach((x) => {
-                newStatusMap.set(x.id, {
-                    name: x.data().name,
-                    number: x.data().number,
-                    pin: x.data().pin,
-                    label: x.data().label,
-                    statusAfterResetingRef: x.data().statusAfterResetingRef,
-                });
-            });
-            setStatusMap(newStatusMap);
-            const bStatusesSnap = await db.collection('building_statuses').orderBy('number', 'asc').get();
-            const newBuildingStatusMap = new Map<string, Status>();
-            bStatusesSnap.forEach((x) => {
-                newBuildingStatusMap.set(x.id, {
-                    name: x.data().name,
-                    number: x.data().number,
-                    pin: x.data().pin,
-                    label: x.data().label,
-                    statusAfterResetingRef: x.data().statusAfterResetingRef,
-                });
-            });
-            setBuildingStatusMap(newBuildingStatusMap);
+            setStatusMap(await getStatusMap(db));
+            setBuildingStatusMap(await getBuildingStatusMap(db));
 
             /* 地図情報を取得 */
-            const mapSnap = await db.collection('maps').doc(id).get();
-            const mapData = mapSnap.data();
-            if (!mapData) {
-                return;
-            }
-            const housesSnap = await mapSnap.ref.collection('houses').get();
-            const houses = housesSnap.docs.map(x => ({
-                id: x.id,
-                latLng: x.data().latLng,
-                statusRef: x.data().statusRef,
-            }));
-            const buildingsSnap = await mapSnap.ref.collection('buildings').get();
-            const buildings = await Promise.all(buildingsSnap.docs.map(async x => {
-                const floorsSnap = await x.ref.collection('floors').orderBy('number', 'asc').get();
-                const floors = await Promise.all(floorsSnap.docs.map(async y => {
-                    const roomsSnap = await y.ref.collection('rooms').orderBy('orderNumber', 'asc').get();
-                    const rooms = roomsSnap.docs.map(z => ({
-                        id: z.id,
-                        orderNumber: z.data().orderNumber,
-                        roomNumber: z.data().roomNumber,
-                        statusRef: z.data().statusRef,
-                    }));
-                    return {
-                        id: y.id,
-                        number: y.data().number,
-                        rooms: rooms,
-                    };
-                }));
-                return {
-                    id: x.id,
-                    name: x.data().name,
-                    latLng: x.data().latLng,
-                    statusRef: x.data().statusRef,
-                    floors: floors,
-                };
-            }));
-            const newData: MapData = {
-                id: mapSnap.id,
-                orderNumber: mapData.orderNumber,
-                name: mapData.name,
-                status: mapData.status,
-                borderCoords: mapData.borderCoords,
-                badgeLatLng: mapData.badgeLatLng,
-                buildings: buildings,
-                houses: houses,
-            };
+            const newData = await getMapData(db, id);
             setClientData(newData);
             setFetchedData(newData);
         };
-        getData();
+        setData();
     }, []);
 
     return (
