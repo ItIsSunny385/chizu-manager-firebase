@@ -12,8 +12,8 @@ import { InfoCircleFill } from 'react-bootstrap-icons';
 import { MessageModalProps } from '../../components/MessageModal';
 import SelectBuildingTypeWindow from '../../components/SelectBuildingTypeWindow';
 import MapNameBadge from '../../components/MapNameBadge';
-import HouseMarker from '../../components/HouseMarker';
-import BuildingMarker from '../../components/BuildingMarker';
+import HouseMarkers from '../../components/HouseMarkers';
+import BuildingMarkers from '../../components/BuildingMarkers';
 import { Status } from '../../types/model';
 
 interface Props {
@@ -252,50 +252,18 @@ export default function AddOthers(props: Props) {
                     />
                 }
                 {/* 家 */}
-                {
-                    houses.map((x, i) => {
-                        const setHouseInfo = (newHouseInfo: House) => {
-                            const newHouses = [...houses];
-                            newHouses[i] = newHouseInfo;
-                            setHouses(newHouses);
-                        };
-                        const deleteHouseInfo = () => {
-                            const newHouses = [...houses];
-                            newHouses.splice(i, 1);
-                            setHouses(newHouses);
-                        };
-                        return <HouseMarker
-                            key={i}
-                            data={x}
-                            statusMap={statusMap}
-                            set={setHouseInfo}
-                            delete={deleteHouseInfo}
-                        />;
-                    })
-                }
+                <HouseMarkers
+                    data={houses}
+                    statusMap={statusMap}
+                    setData={setHouses}
+                />
                 {/* 集合住宅 */}
-                {
-                    buildings.map((x, i) => {
-                        const setBuilding = (newBuilding: Building) => {
-                            const newBuildings = [...buildings];
-                            newBuildings[i] = newBuilding;
-                            setBuildings(newBuildings);
-                        };
-                        const deleteBuilding = () => {
-                            const newBuildings = [...buildings];
-                            newBuildings.splice(i, 1);
-                            setBuildings(newBuildings);
-                        };
-                        return <BuildingMarker
-                            key={i}
-                            data={x}
-                            statusMap={statusMap}
-                            buildingStatusMap={buildingStatusMap}
-                            set={setBuilding}
-                            delete={deleteBuilding}
-                        />;
-                    })
-                }
+                <BuildingMarkers
+                    data={buildings}
+                    statusMap={statusMap}
+                    buildingStatusMap={buildingStatusMap}
+                    setData={setBuildings}
+                />
             </MapApp>
             {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
             <div style={{ display: 'none' }}>
