@@ -189,6 +189,37 @@ export default function Edit(props: Props) {
             if (!mapData) {
                 return;
             }
+            const housesSnap = await mapSnap.ref.collection('houses').get();
+            const houses = housesSnap.docs.map(x => ({
+                id: x.id,
+                latLng: x.data().latLng,
+                statusRef: x.data().statusRef,
+            }));
+            const buildingsSnap = await mapSnap.ref.collection('buildings').get();
+            const buildings = await Promise.all(buildingsSnap.docs.map(async x => {
+                const floorsSnap = await x.ref.collection('floors').orderBy('number', 'asc').get();
+                const floors = await Promise.all(floorsSnap.docs.map(async y => {
+                    const roomsSnap = await y.ref.collection('rooms').orderBy('orderNumber', 'asc').get();
+                    const rooms = roomsSnap.docs.map(z => ({
+                        id: z.id,
+                        orderNumber: z.data().orderNumber,
+                        roomNumber: z.data().roomNumber,
+                        statusRef: z.data().statusRef,
+                    }));
+                    return {
+                        id: y.id,
+                        number: y.data().number,
+                        rooms: rooms,
+                    };
+                }));
+                return {
+                    id: x.id,
+                    name: x.data().name,
+                    latLng: x.data().latLng,
+                    statusRef: x.data().statusRef,
+                    floors: floors,
+                };
+            }));
             const newData: MapData = {
                 id: mapSnap.id,
                 orderNumber: mapData.orderNumber,
@@ -196,46 +227,9 @@ export default function Edit(props: Props) {
                 status: mapData.status,
                 borderCoords: mapData.borderCoords,
                 badgeLatLng: mapData.badgeLatLng,
-                buildings: [],
-                houses: [],
+                buildings: buildings,
+                houses: houses,
             };
-            const housesSnap = await mapSnap.ref.collection('houses').get();
-            housesSnap.forEach(x => {
-                newData.houses.push({
-                    id: x.id,
-                    latLng: x.data().latLng,
-                    statusRef: x.data().statusRef,
-                });
-            });
-            const buildingsSnap = await mapSnap.ref.collection('buildings').get();
-            for (const x of buildingsSnap.docs) {
-                const floorsSnap = await x.ref.collection('floors').orderBy('number', 'asc').get();
-                const floors = new Array<Floor>();
-                for (const y of floorsSnap.docs) {
-                    const roomsSnap = await y.ref.collection('rooms').orderBy('orderNumber', 'asc').get();
-                    const rooms = new Array<Room>();
-                    roomsSnap.forEach(z => {
-                        rooms.push({
-                            id: z.id,
-                            orderNumber: z.data().orderNumber,
-                            roomNumber: z.data().roomNumber,
-                            statusRef: z.data().statusRef,
-                        });
-                    });
-                    floors.push({
-                        id: y.id,
-                        number: y.data().number,
-                        rooms: rooms,
-                    });
-                }
-                newData.buildings.push({
-                    id: x.id,
-                    name: x.data().name,
-                    latLng: x.data().latLng,
-                    statusRef: x.data().statusRef,
-                    floors: floors,
-                });
-            }
             setClientData(newData);
             setFetchedData(newData);
         };
