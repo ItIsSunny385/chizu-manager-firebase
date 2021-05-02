@@ -13,7 +13,7 @@ import HouseMarkers from '../../components/HouseMarkers';
 import { Building, House, MapData } from '../../types/map';
 import BuildingMarkers from '../../components/BuildingMarkers';
 import { getStatusMap } from '../../utils/statusUtil';
-import { getMapDataWithChildrenFromId } from '../../utils/mapUtil';
+import { getMapDataWithChildrenById } from '../../utils/mapUtil';
 
 interface Props {
     query: any
@@ -164,7 +164,7 @@ export default function Edit(props: Props) {
             setBuildingStatusMap(await getStatusMap(db, 'building_statuses'));
 
             /* 地図情報を取得 */
-            const newData = await getMapDataWithChildrenFromId(db, id);
+            const newData = await getMapDataWithChildrenById(db, id);
             setClientData(newData);
             setFetchedData(newData);
         };

@@ -1,7 +1,7 @@
 import firebase from 'firebase';
 import { MapData } from '../types/map';
 
-export function getMapDataArrayWithNoChildFromQuerySnapshot(snapshot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>) {
+export function getMapDataArrayWithNoChildByQuerySnapshot(snapshot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>): Array<MapData> {
     return snapshot.docs.map(x => ({
         id: x.id,
         orderNumber: x.data().orderNumber,
@@ -14,7 +14,7 @@ export function getMapDataArrayWithNoChildFromQuerySnapshot(snapshot: firebase.f
     }));
 }
 
-export async function getMapDataWithChildrenFromId(db: firebase.firestore.Firestore, id: string) {
+export async function getMapDataWithChildrenById(db: firebase.firestore.Firestore, id: string): Promise<MapData | undefined> {
     const mapSnap = await db.collection('maps').doc(id).get();
     const mapData = mapSnap.data();
     if (!mapData) {
@@ -51,7 +51,7 @@ export async function getMapDataWithChildrenFromId(db: firebase.firestore.Firest
             floors: floors,
         };
     }));
-    const newData: MapData = {
+    return {
         id: mapSnap.id,
         orderNumber: mapData.orderNumber,
         name: mapData.name,
@@ -60,5 +60,5 @@ export async function getMapDataWithChildrenFromId(db: firebase.firestore.Firest
         badgeLatLng: mapData.badgeLatLng,
         buildings: buildings,
         houses: houses,
-    };
+    } as MapData;
 }

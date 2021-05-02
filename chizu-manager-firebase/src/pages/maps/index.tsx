@@ -7,7 +7,7 @@ import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
 import { MapStatus, MapData } from '../../types/map';
-import { getMapDataArrayWithNoChildFromQuerySnapshot } from '../../utils/mapUtil'
+import { getMapDataArrayWithNoChildByQuerySnapshot } from '../../utils/mapUtil'
 import Link from 'next/link';
 
 const db = firebase.firestore();
@@ -18,7 +18,7 @@ export default function Index() {
 
     useEffect(() => {
         db.collection('maps').orderBy('orderNumber', 'asc').onSnapshot((snapshot) => {
-            setMaps(getMapDataArrayWithNoChildFromQuerySnapshot(snapshot));
+            setMaps(getMapDataArrayWithNoChildByQuerySnapshot(snapshot));
             setLoading(false);
         });
     }, []);
