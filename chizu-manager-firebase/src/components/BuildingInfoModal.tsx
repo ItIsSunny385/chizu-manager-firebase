@@ -2,10 +2,11 @@ import firebase from 'firebase';
 import React, { useState } from 'react';
 import { TrashFill } from 'react-bootstrap-icons';
 import { Button, FormGroup, Input, InputGroup, InputGroupAddon, Label } from 'reactstrap';
-import { Building } from '../types/map';
+import { Building, Room } from '../types/map';
 import MessageModal from './MessageModal';
 
 interface Props {
+    buildingRef: firebase.firestore.DocumentReference,
     title: string,
     data: Building,
     defaultStatusRef: firebase.firestore.DocumentReference,
@@ -22,14 +23,20 @@ export default function BuildingInfoModal(props: Props) {
     };
     const onClickDeleteFloor = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         const newData = { ...data };
-        newData.floors.pop();
+        const lastFloorId = Array.from(newData.floors.keys())[newData.floors.size - 1];
+        newData.floors.delete(lastFloorId);
         setData(newData);
     };
     const onClickAddFloor = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         const newData = { ...data };
-        newData.floors.push({
-            number: newData.floors.length + 1,
-            rooms: [{ orderNumber: 1, roomNumber: '', statusRef: props.defaultStatusRef }],
+        const floorRef = props.buildingRef.collection('floors').doc();
+        const roomRef = floorRef.collection('rooms').doc();
+        newData.floors.set(floorRef.id, {
+            number: newData.floors.size + 1,
+            rooms: new Map<string, Room>([[
+                roomRef.id,
+                { orderNumber: 1, roomNumber: '', statusRef: props.defaultStatusRef }
+            ]]),
         });
         setData(newData);
     };
@@ -56,8 +63,9 @@ export default function BuildingInfoModal(props: Props) {
             <Input id="buildingName" defaultValue={data.name} onChange={onChangeName} />
         </FormGroup>
         {
-            data.floors.map((floor, i) => {
+            Array.from(data.floors.values()).map((floor, i) => {
                 const onClickAddRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                    /*
                     const newData = { ...data };
                     const nextOrderNumber = newData.floors[i].rooms.length ?
                         Math.max(...newData.floors[i].rooms.map(x => x.orderNumber)) + 1 : 1;
@@ -67,21 +75,26 @@ export default function BuildingInfoModal(props: Props) {
                         statusRef: props.defaultStatusRef
                     });
                     setData(newData);
+                    */
                 };
                 return <details key={floor.number} className="mt-1">
                     <summary>{floor.number}階</summary>
                     <div>
                         {
-                            floor.rooms.map((room, j) => {
+                            Array.from(floor.rooms.values()).map((room, j) => {
                                 const onChangeRoom = (e: React.ChangeEvent<HTMLInputElement>) => {
+                                    /*
                                     const newData = { ...data };
                                     newData.floors[i].rooms[j].roomNumber = e.target.value;
                                     setData(newData);
+                                    */
                                 };
                                 const onClickDeleteRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                                    /*
                                     const newData = { ...data };
                                     newData.floors[i].rooms.splice(j, 1);
                                     setData(newData);
+                                    */
                                 };
                                 return <InputGroup key={j} className="mt-1">
                                     <Input defaultValue={room.roomNumber} onChange={onChangeRoom} />
@@ -100,7 +113,7 @@ export default function BuildingInfoModal(props: Props) {
         }
         <div className="mt-3">
             {
-                data.floors.length > 1
+                data.floors.size > 1
                 &&
                 <Button onClick={onClickDeleteFloor} className="mr-1">フロア削除</Button>
             }

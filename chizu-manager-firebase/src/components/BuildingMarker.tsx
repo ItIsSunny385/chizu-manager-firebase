@@ -89,11 +89,11 @@ export default function BuildingMarker(props: Props) {
                     </InputGroup>
                     <div className="mt-1">
                         {
-                            props.data.floors.map((x, i) => {
+                            Array.from(props.data.floors.values()).map((x, i) => {
                                 return <details key={i} className="mt-1">
-                                    <summary>{x.number}階（{x.rooms.length}部屋）</summary>
+                                    <summary>{x.number}階（{x.rooms.size}部屋）</summary>
                                     {
-                                        x.rooms.map((y, j) => <InputGroup size="sm">
+                                        Array.from(x.rooms.values()).map((y, j) => <InputGroup size="sm">
                                             <InputGroupAddon addonType="prepend">
                                                 <InputGroupText>{y.roomNumber}</InputGroupText>
                                             </InputGroupAddon>
@@ -101,10 +101,6 @@ export default function BuildingMarker(props: Props) {
                                                 type="select"
                                                 defaultValue={y.statusRef.id}
                                                 onChange={(e) => {
-                                                    const newData = { ...props.data };
-                                                    newData.floors[i].rooms[j].statusRef
-                                                        = db.collection('statuses').doc(e.target.value);
-                                                    props.set(newData);
                                                 }}
                                             >
                                                 {
@@ -122,6 +118,7 @@ export default function BuildingMarker(props: Props) {
                         }
                     </div>
                     {
+                        /*
                         displayBuildingInfoModal
                         &&
                         <BuildingInfoModal
@@ -136,6 +133,7 @@ export default function BuildingMarker(props: Props) {
                                 setDisplayBuildingInfoModal(false);
                             }}
                         />
+                        */
                     }
                 </div>
             </InfoWindow>

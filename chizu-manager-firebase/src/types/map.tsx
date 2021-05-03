@@ -33,14 +33,14 @@ export interface Building {
     id?: string,
     name: string,
     latLng: firebase.firestore.GeoPoint,
-    floors: Floor[],
+    floors: Map<string, Floor>,
     statusRef: firebase.firestore.DocumentReference
 }
 
 export interface Floor {
     id?: string,
     number: number,
-    rooms: Room[]
+    rooms: Map<string, Room>
 }
 
 export interface Room {
@@ -62,7 +62,6 @@ export interface MapData {
     name: string,
     status: string,
     borderCoords: firebase.firestore.GeoPoint[],
-    badgeLatLng: firebase.firestore.GeoPoint,
-    buildings: Building[],
-    houses: House[],
+    buildings: Map<string, Building>,
+    houses: Map<string, House>,
 }

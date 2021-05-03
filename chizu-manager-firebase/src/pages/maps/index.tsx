@@ -9,12 +9,15 @@ import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.m
 import { MapStatus, MapData } from '../../types/map';
 import { getMapDataArrayWithNoChildByQuerySnapshot } from '../../utils/mapUtil'
 import Link from 'next/link';
+import { Button } from 'reactstrap';
+import { useRouter } from 'next/router';
 
 const db = firebase.firestore();
 
 export default function Index() {
     const [loading, setLoading] = useState(true);
-    const [maps, setMaps] = useState([] as Array<MapData>)
+    const [maps, setMaps] = useState([] as Array<MapData>);
+    const router = useRouter();
 
     useEffect(() => {
         db.collection('maps').orderBy('orderNumber', 'asc').onSnapshot((snapshot) => {
@@ -59,6 +62,25 @@ export default function Index() {
                 pagination={paginationFactory({})}
                 noDataIndication={() => (<div className="text-center">データがありません</div>)}
             />
+            <div className="text-left mb-2 mt-2">
+                <Button
+                    onClick={async (e) => {
+                        e.preventDefault();
+                        const newMap = db.collection('maps').doc();
+                        await newMap.set({
+                            orderNumber: maps.length + 1,
+                            name: `Map${maps.length + 1}`,
+                            status: MapStatus.Private,
+                            borderCoords: [],
+                            badgeLatLng: null,
+                        });
+                        router.push(`/maps/edit?id=${newMap.id}`);
+                    }}
+                    className="ml-1"
+                >
+                    追加
+                </Button>
+            </div>
         </AdminApp>
     );
 }

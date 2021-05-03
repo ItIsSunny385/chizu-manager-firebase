@@ -1,5 +1,5 @@
 import firebase from 'firebase';
-import { MapData } from '../types/map';
+import { Building, House, MapData } from '../types/map';
 
 export function getMapDataArrayWithNoChildByQuerySnapshot(snapshot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>): Array<MapData> {
     return snapshot.docs.map(x => ({
@@ -9,11 +9,12 @@ export function getMapDataArrayWithNoChildByQuerySnapshot(snapshot: firebase.fir
         status: x.data().status,
         borderCoords: x.data().borderCoords,
         badgeLatLng: x.data().badgeLatLng,
-        buildings: [],
-        houses: [],
+        buildings: new Map<string, Building>(),
+        houses: new Map<string, House>(),
     }));
 }
 
+/*
 export async function getMapDataWithChildrenById(db: firebase.firestore.Firestore, id: string): Promise<MapData | undefined> {
     const mapSnap = await db.collection('maps').doc(id).get();
     const mapData = mapSnap.data();
@@ -62,3 +63,4 @@ export async function getMapDataWithChildrenById(db: firebase.firestore.Firestor
         houses: houses,
     } as MapData;
 }
+*/

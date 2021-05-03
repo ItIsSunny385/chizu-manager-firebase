@@ -1,3 +1,4 @@
+import '../utils/InitializeFirebase'; // comoponent中では import firebase の前に書く
 import firebase from 'firebase';
 import React, { useState } from 'react';
 import BuildingBasicInfoModal from './BuildingBasicInfoModal';
@@ -5,7 +6,10 @@ import BuildingFloorInfoModal, { FloorInfoA } from './BuildingFloorInfoModal';
 import BuildingInfoModal from './BuildingInfoModal';
 import { BuildingBasicInfo, Building, Floor, Room, RoomNumberTypes } from '../types/map';
 
+const db = firebase.firestore();
+
 interface Props {
+    buildingRef: firebase.firestore.DocumentReference,
     latLng: google.maps.LatLng,
     defaultStatusRef: firebase.firestore.DocumentReference,
     defaultBuildingStatusRef: firebase.firestore.DocumentReference,
@@ -33,14 +37,18 @@ export default function AddBuildingModals(props: Props) {
                     setDisplayBasicInfoModal(false);
                     setBasicInfo(result);
                     if (result.roomNumberType === RoomNumberTypes.Other) {
-                        const floors = Array.from({ length: result.numberOfFloors }, (v, i) => ({
-                            number: i + 1,
-                            rooms: [{
-                                orderNumber: 1,
-                                roomNumber: '',
-                                statusRef: props.defaultStatusRef
-                            } as Room]
-                        } as Floor));
+                        const floors = new Map<string, Floor>(Array.from({ length: result.numberOfFloors }, (v, i) => {
+                            const floorRef = props.buildingRef.collection('floors').doc();
+                            const roomRef = floorRef.collection('rooms').doc()
+                            return [floorRef.id, {
+                                number: i + 1,
+                                rooms: new Map<string, Room>([[roomRef.id, {
+                                    orderNumber: 1,
+                                    roomNumber: '',
+                                    statusRef: props.defaultStatusRef
+                                } as Room]])
+                            } as Floor];
+                        }));
                         const building: Building = {
                             statusRef: props.defaultBuildingStatusRef,
                             name: result.name,
@@ -66,8 +74,9 @@ export default function AddBuildingModals(props: Props) {
                 }}
                 next={(result: FloorInfoA[]) => {
                     setDisplayFloorInfoModal(false);
-                    const floors = result.map(x => {
-                        const rooms = Array.from({ length: x.maxRoomNumber }, (v, i) => i + 1)
+                    const floors = new Map<string, Floor>(result.map(x => {
+                        const floorRef = props.buildingRef.collection('floors').doc();
+                        const rooms = new Map<string, Room>(Array.from({ length: x.maxRoomNumber }, (v, i) => i + 1)
                             .filter(j => {
                                 if (j === 4 && basicInfo.roomNumberType === RoomNumberTypes.Except4) {
                                     return false;
@@ -77,16 +86,19 @@ export default function AddBuildingModals(props: Props) {
                                     return true;
                                 }
                             })
-                            .map(j => ({
-                                orderNumber: j,
-                                roomNumber: `${x.floorNumber}${j.toString().padStart(2, '0')}`,
-                                statusRef: props.defaultStatusRef
-                            } as Room));
-                        return {
+                            .map(j => {
+                                const roomRef = floorRef.collection('rooms').doc();
+                                return [roomRef.id, {
+                                    orderNumber: j,
+                                    roomNumber: `${x.floorNumber}${j.toString().padStart(2, '0')}`,
+                                    statusRef: props.defaultStatusRef
+                                } as Room];
+                            }));
+                        return [floorRef.id, {
                             number: x.floorNumber,
                             rooms: rooms
-                        }
-                    });
+                        }];
+                    }));
                     const building: Building = {
                         statusRef: props.defaultBuildingStatusRef,
                         name: basicInfo.name,
@@ -102,6 +114,7 @@ export default function AddBuildingModals(props: Props) {
             displayBuildingInfoModal && building
             &&
             <BuildingInfoModal
+                buildingRef={props.buildingRef}
                 title='集合住宅追加（最終調整）'
                 data={building}
                 defaultStatusRef={props.defaultStatusRef}

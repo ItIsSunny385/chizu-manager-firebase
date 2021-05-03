@@ -1,6 +1,6 @@
 import '../../utils/InitializeFirebase';
 import firebase from 'firebase';
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useRouter } from 'next/router';
 import MapApp from '../../components/MapApp';
@@ -10,10 +10,10 @@ import { Status } from '../../types/model';
 import { Polygon, Polyline } from '@react-google-maps/api';
 import MapNameBadge from '../../components/MapNameBadge';
 import HouseMarkers from '../../components/HouseMarkers';
-import { Building, House, MapData } from '../../types/map';
+import { Building, Floor, House, MapData, Room } from '../../types/map';
 import BuildingMarkers from '../../components/BuildingMarkers';
+import BorderModeMapContents from '../../components/BorderModeMapContents';
 import { getStatusMap } from '../../utils/statusUtil';
-import { getMapDataWithChildrenById } from '../../utils/mapUtil';
 
 interface Props {
     query: any
@@ -32,17 +32,16 @@ export default function Edit(props: Props) {
     const [loading, setLoading] = useState(true);
     const [controllerSetted, setControllerSetted] = useState(false);
     const [id] = useState(props.query.id);
-    const [fetchedData, setFetchedData] = useState(undefined as MapData | undefined);
-    const [clientData, setClientData] = useState(undefined as MapData | undefined);
+    const [mapData, setMapData] = useState(undefined as MapData | undefined);
     const [map, setMap] = useState(undefined as google.maps.Map<Element> | undefined);
-    const [polylinePath, setPolylinePath] = useState([] as google.maps.LatLngLiteral[]);
-    const [pageMode, setPageMode] = useState(PageMode.Marker);
+    const [pageMode, setPageMode] = useState(PageMode.Border);
+    const [newLatLng, setNewLatLng] = useState(undefined as google.maps.LatLng | undefined);
     const [statusMap, setStatusMap] = useState(new Map<string, Status>());
     const [buildingStatusMap, setBuildingStatusMap] = useState(new Map<string, Status>());
     const router = useRouter();
 
     useEffect(() => {
-        if (map && clientData && !controllerSetted) {
+        if (map && mapData && !controllerSetted) {
             /* 地図上のボタンの配置 */
             const topLeftTitle = <div className="mt-1 ml-1 d-block d-md-none"><h4>
                 <Badge color="dark">地図編集</Badge>
@@ -76,17 +75,17 @@ export default function Edit(props: Props) {
             map.controls[google.maps.ControlPosition.TOP_CENTER].push(topCenterTitleDiv);
             const rightTopButtons = <ButtonGroup className="mt-1 mr-1">
                 <Button
-                    id="markerButton"
-                    active
-                    onClick={(e) => { document.getElementById('marker')!.click(); }}
-                >
-                    <GeoAltFill />
-                </Button>
-                <Button
                     id="borderButton"
+                    active
                     onClick={(e) => { document.getElementById('border')!.click(); }}
                 >
                     <HeptagonFill />
+                </Button>
+                <Button
+                    id="markerButton"
+                    onClick={(e) => { document.getElementById('marker')!.click(); }}
+                >
+                    <GeoAltFill />
                 </Button>
                 <Button id="userButton"><PeopleFill /></Button>
                 <Button id="settingButton"><GearFill /></Button>
@@ -116,21 +115,21 @@ export default function Edit(props: Props) {
             map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(leftBottomButtonDiv);
 
             /* 境界線に合わせて地図を移動 */
-            const minLat = Math.min(...clientData.borderCoords.map(x => x.latitude));
-            const minLng = Math.min(...clientData.borderCoords.map(x => x.longitude));
-            const maxLat = Math.max(...clientData.borderCoords.map(x => x.latitude));
-            const maxLng = Math.max(...clientData.borderCoords.map(x => x.longitude));
-            map.fitBounds(new google.maps.LatLngBounds(
-                new google.maps.LatLng(minLat, minLng),
-                new google.maps.LatLng(maxLat, maxLng)
-            ));
-            const newPolyLinePath = clientData.borderCoords.map(x => ({ lat: x.latitude, lng: x.longitude }));
-            newPolyLinePath.push(newPolyLinePath[0]);
-            setPolylinePath(newPolyLinePath);
+            if (mapData.borderCoords.length > 0) {
+                const minLat = Math.min(...mapData.borderCoords.map(x => x.latitude));
+                const minLng = Math.min(...mapData.borderCoords.map(x => x.longitude));
+                const maxLat = Math.max(...mapData.borderCoords.map(x => x.latitude));
+                const maxLng = Math.max(...mapData.borderCoords.map(x => x.longitude));
+                map.fitBounds(new google.maps.LatLngBounds(
+                    new google.maps.LatLng(minLat, minLng),
+                    new google.maps.LatLng(maxLat, maxLng)
+                ));
+            }
             setLoading(false);
             setControllerSetted(true);
         }
-    }, [map, clientData])
+    }, [map, mapData]);
+
 
     useEffect(() => {
         /* ページモードの変更に応じて、地図上ボタンの活性状態を変える */
@@ -158,39 +157,183 @@ export default function Edit(props: Props) {
     }, [pageMode]);
 
     useEffect(() => {
-        const setData = async () => {
+        const f = async () => {
             /* ステータス情報を取得 */
             setStatusMap(await getStatusMap(db, 'statuses'));
             setBuildingStatusMap(await getStatusMap(db, 'building_statuses'));
-
-            /* 地図情報を取得 */
-            const newData = await getMapDataWithChildrenById(db, id);
-            setClientData(newData);
-            setFetchedData(newData);
         };
-        setData();
+        f();
+
+        /* 地図情報を取得 */
+        db.collection('maps').doc(id).onSnapshot((mapSnap) => {
+            const mapData = mapSnap.data();
+            if (!mapData) {
+                setMapData(undefined);
+                return;
+            }
+            setMapData({
+                id: mapSnap.id,
+                orderNumber: mapData.orderNumber,
+                name: mapData.name,
+                status: mapData.status,
+                borderCoords: mapData.borderCoords,
+                buildings: new Map<string, Building>(),
+                houses: new Map<string, House>(),
+            } as MapData);
+        });
     }, []);
+
+    const prevMapDataRef = useRef<MapData | undefined>();
+    useEffect(() => {
+        prevMapDataRef.current = mapData;
+    });
+    const prevMapData = prevMapDataRef.current;
+    useEffect(() => {
+        if (!prevMapData && mapData) {
+            db.collection('maps').doc(id).collection('houses').onSnapshot((housesSnap) => {
+                if (!mapData) {
+                    return;
+                }
+                const newMapData1 = { ...mapData };
+                for (let changeH of housesSnap.docChanges()) {
+                    if (changeH.type === 'added') {
+                        newMapData1.houses.set(changeH.doc.id, {
+                            id: changeH.doc.id,
+                            latLng: changeH.doc.data().latLng,
+                            statusRef: changeH.doc.data().statusRef,
+                        });
+                    } else if (changeH.type === 'modified') {
+                        const newHouse = { ...newMapData1.houses.get(changeH.doc.id) } as House;
+                        newHouse.latLng = changeH.doc.data().latLng;
+                        newHouse.statusRef = changeH.doc.data().statusRef;
+                    } else if (changeH.type === "removed") {
+                        newMapData1.houses.delete(changeH.doc.id);
+                    }
+                }
+                setMapData(newMapData1);
+            });
+            db.collection('maps').doc(id).collection('buildings').onSnapshot((buildingsSnap) => {
+                if (!mapData) {
+                    return;
+                }
+                const newMapData1 = { ...mapData };
+                for (let changeB of buildingsSnap.docChanges()) {
+                    if (changeB.type === 'added') {
+                        newMapData1.buildings.set(changeB.doc.id, {
+                            id: changeB.doc.id,
+                            name: changeB.doc.data().name,
+                            latLng: changeB.doc.data().latLng,
+                            statusRef: changeB.doc.data().statusRef,
+                            floors: new Map<string, Floor>(),
+                        } as Building);
+                        changeB.doc.ref.collection('floors').onSnapshot((floorsSnap) => {
+                            if (!mapData) {
+                                return;
+                            }
+                            const newMapData2 = { ...mapData };
+                            const newBuilding1 = newMapData2.buildings.get(changeB.doc.id);
+                            if (!newBuilding1) {
+                                return;
+                            }
+                            for (let changeF of floorsSnap.docChanges()) {
+                                if (changeF.type === 'added') {
+                                    newBuilding1.floors.set(changeF.doc.id, {
+                                        id: changeF.doc.id,
+                                        number: changeF.doc.data().number,
+                                        rooms: new Map<string, Room>(),
+                                    });
+                                    changeF.doc.ref.collection('rooms').onSnapshot((roomsSnap) => {
+                                        if (!mapData) {
+                                            return;
+                                        }
+                                        const newMapData3 = { ...mapData };
+                                        const newBuilding2 = newMapData3.buildings.get(changeB.doc.id);
+                                        if (!newBuilding2) {
+                                            return;
+                                        }
+                                        const newFloor = newBuilding2.floors.get(changeF.doc.id);
+                                        if (!newFloor) {
+                                            return;
+                                        }
+                                        for (let changeR of roomsSnap.docChanges()) {
+                                            if (changeR.type === 'added') {
+                                                newFloor.rooms.set(changeR.doc.id, {
+                                                    id: changeR.doc.id,
+                                                    orderNumber: changeR.doc.data().orderNumber,
+                                                    roomNumber: changeR.doc.data().roomNumber,
+                                                    statusRef: changeR.doc.data().statusRef
+                                                })
+                                            } else if (changeR.type === 'modified') {
+                                                const newRoom = { ...newFloor.rooms.get(changeR.doc.id) } as Room;
+                                                newRoom.orderNumber = changeR.doc.data().orderNumber;
+                                                newRoom.roomNumber = changeR.doc.data().roomNumber;
+                                                newRoom.statusRef = changeR.doc.data().statusRef;
+                                                newFloor.rooms.set(changeR.doc.id, newRoom);
+                                            } else if (changeR.type === 'removed') {
+                                                newFloor.rooms.delete(changeR.doc.id);
+                                            }
+                                        }
+                                        setMapData(newMapData3);
+                                    });
+                                } else if (changeF.type === 'modified') {
+                                    const newFloor = { ...newBuilding1.floors.get(changeF.doc.id) } as Floor;
+                                    newFloor.number = changeF.doc.data().number;
+                                    newBuilding1.floors.set(changeF.doc.id, newFloor);
+                                } else if (changeF.type === 'removed') {
+                                    newBuilding1.floors.delete(changeF.doc.id);
+                                }
+                            }
+                            setMapData(newMapData2);
+                        });
+                    } else if (changeB.type === 'modified') {
+                        const newBuilding = { ...newMapData1.buildings.get(changeB.doc.id) } as Building;
+                        newBuilding.name = changeB.doc.data().name;
+                        newBuilding.latLng = changeB.doc.data().latLng;
+                        newBuilding.statusRef = changeB.doc.data().statusRef;
+                        newMapData1.buildings.set(changeB.doc.id, newBuilding);
+                    } else if (changeB.type === "removed") {
+                        newMapData1.buildings.delete(changeB.doc.id);
+                    }
+                }
+                setMapData(newMapData1);
+            });
+        }
+    }, [mapData]);
+
+    const polylinePath = mapData ? mapData.borderCoords.map(x => ({ lat: x.latitude, lng: x.longitude })) : [];
+    mapData && polylinePath.push(polylinePath[0]);
 
     return (
         <React.Fragment>
             <MapApp
                 loading={loading}
-                onLoadMap={(map) => { setMap(map); }}
+                onLoadMap={setMap}
+                onRightClick={(e) => { setNewLatLng(e.latLng); }}
             >
                 {
-                    clientData
+                    map
+                    &&
+                    mapData
                     &&
                     pageMode === PageMode.Border
                     &&
-                    <Polygon
-                        path={clientData.borderCoords.map(x => ({ lat: x.latitude, lng: x.longitude }))}
-                        editable={true}
-                        options={{ strokeColor: "red", fillColor: "red" }}
-                        onMouseUp={(e) => { }}
+                    <BorderModeMapContents
+                        borderCoords={mapData.borderCoords.map(x =>
+                            new google.maps.LatLng({ lat: x.latitude, lng: x.longitude }))
+                        }
+                        newLatLng={newLatLng}
+                        setBorderCoords={(newBorderCoords) => {
+                            db.collection('maps').doc(id).update({
+                                borderCoords: newBorderCoords.map(x => new firebase.firestore.GeoPoint(x.lat(), x.lng()))
+                            })
+                        }}
+                        resetNewLatLng={() => { setNewLatLng(undefined); }}
                     />
                 }
                 {
-                    clientData
+                    map
+                    &&
+                    mapData
                     &&
                     pageMode !== PageMode.Border
                     &&
@@ -200,31 +343,19 @@ export default function Edit(props: Props) {
                             path={polylinePath}
                             options={{ strokeColor: "red", zIndex: 1 }}
                         />
-                        {/* 地図名バッジ */}
-                        <MapNameBadge
-                            latLng={clientData.badgeLatLng}
-                            name={clientData.name}
-                            draggable={true}
-                        />
                         {/* 家 */}
                         <HouseMarkers
-                            data={clientData.houses}
+                            data={Array.from(mapData.houses.values())}
                             statusMap={statusMap}
                             setData={(houses: Array<House>) => {
-                                const newClientData = { ...clientData };
-                                newClientData.houses = houses;
-                                setClientData(newClientData);
                             }}
                         />
                         {/* 集合住宅 */}
                         <BuildingMarkers
-                            data={clientData.buildings}
+                            data={Array.from(mapData.buildings.values())}
                             statusMap={statusMap}
                             buildingStatusMap={buildingStatusMap}
                             setData={(buildings: Array<Building>) => {
-                                const newClientData = { ...clientData };
-                                newClientData.buildings = buildings;
-                                setClientData(newClientData);
                             }}
                         />
                     </Fragment>

@@ -233,6 +233,7 @@ export default function AddOthers(props: Props) {
                 />
                 {/* 新規建物追加ウィンドウ */}
                 {
+                    /*
                     displaySelectBuildingTypeWindow && newBuildingLatLng
                     &&
                     <SelectBuildingTypeWindow
@@ -250,6 +251,7 @@ export default function AddOthers(props: Props) {
                         addHouse={addHouse}
                         addBuilding={addBuilding}
                     />
+                    */
                 }
                 {/* 家 */}
                 <HouseMarkers

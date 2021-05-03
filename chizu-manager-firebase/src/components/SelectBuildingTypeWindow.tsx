@@ -1,3 +1,4 @@
+import '../utils/InitializeFirebase'; // comoponent中では import firebase の前に書く
 import React, { Fragment, useState } from 'react';
 import firebase from 'firebase';
 import { InfoWindow } from '@react-google-maps/api';
@@ -6,7 +7,10 @@ import { Nav, NavItem, NavLink } from 'reactstrap';
 import AddBuildingModals from './AddBuildingModals';
 import { Building, House } from '../types/map';
 
+const db = firebase.firestore();
+
 interface Props {
+    mapRef: firebase.firestore.DocumentReference,
     latLng: google.maps.LatLng,
     defaultStatusRef: firebase.firestore.DocumentReference,
     defaultBuildingStatusRef: firebase.firestore.DocumentReference,
@@ -14,8 +18,6 @@ interface Props {
     addHouse: (result: House) => void,
     addBuilding: (result: Building) => void,
 }
-
-const db = firebase.firestore();
 
 export default function SelectBuildingTypeWindow(props: Props) {
     const [displayAddBuildingModals, setDisplayAddBuildingModals] = useState(false);
@@ -56,6 +58,7 @@ export default function SelectBuildingTypeWindow(props: Props) {
                         displayAddBuildingModals
                         &&
                         <AddBuildingModals
+                            buildingRef={props.mapRef.collection('buildings').doc()}
                             latLng={props.latLng}
                             defaultStatusRef={props.defaultStatusRef}
                             defaultBuildingStatusRef={props.defaultBuildingStatusRef}
