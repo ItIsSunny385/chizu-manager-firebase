@@ -8,11 +8,11 @@ import { Badge, Button, ButtonGroup } from 'reactstrap';
 import { GearFill, GeoAltFill, HeptagonFill, InfoCircleFill, PeopleFill } from 'react-bootstrap-icons';
 import { Status } from '../../types/model';
 import { Polygon, Polyline } from '@react-google-maps/api';
-import MapNameBadge from '../../components/MapNameBadge';
 import HouseMarkers from '../../components/HouseMarkers';
 import { Building, Floor, House, MapData, Room } from '../../types/map';
 import BuildingMarkers from '../../components/BuildingMarkers';
 import BorderModeMapContents from '../../components/BorderModeMapContents';
+import MarkerModeMapContents from '../../components/MarkerModeMapContents';
 import { getStatusMap } from '../../utils/statusUtil';
 
 interface Props {
@@ -206,6 +206,7 @@ export default function Edit(props: Props) {
                         const newHouse = { ...newMapData1.houses.get(changeH.doc.id) } as House;
                         newHouse.latLng = changeH.doc.data().latLng;
                         newHouse.statusRef = changeH.doc.data().statusRef;
+                        newMapData1.houses.set(changeH.doc.id, newHouse);
                     } else if (changeH.type === "removed") {
                         newMapData1.houses.delete(changeH.doc.id);
                     }
@@ -300,9 +301,6 @@ export default function Edit(props: Props) {
         }
     }, [mapData]);
 
-    const polylinePath = mapData ? mapData.borderCoords.map(x => ({ lat: x.latitude, lng: x.longitude })) : [];
-    mapData && polylinePath.push(polylinePath[0]);
-
     return (
         <React.Fragment>
             <MapApp
@@ -318,15 +316,11 @@ export default function Edit(props: Props) {
                     pageMode === PageMode.Border
                     &&
                     <BorderModeMapContents
+                        mapRef={db.collection('maps').doc(id)}
                         borderCoords={mapData.borderCoords.map(x =>
                             new google.maps.LatLng({ lat: x.latitude, lng: x.longitude }))
                         }
                         newLatLng={newLatLng}
-                        setBorderCoords={(newBorderCoords) => {
-                            db.collection('maps').doc(id).update({
-                                borderCoords: newBorderCoords.map(x => new firebase.firestore.GeoPoint(x.lat(), x.lng()))
-                            })
-                        }}
                         resetNewLatLng={() => { setNewLatLng(undefined); }}
                     />
                 }
@@ -337,28 +331,14 @@ export default function Edit(props: Props) {
                     &&
                     pageMode !== PageMode.Border
                     &&
-                    <Fragment>
-                        {/* 境界線 */}
-                        <Polyline
-                            path={polylinePath}
-                            options={{ strokeColor: "red", zIndex: 1 }}
-                        />
-                        {/* 家 */}
-                        <HouseMarkers
-                            data={Array.from(mapData.houses.values())}
-                            statusMap={statusMap}
-                            setData={(houses: Array<House>) => {
-                            }}
-                        />
-                        {/* 集合住宅 */}
-                        <BuildingMarkers
-                            data={Array.from(mapData.buildings.values())}
-                            statusMap={statusMap}
-                            buildingStatusMap={buildingStatusMap}
-                            setData={(buildings: Array<Building>) => {
-                            }}
-                        />
-                    </Fragment>
+                    <MarkerModeMapContents
+                        mapRef={db.collection('maps').doc(id)}
+                        borderCoords={mapData.borderCoords.map(x => new google.maps.LatLng({ lat: x.latitude, lng: x.longitude }))}
+                        statusMap={statusMap}
+                        buildingStatusMap={buildingStatusMap}
+                        houses={Array.from(mapData.houses.values())}
+                        buildings={Array.from(mapData.buildings.values())}
+                    />
                 }
             </MapApp>
             {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}

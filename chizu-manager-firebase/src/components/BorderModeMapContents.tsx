@@ -1,11 +1,13 @@
+import '../utils/InitializeFirebase';
+import firebase from 'firebase';
 import { Polygon, Polyline } from "@react-google-maps/api";
 import { Fragment, useEffect, useState } from "react";
 import BorderVertexInfoWindow, { Props as InfoWindowProps } from "./BorderVertexInfoWIndow";
 
 interface Props {
+    mapRef: firebase.firestore.DocumentReference,
     borderCoords: google.maps.LatLng[],
     newLatLng: google.maps.LatLng | undefined,
-    setBorderCoords: (borderCoords: google.maps.LatLng[]) => void,
     resetNewLatLng: () => void,
 }
 
@@ -52,7 +54,9 @@ export default function BorderModeMapContents(props: Props) {
                     setInfoWindowProps(undefined);
                 },
                 check: () => {
-                    props.setBorderCoords(corners);
+                    props.mapRef.update({
+                        borderCoords: corners.map(x => new firebase.firestore.GeoPoint(x.lat(), x.lng()))
+                    });
                     setInfoWindowProps(undefined);
                 },
             });
@@ -69,7 +73,9 @@ export default function BorderModeMapContents(props: Props) {
     useEffect(() => {
         if (props.borderCoords.length > 0) {
             console.log(corners);
-            props.setBorderCoords(corners);
+            props.mapRef.update({
+                borderCoords: corners.map(x => new firebase.firestore.GeoPoint(x.lat(), x.lng()))
+            });
         }
     }, [corners])
 

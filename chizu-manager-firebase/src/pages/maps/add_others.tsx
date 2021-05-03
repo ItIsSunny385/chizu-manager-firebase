@@ -12,7 +12,6 @@ import { InfoCircleFill } from 'react-bootstrap-icons';
 import { MessageModalProps } from '../../components/MessageModal';
 import SelectBuildingTypeWindow from '../../components/SelectBuildingTypeWindow';
 import MapNameBadge from '../../components/MapNameBadge';
-import HouseMarkers from '../../components/HouseMarkers';
 import BuildingMarkers from '../../components/BuildingMarkers';
 import { Status } from '../../types/model';
 
@@ -254,11 +253,15 @@ export default function AddOthers(props: Props) {
                     */
                 }
                 {/* 家 */}
-                <HouseMarkers
-                    data={houses}
-                    statusMap={statusMap}
-                    setData={setHouses}
-                />
+                {
+                    /*
+                    <HouseMarkers
+                        data={houses}
+                        statusMap={statusMap}
+                        setData={setHouses}
+                    />
+                    */
+                }
                 {/* 集合住宅 */}
                 <BuildingMarkers
                     data={buildings}

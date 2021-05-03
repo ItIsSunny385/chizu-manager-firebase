@@ -1,3 +1,4 @@
+import '../utils/InitializeFirebase';
 import firebase from 'firebase';
 import { InfoWindow, Marker } from "@react-google-maps/api";
 import { useState } from "react";
@@ -8,16 +9,16 @@ import { Status } from "../types/model";
 import { getMarkerUrl } from '../utils/markerUtil';
 
 interface Props {
+    docRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
     data: House,
     statusMap: Map<string, Status>,
-    set: (newData: House) => void,
-    delete: () => void,
 }
 
 const db = firebase.firestore();
 
 export default function HouseMarker(props: Props) {
     const [openWindow, setOpenWindow] = useState(false);
+
     const statusId = props.data.statusRef.id;
     const status = props.statusMap.get(statusId)!;
 
@@ -34,10 +35,10 @@ export default function HouseMarker(props: Props) {
             fontWeight: 'bold',
         }}
         draggable={true}
-        onDragEnd={(e) => {
+        onDragEnd={async (e) => {
             const newData = { ...props.data };
             newData.latLng = new firebase.firestore.GeoPoint(e.latLng.lat(), e.latLng.lng());
-            props.set(newData);
+            await props.docRef.update(newData);
         }}
         onClick={(e) => {
             setOpenWindow(!openWindow);
@@ -51,11 +52,11 @@ export default function HouseMarker(props: Props) {
                 <InputGroup size="sm">
                     <Input
                         type="select"
-                        defaultValue={statusId}
-                        onChange={(e) => {
+                        value={statusId}
+                        onChange={async (e) => {
                             const newData = { ...props.data };
                             newData.statusRef = db.collection('statuses').doc(e.target.value);
-                            props.set(newData);
+                            await props.docRef.update(newData);
                         }}
                     >
                         {
@@ -67,7 +68,7 @@ export default function HouseMarker(props: Props) {
                         <Button><ChatTextFill /></Button>
                     </InputGroupAddon>
                     <InputGroupAddon addonType="append">
-                        <Button onClick={(e) => { props.delete(); }}><TrashFill /></Button>
+                        <Button onClick={(e) => { props.docRef.delete(); }}><TrashFill /></Button>
                     </InputGroupAddon>
                 </InputGroup>
             </InfoWindow>

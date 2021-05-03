@@ -13,23 +13,13 @@ export default function HouseMarkers({ data, statusMap, setData }: Props) {
     return <Fragment>
         {
             data.map((x, i) => {
-                const setHouseInfo = (newHouseInfo: House) => {
-                    const newHouses = [...data];
-                    newHouses[i] = newHouseInfo;
-                    setData(newHouses);
-                };
-                const deleteHouseInfo = () => {
-                    const newHouses = [...data];
-                    newHouses.splice(i, 1);
-                    setData(newHouses);
-                };
+                /*
                 return <HouseMarker
                     key={i}
                     data={x}
                     statusMap={statusMap}
-                    set={setHouseInfo}
-                    delete={deleteHouseInfo}
                 />;
+                */
             })
         }
     </Fragment>;
