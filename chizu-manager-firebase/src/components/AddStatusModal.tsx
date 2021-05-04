@@ -25,7 +25,7 @@ export default function AddStatusModal(props: Props) {
     const collectionName = StatusCollectionName[props.type];
     const title = props.type === StatusType.HouseOrRoom ? '家・部屋ステータス追加' : '集合住宅ステータス追加';
 
-    const onClickSaveButton = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const onClickSaveButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         const batch = firebase.firestore().batch();
         Array.from(props.statusMap.entries()).forEach(([id, status]) => {
             if (status.number >= data.number) {
@@ -36,7 +36,7 @@ export default function AddStatusModal(props: Props) {
         });
         const newStatusRef = db.collection(collectionName).doc();
         batch.set(newStatusRef, data);
-        await batch.commit();
+        batch.commit();
         props.toggle();
     };
 
