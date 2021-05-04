@@ -6,7 +6,7 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
-import { MapStatus, MapData } from '../../types/map';
+import { MapStatus, MapData, MapBasicData } from '../../types/map';
 import { getMapDataArrayWithNoChildByQuerySnapshot } from '../../utils/mapUtil'
 import Link from 'next/link';
 import { Button } from 'reactstrap';
@@ -72,7 +72,7 @@ export default function Index() {
                             name: `Map${maps.length + 1}`,
                             status: MapStatus.Private,
                             borderCoords: [],
-                        });
+                        } as MapBasicData);
                         router.push(`/maps/edit?id=${newMap.id}`);
                     }}
                     className="ml-1"

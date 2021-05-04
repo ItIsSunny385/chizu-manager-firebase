@@ -39,17 +39,28 @@ export default function AddBuildingModals(props: Props) {
                     if (result.roomNumberType === RoomNumberTypes.Other) {
                         const floors = new Map<string, Floor>(Array.from({ length: result.numberOfFloors }, (v, i) => {
                             const floorRef = props.buildingRef.collection('floors').doc();
-                            const roomRef = floorRef.collection('rooms').doc()
-                            return [floorRef.id, {
+                            const roomRef = floorRef.collection('rooms').doc();
+                            const newRoom: Room = {
+                                id: roomRef.id,
+                                orderNumber: 1,
+                                roomNumber: '',
+                                statusRef: props.defaultStatusRef
+                            };
+                            const newRooms = new Map<string, Room>([[roomRef.id, newRoom]]);
+                            const newFloor: Floor = {
+                                id: floorRef.id,
                                 number: i + 1,
                                 rooms: new Map<string, Room>([[roomRef.id, {
+                                    id: roomRef.id,
                                     orderNumber: 1,
                                     roomNumber: '',
                                     statusRef: props.defaultStatusRef
                                 } as Room]])
-                            } as Floor];
+                            };
+                            return [floorRef.id, newFloor];
                         }));
                         const building: Building = {
+                            id: props.buildingRef.id,
                             statusRef: props.defaultBuildingStatusRef,
                             name: result.name,
                             latLng: new firebase.firestore.GeoPoint(props.latLng.lat(), props.latLng.lng()),
@@ -88,18 +99,23 @@ export default function AddBuildingModals(props: Props) {
                             })
                             .map(j => {
                                 const roomRef = floorRef.collection('rooms').doc();
-                                return [roomRef.id, {
+                                const newRoom = {
+                                    id: roomRef.id,
                                     orderNumber: j,
                                     roomNumber: `${x.floorNumber}${j.toString().padStart(2, '0')}`,
                                     statusRef: props.defaultStatusRef
-                                } as Room];
+                                };
+                                return [roomRef.id, newRoom];
                             }));
-                        return [floorRef.id, {
+                        const newFloor: Floor = {
+                            id: floorRef.id,
                             number: x.floorNumber,
                             rooms: rooms
-                        }];
+                        };
+                        return [floorRef.id, newFloor];
                     }));
                     const building: Building = {
+                        id: props.buildingRef.id,
                         statusRef: props.defaultBuildingStatusRef,
                         name: basicInfo.name,
                         latLng: new firebase.firestore.GeoPoint(props.latLng.lat(), props.latLng.lng()),

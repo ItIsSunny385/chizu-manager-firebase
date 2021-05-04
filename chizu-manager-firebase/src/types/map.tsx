@@ -29,25 +29,33 @@ export interface MapBasicInfoWithBorderCoords extends MapBasicInfo {
     borderCoords: firebase.firestore.GeoPoint[]
 }
 
-export interface Building {
-    id?: string,
+export interface BasicBuilding {
     name: string,
     latLng: firebase.firestore.GeoPoint,
-    floors: Map<string, Floor>,
     statusRef: firebase.firestore.DocumentReference
 }
 
-export interface Floor {
-    id?: string,
+export interface Building extends BasicBuilding {
+    id: string,
+    floors: Map<string, Floor>,
+}
+
+export interface BasicFloor {
     number: number,
+}
+export interface Floor extends BasicFloor {
+    id: string,
     rooms: Map<string, Room>
 }
 
-export interface Room {
-    id?: string,
+export interface BasicRoom {
     orderNumber: number,
     roomNumber: string,
     statusRef: firebase.firestore.DocumentReference
+}
+
+export interface Room extends BasicRoom {
+    id: string,
 }
 
 export interface House {
@@ -56,12 +64,15 @@ export interface House {
     statusRef: firebase.firestore.DocumentReference
 }
 
-export interface MapData {
-    id?: string,
+export interface MapBasicData {
     orderNumber: number,
     name: string,
     status: string,
     borderCoords: firebase.firestore.GeoPoint[],
+}
+
+export interface MapData extends MapBasicData {
+    id?: string,
     buildings: Map<string, Building>,
     houses: Map<string, House>,
 }

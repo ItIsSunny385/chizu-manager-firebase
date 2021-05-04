@@ -5,7 +5,7 @@ import { InfoWindow } from '@react-google-maps/api';
 import { Building as BuildingIcon, House as HouseIcon } from 'react-bootstrap-icons';
 import { Nav, NavItem, NavLink } from 'reactstrap';
 import AddBuildingModals from './AddBuildingModals';
-import { Building, House } from '../types/map';
+import { BasicBuilding, BasicFloor, BasicRoom, Building, House } from '../types/map';
 
 const db = firebase.firestore();
 
@@ -67,20 +67,25 @@ export default function SelectBuildingTypeWindow(props: Props) {
                             }}
                             finish={(result: Building) => {
                                 const batch = firebase.firestore().batch();
-                                const newBuilding = { ...result } as any;
-                                delete newBuilding.id;
-                                delete newBuilding.floors;
+                                const newBuilding: BasicBuilding = {
+                                    name: result.name,
+                                    latLng: result.latLng,
+                                    statusRef: result.statusRef,
+                                };
                                 batch.set(buildingRef, newBuilding);
                                 result.floors.forEach((x) => {
                                     const floorRef = buildingRef.collection('floors').doc(x.id);
-                                    const newFloor = { ...x } as any;
-                                    delete newFloor.id;
-                                    delete newFloor.rooms;
+                                    const newFloor: BasicFloor = {
+                                        number: x.number,
+                                    };
                                     batch.set(floorRef, newFloor);
                                     x.rooms.forEach((y) => {
                                         const roomRef = floorRef.collection('rooms').doc(y.id);
-                                        const newRoom = { ...y } as any;
-                                        delete newRoom.id;
+                                        const newRoom: BasicRoom = {
+                                            orderNumber: y.orderNumber,
+                                            roomNumber: y.roomNumber,
+                                            statusRef: y.statusRef,
+                                        };
                                         batch.set(roomRef, newRoom);
                                     });
                                 });

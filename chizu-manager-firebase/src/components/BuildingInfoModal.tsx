@@ -32,10 +32,11 @@ export default function BuildingInfoModal(props: Props) {
         const floorRef = props.buildingRef.collection('floors').doc();
         const roomRef = floorRef.collection('rooms').doc();
         newData.floors.set(floorRef.id, {
+            id: floorRef.id,
             number: newData.floors.size + 1,
             rooms: new Map<string, Room>([[
                 roomRef.id,
-                { orderNumber: 1, roomNumber: '', statusRef: props.defaultStatusRef }
+                { id: roomRef.id, orderNumber: 1, roomNumber: '', statusRef: props.defaultStatusRef }
             ]]),
         });
         setData(newData);
