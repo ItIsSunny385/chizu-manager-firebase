@@ -9,11 +9,10 @@ import BuildingInfoModal from './BuildingInfoModal';
 import { ChatTextFill, PencilFill, TrashFill } from 'react-bootstrap-icons';
 
 interface Props {
+    docRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
     data: Building,
     statusMap: Map<string, Status>,
     buildingStatusMap: Map<string, Status>,
-    set: (newData: Building) => void,
-    delete: () => void,
 }
 
 const db = firebase.firestore();
@@ -40,9 +39,7 @@ export default function BuildingMarker(props: Props) {
         }}
         draggable={true}
         onDragEnd={(e) => {
-            const newData = { ...props.data };
-            newData.latLng = new firebase.firestore.GeoPoint(e.latLng.lat(), e.latLng.lng());
-            props.set(newData);
+            props.docRef.update({ latLng: new firebase.firestore.GeoPoint(e.latLng.lat(), e.latLng.lng()) })
         }}
         onClick={(e) => {
             setOpenWindow(!openWindow);
@@ -63,7 +60,7 @@ export default function BuildingMarker(props: Props) {
                         </Button>
                         <Button
                             outline
-                            onClick={(e) => { props.delete(); }}>
+                            onClick={(e) => { props.docRef.delete(); }}>
                             <TrashFill />
                         </Button>
                     </ButtonGroup>
@@ -73,9 +70,7 @@ export default function BuildingMarker(props: Props) {
                             type="select"
                             defaultValue={props.data.statusRef.id}
                             onChange={(e) => {
-                                const newData = { ...props.data };
-                                newData.statusRef = db.collection('building_statuses').doc(e.target.value);
-                                props.set(newData);
+                                props.docRef.update({ statusRef: db.collection('building_statuses').doc(e.target.value) });
                             }}
                         >
                             {
@@ -90,6 +85,7 @@ export default function BuildingMarker(props: Props) {
                     <div className="mt-1">
                         {
                             Array.from(props.data.floors.values()).map((x, i) => {
+                                const floorRef = props.docRef.collection('floors').doc(x.id);
                                 return <details key={i} className="mt-1">
                                     <summary>{x.number}階（{x.rooms.size}部屋）</summary>
                                     {
@@ -99,8 +95,10 @@ export default function BuildingMarker(props: Props) {
                                             </InputGroupAddon>
                                             <Input
                                                 type="select"
-                                                defaultValue={y.statusRef.id}
+                                                value={y.statusRef.id}
                                                 onChange={(e) => {
+                                                    const roomRef = floorRef.collection('rooms').doc(y.id);
+                                                    roomRef.update({ statusRef: db.collection('statuses').doc(e.target.value) })
                                                 }}
                                             >
                                                 {

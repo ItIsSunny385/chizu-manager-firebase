@@ -3,10 +3,10 @@ import firebase from 'firebase';
 import { Fragment } from "react";
 import { Polyline } from "@react-google-maps/api";
 import { Building, House } from '../types/map';
-import BuildingMarkers from './BuildingMarkers';
 import { Status } from "../types/model";
 import HouseMarker from './HouseMarker';
 import SelectBuildingTypeWindow from './SelectBuildingTypeWindow';
+import BuildingMarker from './BuildingMarker';
 
 interface Props {
     mapRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
@@ -44,13 +44,17 @@ export default function MarkerModeMapContents(props: Props) {
             })
         }
         {/* 集合住宅 */}
-        <BuildingMarkers
-            data={props.buildings}
-            statusMap={props.statusMap}
-            buildingStatusMap={props.buildingStatusMap}
-            setData={(buildings: Array<Building>) => {
-            }}
-        />
+        {
+            props.buildings.map((x, i) => {
+                return <BuildingMarker
+                    docRef={props.mapRef.collection('buildings').doc(x.id)}
+                    key={i}
+                    data={x}
+                    statusMap={props.statusMap}
+                    buildingStatusMap={props.buildingStatusMap}
+                />;
+            })
+        }
         {/* 建物種別選択ウィンドウ */}
         {
             props.newLatLng

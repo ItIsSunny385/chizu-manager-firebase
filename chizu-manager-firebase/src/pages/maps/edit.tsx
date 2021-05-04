@@ -1,15 +1,13 @@
 import '../../utils/InitializeFirebase';
 import firebase from 'firebase';
-import React, { useState, useEffect, Fragment, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useRouter } from 'next/router';
 import MapApp from '../../components/MapApp';
 import { Badge, Button, ButtonGroup } from 'reactstrap';
 import { GearFill, GeoAltFill, HeptagonFill, InfoCircleFill, PeopleFill } from 'react-bootstrap-icons';
 import { Status } from '../../types/model';
-import { Polygon, Polyline } from '@react-google-maps/api';
-import { Building, Floor, House, MapData, Room } from '../../types/map';
-import BuildingMarkers from '../../components/BuildingMarkers';
+import { MapData } from '../../types/map';
 import BorderModeMapContents from '../../components/BorderModeMapContents';
 import MarkerModeMapContents from '../../components/MarkerModeMapContents';
 import { getStatusMap } from '../../utils/statusUtil';
@@ -94,13 +92,6 @@ export default function Edit(props: Props) {
             ReactDOM.render(rightTopButtons, rightTopButtonDiv);
             map.controls[google.maps.ControlPosition.RIGHT_TOP].push(rightTopButtonDiv);
             const leftBottomButtons = <div className="ml-2 mb-2">
-                <Button
-                    onClick={(e) => {
-                        e.preventDefault(); document.getElementById('back')!.click();
-                    }}
-                >
-                    戻る
-                </Button>
                 <Button
                     className="ml-1"
                     onClick={(e) => {
@@ -222,10 +213,6 @@ export default function Edit(props: Props) {
             </MapApp>
             {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
             <div style={{ display: 'none' }}>
-                <Button id="back" onClick={(e) => {
-                    e.preventDefault();
-                    router.push('/maps');
-                }} />
                 <Button id="finish" onClick={(e) => {
                     e.preventDefault();
                     router.push('/maps');

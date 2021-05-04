@@ -12,7 +12,6 @@ import { InfoCircleFill } from 'react-bootstrap-icons';
 import { MessageModalProps } from '../../components/MessageModal';
 import SelectBuildingTypeWindow from '../../components/SelectBuildingTypeWindow';
 import MapNameBadge from '../../components/MapNameBadge';
-import BuildingMarkers from '../../components/BuildingMarkers';
 import { Status } from '../../types/model';
 
 interface Props {
@@ -263,12 +262,16 @@ export default function AddOthers(props: Props) {
                     */
                 }
                 {/* 集合住宅 */}
-                <BuildingMarkers
-                    data={buildings}
-                    statusMap={statusMap}
-                    buildingStatusMap={buildingStatusMap}
-                    setData={setBuildings}
-                />
+                {
+                    /*
+                    <BuildingMarkers
+                        data={buildings}
+                        statusMap={statusMap}
+                        buildingStatusMap={buildingStatusMap}
+                        setData={setBuildings}
+                    />
+                    */
+                }
             </MapApp>
             {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
             <div style={{ display: 'none' }}>
