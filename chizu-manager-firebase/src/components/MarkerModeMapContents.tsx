@@ -35,7 +35,6 @@ export default function MarkerModeMapContents(props: Props) {
         {/* 家 */}
         {
             props.houses.map((x, i) => {
-                console.log(props.mapRef.collection('houses').doc(x.id));
                 return <HouseMarker
                     docRef={props.mapRef.collection('houses').doc(x.id)}
                     key={i}

@@ -72,7 +72,6 @@ export default function BorderModeMapContents(props: Props) {
 
     useEffect(() => {
         if (props.borderCoords.length > 0) {
-            console.log(corners);
             props.mapRef.update({
                 borderCoords: corners.map(x => new firebase.firestore.GeoPoint(x.lat(), x.lng()))
             });
