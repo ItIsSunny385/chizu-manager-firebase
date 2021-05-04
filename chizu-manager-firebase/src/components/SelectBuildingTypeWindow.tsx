@@ -29,13 +29,13 @@ export default function SelectBuildingTypeWindow(props: Props) {
                     <Nav className="h4 mb-0">
                         <NavItem className="ml-3">
                             <NavLink
-                                onClick={async (e) => {
+                                onClick={(e) => {
                                     const newHouse: House = {
                                         latLng: new firebase.firestore.GeoPoint(props.latLng.lat(), props.latLng.lng()),
                                         statusRef: props.defaultStatusRef,
                                     };
                                     const docRef = props.mapRef.collection('houses').doc();
-                                    await docRef.set(newHouse);
+                                    docRef.set(newHouse);
                                     props.close();
                                 }}
                             >
