@@ -8,7 +8,6 @@ import { Badge, Button, ButtonGroup } from 'reactstrap';
 import { GearFill, GeoAltFill, HeptagonFill, InfoCircleFill, PeopleFill } from 'react-bootstrap-icons';
 import { Status } from '../../types/model';
 import { Polygon, Polyline } from '@react-google-maps/api';
-import HouseMarkers from '../../components/HouseMarkers';
 import { Building, Floor, House, MapData, Room } from '../../types/map';
 import BuildingMarkers from '../../components/BuildingMarkers';
 import BorderModeMapContents from '../../components/BorderModeMapContents';
