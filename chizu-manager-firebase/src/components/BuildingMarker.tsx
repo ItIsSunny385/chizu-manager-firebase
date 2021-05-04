@@ -38,8 +38,8 @@ export default function BuildingMarker(props: Props) {
             fontWeight: 'bold',
         }}
         draggable={true}
-        onDragEnd={(e) => {
-            props.docRef.update({ latLng: new firebase.firestore.GeoPoint(e.latLng.lat(), e.latLng.lng()) })
+        onDragEnd={async (e) => {
+            await props.docRef.update({ latLng: new firebase.firestore.GeoPoint(e.latLng.lat(), e.latLng.lng()) })
         }}
         onClick={(e) => {
             setOpenWindow(!openWindow);
@@ -69,8 +69,8 @@ export default function BuildingMarker(props: Props) {
                         <Input
                             type="select"
                             defaultValue={props.data.statusRef.id}
-                            onChange={(e) => {
-                                props.docRef.update({ statusRef: db.collection('building_statuses').doc(e.target.value) });
+                            onChange={async (e) => {
+                                await props.docRef.update({ statusRef: db.collection('building_statuses').doc(e.target.value) });
                             }}
                         >
                             {
@@ -96,9 +96,9 @@ export default function BuildingMarker(props: Props) {
                                             <Input
                                                 type="select"
                                                 value={y.statusRef.id}
-                                                onChange={(e) => {
+                                                onChange={async (e) => {
                                                     const roomRef = floorRef.collection('rooms').doc(y.id);
-                                                    roomRef.update({ statusRef: db.collection('statuses').doc(e.target.value) })
+                                                    await roomRef.update({ statusRef: db.collection('statuses').doc(e.target.value) })
                                                 }}
                                             >
                                                 {
