@@ -337,6 +337,8 @@ export default function Edit(props: Props) {
                         buildingStatusMap={buildingStatusMap}
                         houses={Array.from(mapData.houses.values())}
                         buildings={Array.from(mapData.buildings.values())}
+                        newLatLng={newLatLng}
+                        resetNewLatLng={() => { setNewLatLng(undefined); }}
                     />
                 }
             </MapApp>

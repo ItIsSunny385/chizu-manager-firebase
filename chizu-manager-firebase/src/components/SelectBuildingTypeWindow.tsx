@@ -15,8 +15,6 @@ interface Props {
     defaultStatusRef: firebase.firestore.DocumentReference,
     defaultBuildingStatusRef: firebase.firestore.DocumentReference,
     close: () => void,
-    addHouse: (result: House) => void,
-    addBuilding: (result: Building) => void,
 }
 
 export default function SelectBuildingTypeWindow(props: Props) {
@@ -27,14 +25,16 @@ export default function SelectBuildingTypeWindow(props: Props) {
     };
     const finishAddBuildingModals = (result: Building) => {
         setDisplayAddBuildingModals(false);
-        props.addBuilding(result);
+        /* 要修正 */
     };
-    const onClickHouseIcon = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const onClickHouseIcon = async (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         const newHouse: House = {
             latLng: new firebase.firestore.GeoPoint(props.latLng.lat(), props.latLng.lng()),
             statusRef: props.defaultStatusRef,
         };
-        props.addHouse(newHouse);
+        const docRef = props.mapRef.collection('houses').doc();
+        await docRef.set(newHouse);
+        props.close();
     };
     const onClickBuildingIcon = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         setDisplayAddBuildingModals(true);
