@@ -72,7 +72,6 @@ export default function Index() {
                             name: `Map${maps.length + 1}`,
                             status: MapStatus.Private,
                             borderCoords: [],
-                            badgeLatLng: null,
                         });
                         router.push(`/maps/edit?id=${newMap.id}`);
                     }}

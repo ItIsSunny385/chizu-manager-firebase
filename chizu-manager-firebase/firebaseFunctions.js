@@ -30,3 +30,19 @@ exports.onCreateDeleteAuthUser = functions.firestore
     .onCreate(async (snapshot, { params }) => {
         admin.auth().deleteUser(snapshot.get('uid'))
     })
+
+/* 集合住宅の削除用関数 */
+exports.onDeleteBuilding = functions.firestore
+    .document('maps/{mapId}/buildings/{buildingId}')
+    .onDelete(async (buildingSnap, context) => {
+        const batch = admin.firestore().batch()
+        const floorsSnap = await buildingSnap.ref.collection('floors').get()
+        await Promise.all(floorsSnap.docs.map(async floorSnap => {
+            const roomsSnap = await floorSnap.ref.collection('rooms').get()
+            roomsSnap.docs.map(roomSnap => {
+                batch.delete(roomSnap.ref)
+            })
+            batch.delete(floorSnap.ref)
+        }))
+        await batch.commit();
+    })
