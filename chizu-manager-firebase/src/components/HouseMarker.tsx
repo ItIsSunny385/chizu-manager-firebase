@@ -36,9 +36,7 @@ export default function HouseMarker(props: Props) {
         }}
         draggable={true}
         onDragEnd={async (e) => {
-            const newData = { ...props.data };
-            newData.latLng = new firebase.firestore.GeoPoint(e.latLng.lat(), e.latLng.lng());
-            await props.docRef.update(newData);
+            await props.docRef.update({ latLng: new firebase.firestore.GeoPoint(e.latLng.lat(), e.latLng.lng()) });
         }}
         onClick={(e) => {
             setOpenWindow(!openWindow);
@@ -54,9 +52,7 @@ export default function HouseMarker(props: Props) {
                         type="select"
                         value={statusId}
                         onChange={async (e) => {
-                            const newData = { ...props.data };
-                            newData.statusRef = db.collection('statuses').doc(e.target.value);
-                            await props.docRef.update(newData);
+                            await props.docRef.update({ statusRef: db.collection('statuses').doc(e.target.value) });
                         }}
                     >
                         {
