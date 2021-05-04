@@ -130,7 +130,7 @@ export function listeningMapInfoWithChildren(
                             statusRef: changeB.doc.data().statusRef,
                             floors: new Map<string, Floor>(),
                         } as Building);
-                        changeB.doc.ref.collection('floors').onSnapshot((floorsSnap) => {
+                        changeB.doc.ref.collection('floors').orderBy('number', 'asc').onSnapshot((floorsSnap) => {
                             if (!mapDataRef.current) {
                                 return;
                             }
@@ -146,7 +146,7 @@ export function listeningMapInfoWithChildren(
                                         number: changeF.doc.data().number,
                                         rooms: new Map<string, Room>(),
                                     });
-                                    changeF.doc.ref.collection('rooms').onSnapshot((roomsSnap) => {
+                                    changeF.doc.ref.collection('rooms').orderBy('orderNumber', 'asc').onSnapshot((roomsSnap) => {
                                         if (!mapDataRef.current) {
                                             return;
                                         }

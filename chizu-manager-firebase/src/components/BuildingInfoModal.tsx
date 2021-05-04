@@ -65,18 +65,21 @@ export default function BuildingInfoModal(props: Props) {
         </FormGroup>
         {
             Array.from(data.floors.values()).map((floor, i) => {
+                const floorRef = props.buildingRef.collection('floors').doc(floor.id);
+                const roomsRef = floorRef.collection('rooms');
                 const onClickAddRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                    /*
                     const newData = { ...data };
-                    const nextOrderNumber = newData.floors[i].rooms.length ?
-                        Math.max(...newData.floors[i].rooms.map(x => x.orderNumber)) + 1 : 1;
-                    newData.floors[i].rooms.push({
+                    const nextOrderNumber = floor.rooms.size > 0
+                        ? Math.max(...Array.from(floor.rooms.values()).map(x => x.orderNumber)) + 1 : 1;
+                    const roomRef = roomsRef.doc();
+                    const newRoom: Room = {
+                        id: roomRef.id,
                         orderNumber: nextOrderNumber,
                         roomNumber: '',
                         statusRef: props.defaultStatusRef
-                    });
+                    };
+                    newData.floors.get(floor.id)!.rooms.set(roomRef.id, newRoom);
                     setData(newData);
-                    */
                 };
                 return <details key={floor.number} className="mt-1">
                     <summary>{floor.number}階</summary>
@@ -84,18 +87,14 @@ export default function BuildingInfoModal(props: Props) {
                         {
                             Array.from(floor.rooms.values()).map((room, j) => {
                                 const onChangeRoom = (e: React.ChangeEvent<HTMLInputElement>) => {
-                                    /*
                                     const newData = { ...data };
-                                    newData.floors[i].rooms[j].roomNumber = e.target.value;
+                                    newData.floors.get(floor.id)!.rooms.get(room.id)!.roomNumber = e.target.value;
                                     setData(newData);
-                                    */
                                 };
                                 const onClickDeleteRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                                    /*
                                     const newData = { ...data };
-                                    newData.floors[i].rooms.splice(j, 1);
+                                    newData.floors.get(floor.id)!.rooms.delete(room.id);
                                     setData(newData);
-                                    */
                                 };
                                 return <InputGroup key={j} className="mt-1">
                                     <Input defaultValue={room.roomNumber} onChange={onChangeRoom} />
