@@ -18,27 +18,8 @@ interface Props {
 }
 
 export default function SelectBuildingTypeWindow(props: Props) {
-    const [displayAddBuildingModals, setDisplayAddBuildingModals] = useState(false);
-    const toggleAddBuildingModals = () => {
-        setDisplayAddBuildingModals(false);
-        props.close();
-    };
-    const finishAddBuildingModals = (result: Building) => {
-        setDisplayAddBuildingModals(false);
-        /* 要修正 */
-    };
-    const onClickHouseIcon = async (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-        const newHouse: House = {
-            latLng: new firebase.firestore.GeoPoint(props.latLng.lat(), props.latLng.lng()),
-            statusRef: props.defaultStatusRef,
-        };
-        const docRef = props.mapRef.collection('houses').doc();
-        await docRef.set(newHouse);
-        props.close();
-    };
-    const onClickBuildingIcon = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-        setDisplayAddBuildingModals(true);
-    };
+    const [buildingRef, setBuildingRef] = useState(undefined as firebase.firestore.DocumentReference<firebase.firestore.DocumentData> | undefined);
+
     return <InfoWindow position={props.latLng} onCloseClick={props.close}>
         {
             props.defaultStatusRef && props.defaultBuildingStatusRef
@@ -47,23 +28,66 @@ export default function SelectBuildingTypeWindow(props: Props) {
                     <div>どちらを追加しますか？</div>
                     <Nav className="h4 mb-0">
                         <NavItem className="ml-3">
-                            <NavLink onClick={onClickHouseIcon}><HouseIcon /></NavLink>
+                            <NavLink
+                                onClick={async (e) => {
+                                    const newHouse: House = {
+                                        latLng: new firebase.firestore.GeoPoint(props.latLng.lat(), props.latLng.lng()),
+                                        statusRef: props.defaultStatusRef,
+                                    };
+                                    const docRef = props.mapRef.collection('houses').doc();
+                                    await docRef.set(newHouse);
+                                    props.close();
+                                }}
+                            >
+                                <HouseIcon />
+                            </NavLink>
                         </NavItem>
                         <NavItem>
-                            <NavLink onClick={onClickBuildingIcon}><BuildingIcon /></NavLink>
+                            <NavLink
+                                onClick={(e) => {
+                                    setBuildingRef(props.mapRef.collection('buildings').doc());
+                                }}
+                            >
+                                <BuildingIcon />
+                            </NavLink>
                         </NavItem>
                     </Nav>
                     {/* 建物追加モーダル表示 */}
                     {
-                        displayAddBuildingModals
+                        buildingRef
                         &&
                         <AddBuildingModals
-                            buildingRef={props.mapRef.collection('buildings').doc()}
+                            buildingRef={buildingRef}
                             latLng={props.latLng}
                             defaultStatusRef={props.defaultStatusRef}
                             defaultBuildingStatusRef={props.defaultBuildingStatusRef}
-                            toggle={toggleAddBuildingModals}
-                            finish={finishAddBuildingModals}
+                            toggle={() => {
+                                setBuildingRef(undefined);
+                                props.close();
+                            }}
+                            finish={(result: Building) => {
+                                const batch = firebase.firestore().batch();
+                                const newBuilding = { ...result } as any;
+                                delete newBuilding.id;
+                                delete newBuilding.floors;
+                                batch.set(buildingRef, newBuilding);
+                                result.floors.forEach((x) => {
+                                    const floorRef = buildingRef.collection('floors').doc(x.id);
+                                    const newFloor = { ...x } as any;
+                                    delete newFloor.id;
+                                    delete newFloor.rooms;
+                                    batch.set(floorRef, newFloor);
+                                    x.rooms.forEach((y) => {
+                                        const roomRef = floorRef.collection('rooms').doc(y.id);
+                                        const newRoom = { ...y } as any;
+                                        delete newRoom.id;
+                                        batch.set(roomRef, newRoom);
+                                    });
+                                });
+                                batch.commit();
+                                setBuildingRef(undefined);
+                                props.close();
+                            }}
                         />
                     }
                 </Fragment>
