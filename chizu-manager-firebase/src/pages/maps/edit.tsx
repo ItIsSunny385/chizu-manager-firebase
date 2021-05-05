@@ -205,6 +205,7 @@ export default function Edit(props: Props) {
     return (
         <React.Fragment>
             <MapApp
+                title={mapData ? mapData.name + ' | 地図編集' : '地図編集'}
                 loading={loading}
                 onLoadMap={setMap}
                 onRightClick={(e) => { setNewLatLng(e.latLng); }}

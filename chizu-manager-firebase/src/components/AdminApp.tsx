@@ -27,7 +27,7 @@ export default function AdminApp(props: Props) {
     }
 
     return (
-        <App loading={props.loading}>
+        <App title={props.pageTitle} loading={props.loading}>
             <Container>
                 <Row>
                     <Col>

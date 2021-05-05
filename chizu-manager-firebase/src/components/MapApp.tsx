@@ -4,6 +4,7 @@ import { GoogleMap, LoadScript } from "@react-google-maps/api";
 import { MessageModalProps } from './MessageModal';
 
 interface Props {
+    title: string;
     loading: boolean;
     children?: any;
     onLoadMap?: (map: google.maps.Map<Element>) => void | Promise<void>;
@@ -31,6 +32,7 @@ export default function MapApp(props: Props) {
 
     return (
         <App
+            title={props.title}
             loading={props.loading}
             containerStyle={appStyle}
             messageModalProps={props.messageModalProps}
