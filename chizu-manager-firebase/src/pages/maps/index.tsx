@@ -20,7 +20,7 @@ export default function Index() {
     const router = useRouter();
 
     useEffect(() => {
-        db.collection('maps').orderBy('orderNumber', 'asc').onSnapshot((snapshot) => {
+        db.collection('maps').orderBy('name', 'asc').onSnapshot((snapshot) => {
             setMaps(getMapDataArrayWithNoChildByQuerySnapshot(snapshot));
             setLoading(false);
         });
@@ -64,16 +64,10 @@ export default function Index() {
             />
             <div className="text-left mb-2 mt-2">
                 <Button
-                    onClick={async (e) => {
+                    onClick={(e) => {
                         e.preventDefault();
-                        const newMap = db.collection('maps').doc();
-                        await newMap.set({
-                            orderNumber: maps.length + 1,
-                            name: `Map${maps.length + 1}`,
-                            status: MapStatus.Private,
-                            borderCoords: [],
-                        } as MapBasicData);
-                        router.push(`/maps/edit?id=${newMap.id}`);
+                        const newMapRef = db.collection('maps').doc();
+                        router.push(`/maps/edit?id=${newMapRef.id}`);
                     }}
                     className="ml-1"
                 >

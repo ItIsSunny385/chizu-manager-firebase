@@ -2,16 +2,17 @@ import firebase from 'firebase';
 import { Building, Floor, House, MapData, Room } from '../types/map';
 
 export function getMapDataArrayWithNoChildByQuerySnapshot(snapshot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>): Array<MapData> {
-    return snapshot.docs.map(x => ({
-        id: x.id,
-        orderNumber: x.data().orderNumber,
-        name: x.data().name,
-        status: x.data().status,
-        borderCoords: x.data().borderCoords,
-        badgeLatLng: x.data().badgeLatLng,
-        buildings: new Map<string, Building>(),
-        houses: new Map<string, House>(),
-    }));
+    return snapshot.docs.map(x => {
+        const mapData: MapData = {
+            id: x.id,
+            name: x.data().name,
+            status: x.data().status,
+            borderCoords: x.data().borderCoords,
+            buildings: new Map<string, Building>(),
+            houses: new Map<string, House>(),
+        }
+        return mapData;
+    });
 }
 
 /*
@@ -68,7 +69,7 @@ export async function getMapDataWithChildrenById(db: firebase.firestore.Firestor
 export function listeningMapInfoWithChildren(
     mapRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
     mapDataRef: React.MutableRefObject<MapData | undefined>,
-    setMapData: (data: MapData | undefined) => void
+    setMapData: (data: MapData | undefined) => void,
 ) {
     mapRef.onSnapshot((mapSnap) => {
         const newData = mapSnap.data();
@@ -77,22 +78,21 @@ export function listeningMapInfoWithChildren(
             return;
         }
         if (mapDataRef.current) {
-            const newMapData = { ...mapDataRef.current } as MapData;
-            newMapData.orderNumber = newData.orderNumber;
+            const newMapData: MapData = { ...mapDataRef.current };
             newMapData.name = newData.name;
             newMapData.status = newData.status;
             newMapData.borderCoords = newData.borderCoords;
             setMapData(newMapData);
         } else {
-            setMapData({
+            const newMapData: MapData = {
                 id: mapSnap.id,
-                orderNumber: newData.orderNumber,
                 name: newData.name,
                 status: newData.status,
                 borderCoords: newData.borderCoords,
                 buildings: new Map<string, Building>(),
                 houses: new Map<string, House>(),
-            } as MapData);
+            };
+            setMapData(newMapData);
             mapRef.collection('houses').onSnapshot((housesSnap) => {
                 if (!mapDataRef.current) {
                     return;
