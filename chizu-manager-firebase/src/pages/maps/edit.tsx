@@ -80,8 +80,15 @@ export default function Edit(props: Props) {
         if (map && !controllerSetted) {
             /* 地図が準備できたら地図上のボタンを配置する */
             const topLeftTitle = <div className="mt-2 ml-1"><h4>
-                <Badge color="light" id="mapName" className="d-none  border border-dark" />
+                {
+                    mapData
+                        ?
+                        <Badge color="light" id="mapName" className="border border-dark">{mapData.name}</Badge>
+                        :
+                        <Badge color="light" id="mapName" className="d-none border border-dark" />
+                }
             </h4></div>;
+
             const topLeftTitleDiv = document.createElement('div');
             ReactDOM.render(topLeftTitle, topLeftTitleDiv);
             map.controls[google.maps.ControlPosition.TOP_LEFT].push(topLeftTitleDiv);
