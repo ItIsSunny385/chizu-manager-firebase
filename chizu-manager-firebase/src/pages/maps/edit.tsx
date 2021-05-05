@@ -13,6 +13,7 @@ import MarkerModeMapContents from '../../components/MarkerModeMapContents';
 import AddMapModal from '../../components/AddMapModal';
 import { getStatusMap } from '../../utils/statusUtil';
 import { listeningMapInfoWithChildren } from '../../utils/mapUtil';
+import MapSettingModal from '../../components/MapSettingModal';
 
 interface Props {
     query: any
@@ -35,6 +36,7 @@ export default function Edit(props: Props) {
     const [mapDataLoading, _setMapDataLoading] = useState(true);
     const [map, setMap] = useState(undefined as google.maps.Map<Element> | undefined);
     const [pageMode, setPageMode] = useState(PageMode.Border);
+    const [prevPageMode, setPrevPageMode] = useState(undefined as PageMode | undefined);
     const [newLatLng, setNewLatLng] = useState(undefined as google.maps.LatLng | undefined);
     const [statusMap, setStatusMap] = useState(new Map<string, Status>());
     const [buildingStatusMap, setBuildingStatusMap] = useState(new Map<string, Status>());
@@ -108,11 +110,17 @@ export default function Edit(props: Props) {
                     <HouseFill className="mb-1" />
                     <span className="d-none d-md-block">建物</span>
                 </Button>
-                <Button id="userButton">
+                <Button
+                    id="userButton"
+                    onClick={(e) => { document.getElementById('user')!.click(); }}
+                >
                     <PeopleFill className="mb-1" />
                     <span className="d-none d-md-block">ユーザ</span>
                 </Button>
-                <Button id="settingButton">
+                <Button
+                    id="settingButton"
+                    onClick={(e) => { document.getElementById('setting')!.click(); }}
+                >
                     <GearFill className="mb-1" />
                     <span className="ml-1 d-none d-md-block">設定</span>
                 </Button>
@@ -134,8 +142,6 @@ export default function Edit(props: Props) {
             ReactDOM.render(leftBottomButtons, leftBottomButtonDiv);
             map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(leftBottomButtonDiv);
 
-            /* 地図上のボタンを配置できたらローディングアニメーションをやめる */
-            setLoading(false);
             setControllerSetted(true);
         }
     }, [map]);
@@ -152,25 +158,24 @@ export default function Edit(props: Props) {
 
     useEffect(() => {
         /* 地図の表示完了とmapDataの取得が完了した場合に動作する */
-        if (map && !mapDataLoading) {
-            if (mapData) {
-                /* 境界線に合わせて地図を移動 */
-                if (mapData.borderCoords.length > 0) {
-                    const minLat = Math.min(...mapData.borderCoords.map(x => x.latitude));
-                    const minLng = Math.min(...mapData.borderCoords.map(x => x.longitude));
-                    const maxLat = Math.max(...mapData.borderCoords.map(x => x.latitude));
-                    const maxLng = Math.max(...mapData.borderCoords.map(x => x.longitude));
-                    map.fitBounds(new google.maps.LatLngBounds(
-                        new google.maps.LatLng(minLat, minLng),
-                        new google.maps.LatLng(maxLat, maxLng)
-                    ));
-                }
-            } else {
-                /* mapDataの初期値をモーダルで指定させる */
-            }
+        if (map && !mapDataLoading && mapData && mapData.borderCoords.length > 0) {
+            const minLat = Math.min(...mapData.borderCoords.map(x => x.latitude));
+            const minLng = Math.min(...mapData.borderCoords.map(x => x.longitude));
+            const maxLat = Math.max(...mapData.borderCoords.map(x => x.latitude));
+            const maxLng = Math.max(...mapData.borderCoords.map(x => x.longitude));
+            map.fitBounds(new google.maps.LatLngBounds(
+                new google.maps.LatLng(minLat, minLng),
+                new google.maps.LatLng(maxLat, maxLng)
+            ));
         }
     }, [map, mapDataLoading]);
 
+    useEffect(() => {
+        if (!mapDataLoading && controllerSetted) {
+            /* データをロードして、地図上のボタンを配置できたらローディングアニメーションをやめる */
+            setLoading(false);
+        }
+    }, [mapDataLoading, controllerSetted]);
 
     useEffect(() => {
         /* ページモードの変更に応じて、地図上ボタンの活性状態を変える */
@@ -214,27 +219,30 @@ export default function Edit(props: Props) {
                     &&
                     <Fragment>
                         {
-                            pageMode === PageMode.Border
-                                ?
-                                <BorderModeMapContents
-                                    mapRef={db.collection('maps').doc(id)}
-                                    borderCoords={mapData.borderCoords.map(x =>
-                                        new google.maps.LatLng({ lat: x.latitude, lng: x.longitude }))
-                                    }
-                                    newLatLng={newLatLng}
-                                    resetNewLatLng={() => { setNewLatLng(undefined); }}
-                                />
-                                :
-                                <MarkerModeMapContents
-                                    mapRef={db.collection('maps').doc(id)}
-                                    borderCoords={mapData.borderCoords.map(x => new google.maps.LatLng({ lat: x.latitude, lng: x.longitude }))}
-                                    statusMap={statusMap}
-                                    buildingStatusMap={buildingStatusMap}
-                                    houses={Array.from(mapData.houses.values())}
-                                    buildings={Array.from(mapData.buildings.values())}
-                                    newLatLng={newLatLng}
-                                    resetNewLatLng={() => { setNewLatLng(undefined); }}
-                                />
+                            (pageMode === PageMode.Border || prevPageMode === PageMode.Border)
+                            &&
+                            <BorderModeMapContents
+                                mapRef={db.collection('maps').doc(id)}
+                                borderCoords={mapData.borderCoords.map(x =>
+                                    new google.maps.LatLng({ lat: x.latitude, lng: x.longitude }))
+                                }
+                                newLatLng={newLatLng}
+                                resetNewLatLng={() => { setNewLatLng(undefined); }}
+                            />
+                        }
+                        {
+                            (pageMode === PageMode.Marker || prevPageMode === PageMode.Marker)
+                            &&
+                            <MarkerModeMapContents
+                                mapRef={db.collection('maps').doc(id)}
+                                borderCoords={mapData.borderCoords.map(x => new google.maps.LatLng({ lat: x.latitude, lng: x.longitude }))}
+                                statusMap={statusMap}
+                                buildingStatusMap={buildingStatusMap}
+                                houses={Array.from(mapData.houses.values())}
+                                buildings={Array.from(mapData.buildings.values())}
+                                newLatLng={newLatLng}
+                                resetNewLatLng={() => { setNewLatLng(undefined); }}
+                            />
                         }
                     </Fragment>
                 }
@@ -257,6 +265,28 @@ export default function Edit(props: Props) {
                     }}
                 />
             }
+            { /* 設定ボタンが押されてSettingモードになったときは設定モーダルを表示する */}
+            {
+                mapData
+                &&
+                pageMode === PageMode.Setting
+                &&
+                <MapSettingModal
+                    name={mapData.name}
+                    using={mapData.using}
+                    updateNameAndUsing={(name, using) => {
+                        db.collection('maps').doc(id).update({
+                            name: name,
+                            using: using
+                        })
+                    }}
+                    reset={() => { }}
+                    toggle={() => {
+                        setPageMode(prevPageMode!);
+                        setPrevPageMode(undefined);
+                    }}
+                />
+            }
             {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
             <div style={{ display: 'none' }}>
                 <Button id="finish" onClick={(e) => {
@@ -266,11 +296,19 @@ export default function Edit(props: Props) {
                 <Button id="showInfoModal" onClick={(e) => { }} />
                 <Button id="border" onClick={(e) => {
                     e.preventDefault();
+                    setPrevPageMode(undefined);
                     setPageMode(PageMode.Border);
                 }} />
                 <Button id="marker" onClick={(e) => {
                     e.preventDefault();
+                    setPrevPageMode(undefined);
                     setPageMode(PageMode.Marker);
+                }} />
+                <Button id="user" />
+                <Button id="setting" onClick={(e) => {
+                    e.preventDefault();
+                    setPrevPageMode(pageMode);
+                    setPageMode(PageMode.Setting);
                 }} />
             </div>
         </React.Fragment >

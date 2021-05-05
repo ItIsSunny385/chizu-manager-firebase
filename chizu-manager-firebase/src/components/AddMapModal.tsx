@@ -33,25 +33,23 @@ export default function AddMapModal(props: Props) {
     };
 
     return <MessageModal {...messageModalProps}>
-        <Fragment>
-            <Form>
-                <FormGroup>
-                    <Label for="name">名前</Label>
-                    <Input id="name" type="text"
-                        defaultValue={name}
-                        className={displayNameError ? 'is-invalid' : ''}
-                        onChange={(e) => {
-                            setName(e.target.value);
-                        }}
-                    />
-                    {
-                        displayNameError
-                        &&
-                        <FormFeedback>{displayNameError}</FormFeedback>
-                    }
-                    <FormText>名前は必須です。8文字以内で入力してください。</FormText>
-                </FormGroup>
-            </Form>
-        </Fragment>
-    </MessageModal>;
+        <Form>
+            <FormGroup>
+                <Label for="name">名前</Label>
+                <Input id="name" type="text"
+                    defaultValue={name}
+                    className={displayNameError ? 'is-invalid' : ''}
+                    onChange={(e) => {
+                        setName(e.target.value);
+                    }}
+                />
+                {
+                    displayNameError
+                    &&
+                    <FormFeedback>{displayNameError}</FormFeedback>
+                }
+                <FormText>名前は必須です。8文字以内で入力してください。</FormText>
+            </FormGroup>
+        </Form>
+    </MessageModal >;
 }
