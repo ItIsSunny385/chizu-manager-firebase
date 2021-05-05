@@ -82,19 +82,30 @@ export default function Edit(props: Props) {
     useEffect(() => {
         if (map && !controllerSetted) {
             /* 地図が準備できたら地図上のボタンを配置する */
-            const topLeftTitle = <div className="mt-2 ml-1"><h4>
+            const topLeftTitle = <div className="mt-2 ml-1 d-block d-md-none"><h4>
                 {
                     mapData
                         ?
-                        <Badge color="light" id="mapName" className="border border-dark">{mapData.name}</Badge>
+                        <Badge color="light" id="mapNameLeft" className="border border-dark">{mapData.name}</Badge>
                         :
-                        <Badge color="light" id="mapName" className="d-none border border-dark" />
+                        <Badge color="light" id="mapNameLeft" className="d-none border border-dark" />
                 }
             </h4></div>;
-
             const topLeftTitleDiv = document.createElement('div');
             ReactDOM.render(topLeftTitle, topLeftTitleDiv);
             map.controls[google.maps.ControlPosition.TOP_LEFT].push(topLeftTitleDiv);
+            const topCenterTitle = <div className="mt-2 d-none d-md-block"><h4>
+                {
+                    mapData
+                        ?
+                        <Badge color="light" id="mapNameCenter" className="border border-dark">{mapData.name}</Badge>
+                        :
+                        <Badge color="light" id="mapNameCenter" className="d-none border border-dark" />
+                }
+            </h4></div>;
+            const topCenterTitleDiv = document.createElement('div');
+            ReactDOM.render(topCenterTitle, topCenterTitleDiv);
+            map.controls[google.maps.ControlPosition.TOP_CENTER].push(topCenterTitleDiv);
             const rightTopButtons = <ButtonGroup className="mt-1 mr-1">
                 <Button
                     id="borderButton"
@@ -149,10 +160,15 @@ export default function Edit(props: Props) {
 
     useEffect(() => {
         if (mapData && !mapDataLoading && controllerSetted) {
-            const mapNameBadge = document.getElementById('mapName');
-            if (mapNameBadge) {
-                mapNameBadge.innerHTML = mapData.name;
-                mapNameBadge.classList.remove('d-none');
+            const mapNameBadgeLeft = document.getElementById('mapNameLeft');
+            if (mapNameBadgeLeft) {
+                mapNameBadgeLeft.innerHTML = mapData.name;
+                mapNameBadgeLeft.classList.remove('d-none');
+            }
+            const mapNameCenter = document.getElementById('mapNameCenter');
+            if (mapNameCenter) {
+                mapNameCenter.innerHTML = mapData.name;
+                mapNameCenter.classList.remove('d-none');
             }
         }
     }, [mapData, mapDataLoading, controllerSetted]);
