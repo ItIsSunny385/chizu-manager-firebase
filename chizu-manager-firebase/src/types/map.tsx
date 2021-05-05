@@ -1,11 +1,5 @@
 import firebase from 'firebase';
 
-export enum MapStatus {
-    Private = 'Private',
-    Viewable = 'Viewable',
-    Editable = 'Editable',
-}
-
 export enum RoomNumberTypes {
     SerialNumber = 'SerialNumber',
     Except4 = 'Except4',
@@ -56,7 +50,7 @@ export interface House {
 
 export interface MapBasicData {
     name: string,
-    status: string,
+    using: boolean,
     borderCoords: firebase.firestore.GeoPoint[],
 }
 

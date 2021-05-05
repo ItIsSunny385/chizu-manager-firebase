@@ -6,7 +6,7 @@ export function getMapDataArrayWithNoChildByQuerySnapshot(snapshot: firebase.fir
         const mapData: MapData = {
             id: x.id,
             name: x.data().name,
-            status: x.data().status,
+            using: x.data().using,
             borderCoords: x.data().borderCoords,
             buildings: new Map<string, Building>(),
             houses: new Map<string, House>(),
@@ -80,14 +80,14 @@ export function listeningMapInfoWithChildren(
         if (mapDataRef.current) {
             const newMapData: MapData = { ...mapDataRef.current };
             newMapData.name = newData.name;
-            newMapData.status = newData.status;
+            newMapData.using = newData.using;
             newMapData.borderCoords = newData.borderCoords;
             setMapData(newMapData);
         } else {
             const newMapData: MapData = {
                 id: mapSnap.id,
                 name: newData.name,
-                status: newData.status,
+                using: newData.using,
                 borderCoords: newData.borderCoords,
                 buildings: new Map<string, Building>(),
                 houses: new Map<string, House>(),

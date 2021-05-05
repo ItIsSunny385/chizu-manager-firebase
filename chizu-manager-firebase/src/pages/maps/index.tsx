@@ -6,7 +6,7 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
-import { MapStatus, MapData, MapBasicData } from '../../types/map';
+import { MapData } from '../../types/map';
 import { getMapDataArrayWithNoChildByQuerySnapshot } from '../../utils/mapUtil'
 import Link from 'next/link';
 import { Button } from 'reactstrap';
@@ -36,17 +36,11 @@ export default function Index() {
                 bootstrap4
                 keyField='fullId'
                 data={maps.map(x => {
-                    let status = '';
-                    switch (x.status) {
-                        case MapStatus.Private: status = '非公開'; break;
-                        case MapStatus.Viewable: status = '閲覧可'; break;
-                        case MapStatus.Editable: status = '編集可'; break;
-                    }
                     return {
                         fullId: x.id,
                         id: x.id ? x.id.substr(0, 10) + '...' : '',
                         name: x.name,
-                        status: status,
+                        using: x.using ? '使用中' : '不使用',
                         action: <Fragment>
                             <Link href={`/maps/edit?id=${x.id}`}><a className="mr-1">編集</a></Link>
                             <a>削除</a>
@@ -56,7 +50,7 @@ export default function Index() {
                 columns={[
                     { dataField: 'id', text: 'ID', classes: 'd-none d-md-table-cell', headerClasses: 'd-none d-md-table-cell', sort: true },
                     { dataField: 'name', text: '名前', sort: true },
-                    { dataField: 'status', text: 'ステータス', sort: true },
+                    { dataField: 'using', text: '使用状況', sort: true },
                     { dataField: 'action', text: '' }
                 ]}
                 pagination={paginationFactory({})}

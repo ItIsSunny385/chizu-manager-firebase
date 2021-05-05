@@ -7,7 +7,7 @@ import MapApp from '../../components/MapApp';
 import { Badge, Button, ButtonGroup } from 'reactstrap';
 import { GearFill, HeptagonFill, HouseFill, PeopleFill } from 'react-bootstrap-icons';
 import { Status } from '../../types/model';
-import { MapBasicData, MapData, MapStatus } from '../../types/map';
+import { MapBasicData, MapData } from '../../types/map';
 import BorderModeMapContents from '../../components/BorderModeMapContents';
 import MarkerModeMapContents from '../../components/MarkerModeMapContents';
 import AddMapModal from '../../components/AddMapModal';
@@ -250,7 +250,7 @@ export default function Edit(props: Props) {
                     save={(name) => {
                         const newData: MapBasicData = {
                             name: name,
-                            status: MapStatus.Private,
+                            using: false,
                             borderCoords: [],
                         };
                         db.collection('maps').doc(id).set(newData);
