@@ -23,7 +23,7 @@ export default function AddMapModal(props: Props) {
             <Button onClick={() => {
                 if (name.length === 0) {
                     setDisplayNameError('名前は必須です。');
-                } else if (name.length > 16) {
+                } else if (name.length > 8) {
                     setDisplayNameError('名前が長すぎます。');
                 } else {
                     props.save(name);
@@ -49,7 +49,7 @@ export default function AddMapModal(props: Props) {
                         &&
                         <FormFeedback>{displayNameError}</FormFeedback>
                     }
-                    <FormText>名前は必須です。16文字以内で入力してください。</FormText>
+                    <FormText>名前は必須です。8文字以内で入力してください。</FormText>
                 </FormGroup>
             </Form>
         </Fragment>
