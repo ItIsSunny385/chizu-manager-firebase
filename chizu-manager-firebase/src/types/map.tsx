@@ -19,16 +19,6 @@ export interface BuildingBasicInfo {
     roomNumberType: RoomNumberTypes,
 }
 
-export interface MapBasicInfo {
-    name: string;
-    orderNumber: number;
-    status: MapStatus;
-}
-
-export interface MapBasicInfoWithBorderCoords extends MapBasicInfo {
-    borderCoords: firebase.firestore.GeoPoint[]
-}
-
 export interface BasicBuilding {
     name: string,
     latLng: firebase.firestore.GeoPoint,
