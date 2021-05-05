@@ -15,7 +15,7 @@ export default function Login() {
     }, []);
 
     return (
-        <App title={'ログイン'} loading={false}>
+        <App title={'ログイン'} loading={false} pageRole={undefined}>
             <h5>{message}</h5>
         </App>
     );

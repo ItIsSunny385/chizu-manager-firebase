@@ -11,6 +11,7 @@ import { getMapDataArrayWithNoChildByQuerySnapshot } from '../../utils/mapUtil'
 import Link from 'next/link';
 import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
 import { useRouter } from 'next/router';
+import { PageRoles } from '../../types/role';
 
 const db = firebase.firestore();
 
@@ -31,6 +32,7 @@ export default function Index() {
         <AdminApp
             activeTabId={1}
             pageTitle="地図一覧"
+            pageRole={PageRoles.Administrator}
             loading={loading}
         >
             <Form inline className="mb-2">

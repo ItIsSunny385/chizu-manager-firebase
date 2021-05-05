@@ -12,6 +12,7 @@ import '../../utils/InitializeFirebase';
 import { User } from '../../types/model';
 import { Props as FlashMessageProps } from '../../components/FlashMessage';
 import { Colors } from '../../types/bootstrap';
+import { PageRoles } from '../../types/role';
 
 const db = firebase.firestore();
 
@@ -49,6 +50,7 @@ export default function Index() {
         <AdminApp
             activeTabId={2}
             pageTitle="ユーザ一覧"
+            pageRole={PageRoles.Administrator}
             loading={loading}
             flashMessageProps={flashMessageProps}
         >

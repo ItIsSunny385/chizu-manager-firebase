@@ -4,9 +4,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import SpinnerWithBack from './SpinnerWithBack';
 import MessageModal, { MessageModalProps } from './MessageModal';
 import Head from 'next/head';
+import { PageRoles } from '../types/role';
 
 interface Props {
     title: string;
+    pageRole: PageRoles | undefined;
     children: any;
     loading: boolean;
     containerStyle?: React.CSSProperties;
@@ -20,7 +22,7 @@ export default function App(props: Props) {
                 <title>{props.title} | 地図マネージャ</title>
             </Head>
             <main style={props.containerStyle}>
-                <Header />
+                <Header pageRole={props.pageRole} />
                 {props.children}
                 {props.loading && <SpinnerWithBack />}
             </main>

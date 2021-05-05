@@ -2,6 +2,7 @@ import { useState } from 'react';
 import AdminApp from '../../components/AdminApp';
 import StatusList from '../../components/StatusList';
 import { StatusType } from '../../types/model';
+import { PageRoles } from '../../types/role';
 import '../../utils/InitializeFirebase';
 
 export default function Index() {
@@ -11,6 +12,7 @@ export default function Index() {
         <AdminApp
             activeTabId={3}
             pageTitle="設定"
+            pageRole={PageRoles.Administrator}
             loading={statusListLoading}
         >
             <div className="mt-4">

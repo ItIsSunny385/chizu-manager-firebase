@@ -3,8 +3,10 @@ import NavTabs from './NavTabs';
 import FlashMessage, { Props as FlashMessageProps } from './FlashMessage';
 import { Col, Container, Row } from 'reactstrap';
 import { GearFill, MapFill, PeopleFill } from 'react-bootstrap-icons';
+import { PageRoles } from '../types/role';
 
 interface Props {
+    pageRole: PageRoles | undefined;
     children: any,
     activeTabId: number,
     pageTitle: string,
@@ -27,7 +29,7 @@ export default function AdminApp(props: Props) {
     }
 
     return (
-        <App title={props.pageTitle} loading={props.loading}>
+        <App title={props.pageTitle} loading={props.loading} pageRole={props.pageRole}>
             <Container>
                 <Row>
                     <Col>

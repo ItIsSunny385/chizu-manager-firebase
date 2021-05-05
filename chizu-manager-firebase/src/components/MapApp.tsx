@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import App from "./App";
 import { GoogleMap, LoadScript } from "@react-google-maps/api";
 import { MessageModalProps } from './MessageModal';
+import { PageRoles } from '../types/role';
 
 interface Props {
     title: string;
+    pageRole: PageRoles | undefined;
     loading: boolean;
     children?: any;
     onLoadMap?: (map: google.maps.Map<Element>) => void | Promise<void>;
@@ -33,6 +35,7 @@ export default function MapApp(props: Props) {
     return (
         <App
             title={props.title}
+            pageRole={props.pageRole}
             loading={props.loading}
             containerStyle={appStyle}
             messageModalProps={props.messageModalProps}

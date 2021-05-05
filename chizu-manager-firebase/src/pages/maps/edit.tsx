@@ -14,6 +14,7 @@ import AddMapModal from '../../components/AddMapModal';
 import { getStatusMap } from '../../utils/statusUtil';
 import { listeningMapInfoWithChildren } from '../../utils/mapUtil';
 import MapSettingModal from '../../components/MapSettingModal';
+import { PageRoles } from '../../types/role';
 
 interface Props {
     query: any
@@ -206,6 +207,7 @@ export default function Edit(props: Props) {
         <React.Fragment>
             <MapApp
                 title={mapData ? mapData.name + ' | 地図編集' : '地図編集'}
+                pageRole={PageRoles.Administrator}
                 loading={loading}
                 onLoadMap={setMap}
                 onRightClick={(e) => { setNewLatLng(e.latLng); }}
