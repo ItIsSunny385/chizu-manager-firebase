@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom';
 import { useRouter } from 'next/router';
 import MapApp from '../../components/MapApp';
 import { Badge, Button, ButtonGroup } from 'reactstrap';
-import { GearFill, GeoAltFill, HeptagonFill, InfoCircleFill, PeopleFill } from 'react-bootstrap-icons';
+import { GearFill, HeptagonFill, HouseFill, PeopleFill } from 'react-bootstrap-icons';
 import { Status } from '../../types/model';
 import { MapBasicData, MapData, MapStatus } from '../../types/map';
 import BorderModeMapContents from '../../components/BorderModeMapContents';
@@ -79,52 +79,36 @@ export default function Edit(props: Props) {
     useEffect(() => {
         if (map && !controllerSetted) {
             /* 地図が準備できたら地図上のボタンを配置する */
-            const topLeftTitle = <div className="mt-1 ml-1 d-block d-md-none"><h4>
-                <Badge color="dark">地図編集</Badge>
-                <a
-                    className="ml-1"
-                    href="#"
-                    onClick={(e) => {
-                        e.preventDefault(); document.getElementById('showInfoModal')!.click();
-                    }}
-                >
-                    <InfoCircleFill />
-                </a>
+            const topLeftTitle = <div className="mt-2 ml-1"><h4>
+                <Badge color="light" id="mapName" className="d-none  border border-dark" />
             </h4></div>;
             const topLeftTitleDiv = document.createElement('div');
             ReactDOM.render(topLeftTitle, topLeftTitleDiv);
             map.controls[google.maps.ControlPosition.TOP_LEFT].push(topLeftTitleDiv);
-            const topCenterTitle = <div className="mt-1 ml-1 d-none d-md-block"><h4>
-                <Badge color="dark">地図編集</Badge>
-                <a
-                    className="ml-1"
-                    href="#"
-                    onClick={(e) => {
-                        e.preventDefault(); document.getElementById('showInfoModal')!.click();
-                    }}
-                >
-                    <InfoCircleFill />
-                </a>
-            </h4></div>;
-            const topCenterTitleDiv = document.createElement('div');
-            ReactDOM.render(topCenterTitle, topCenterTitleDiv);
-            map.controls[google.maps.ControlPosition.TOP_CENTER].push(topCenterTitleDiv);
             const rightTopButtons = <ButtonGroup className="mt-1 mr-1">
                 <Button
                     id="borderButton"
                     active
                     onClick={(e) => { document.getElementById('border')!.click(); }}
                 >
-                    <HeptagonFill />
+                    <HeptagonFill className="mb-1" />
+                    <span className="d-none d-md-block">境界線</span>
                 </Button>
                 <Button
                     id="markerButton"
                     onClick={(e) => { document.getElementById('marker')!.click(); }}
                 >
-                    <GeoAltFill />
+                    <HouseFill className="mb-1" />
+                    <span className="d-none d-md-block">建物</span>
                 </Button>
-                <Button id="userButton"><PeopleFill /></Button>
-                <Button id="settingButton"><GearFill /></Button>
+                <Button id="userButton">
+                    <PeopleFill className="mb-1" />
+                    <span className="d-none d-md-block">ユーザ</span>
+                </Button>
+                <Button id="settingButton">
+                    <GearFill className="mb-1" />
+                    <span className="ml-1 d-none d-md-block">設定</span>
+                </Button>
             </ButtonGroup>;
             const rightTopButtonDiv = document.createElement('div');
             ReactDOM.render(rightTopButtons, rightTopButtonDiv);
@@ -148,6 +132,16 @@ export default function Edit(props: Props) {
             setControllerSetted(true);
         }
     }, [map]);
+
+    useEffect(() => {
+        if (mapData && !mapDataLoading && controllerSetted) {
+            const mapNameBadge = document.getElementById('mapName');
+            if (mapNameBadge) {
+                mapNameBadge.innerHTML = mapData.name;
+                mapNameBadge.classList.remove('d-none');
+            }
+        }
+    }, [mapData, mapDataLoading, controllerSetted]);
 
     useEffect(() => {
         /* 地図の表示完了とmapDataの取得が完了した場合に動作する */
