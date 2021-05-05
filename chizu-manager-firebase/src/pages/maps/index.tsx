@@ -9,7 +9,7 @@ import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.m
 import { MapData } from '../../types/map';
 import { getMapDataArrayWithNoChildByQuerySnapshot } from '../../utils/mapUtil'
 import Link from 'next/link';
-import { Button } from 'reactstrap';
+import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
 import { useRouter } from 'next/router';
 
 const db = firebase.firestore();
@@ -17,6 +17,7 @@ const db = firebase.firestore();
 export default function Index() {
     const [loading, setLoading] = useState(true);
     const [maps, setMaps] = useState([] as Array<MapData>);
+    const [keyword, setKeyword] = useState('');
     const router = useRouter();
 
     useEffect(() => {
@@ -32,21 +33,28 @@ export default function Index() {
             pageTitle="地図一覧"
             loading={loading}
         >
+            <Form inline className="mb-2">
+                <FormGroup>
+                    <Label className="mr-2">名前検索</Label>
+                    <Input type="text" onChange={(e) => { setKeyword(e.target.value); }} />
+                </FormGroup>
+            </Form>
             <BootstrapTable
                 bootstrap4
                 keyField='fullId'
-                data={maps.map(x => {
-                    return {
-                        fullId: x.id,
-                        id: x.id ? x.id.substr(0, 10) + '...' : '',
-                        name: x.name,
-                        using: x.using ? '使用中' : '不使用',
-                        action: <Fragment>
-                            <Link href={`/maps/edit?id=${x.id}`}><a className="mr-1">編集</a></Link>
-                            <a>削除</a>
-                        </Fragment>
-                    };
-                })}
+                data={maps.filter(x => x.name.includes(keyword))
+                    .map(x => {
+                        return {
+                            fullId: x.id,
+                            id: x.id ? x.id.substr(0, 10) + '...' : '',
+                            name: x.name,
+                            using: x.using ? '使用中' : '不使用',
+                            action: <Fragment>
+                                <Link href={`/maps/edit?id=${x.id}`}><a className="mr-1">編集</a></Link>
+                                <a>削除</a>
+                            </Fragment>
+                        };
+                    })}
                 columns={[
                     { dataField: 'id', text: 'ID', classes: 'd-none d-md-table-cell', headerClasses: 'd-none d-md-table-cell', sort: true },
                     { dataField: 'name', text: '名前', sort: true },
