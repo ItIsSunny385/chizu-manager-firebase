@@ -31,6 +31,22 @@ exports.onCreateDeleteAuthUser = functions.firestore
         admin.auth().deleteUser(snapshot.get('uid'))
     })
 
+/* 地図の削除用関数 */
+exports.onnDeleteMap = functions.firestore
+    .document('maps/{mapId}')
+    .onDelete(async (mapSnap, context) => {
+        const batch = admin.firestore().batch()
+        const buildingsSnap = await mapSnap.ref.collection('buildings').get()
+        buildingsSnap.docs.forEach(buildingSnap => {
+            batch.delete(buildingSnap.ref)
+        })
+        const housesSnap = await mapSnap.ref.collection('houses').get()
+        housesSnap.docs.forEach(houseSnap => {
+            batch.delete(houseSnap.ref)
+        })
+        await batch.commit()
+    })
+
 /* 集合住宅の削除用関数 */
 exports.onDeleteBuilding = functions.firestore
     .document('maps/{mapId}/buildings/{buildingId}')
@@ -40,7 +56,7 @@ exports.onDeleteBuilding = functions.firestore
         floorsSnap.docs.forEach(floorSnap => {
             batch.delete(floorSnap.ref)
         })
-        await batch.commit();
+        await batch.commit()
     })
 
 /* フロアの削除用関数 */

@@ -53,7 +53,10 @@ export default function Index() {
                             using: x.using ? '使用中' : '不使用',
                             action: <Fragment>
                                 <Link href={`/maps/edit?id=${x.id}`}><a className="mr-1">編集</a></Link>
-                                <a>削除</a>
+                                <a href="#" onClick={(e) => {
+                                    e.preventDefault();
+                                    db.collection('maps').doc(x.id).delete();
+                                }}>削除</a>
                             </Fragment>
                         };
                     })}
