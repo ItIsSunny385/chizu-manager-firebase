@@ -17,7 +17,6 @@ import { PageRoles } from '../../types/role';
 const db = firebase.firestore();
 
 export default function Index() {
-    const [initialSetting, setInitialSetting] = useState(true);
     const [loading, setLoading] = useState(true);
     const [userMap, setUserMap] = useState(new Map<string, User>());
     const [displayAddModal, setDisplayAddModal] = useState(false);
@@ -36,15 +35,9 @@ export default function Index() {
                 });
             });
             setUserMap(newUserMap);
+            setLoading(false);
         });
     }, []);
-
-    useEffect(() => {
-        if (initialSetting) {
-            setInitialSetting(false);
-            setLoading(false);
-        }
-    }, [userMap]);
 
     return (
         <AdminApp

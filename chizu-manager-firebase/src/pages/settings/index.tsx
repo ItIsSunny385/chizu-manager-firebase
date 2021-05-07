@@ -7,19 +7,20 @@ import '../../utils/InitializeFirebase';
 
 export default function Index() {
     const [statusListLoading, setStatusListLoading] = useState(true);
+    const [buildingStatusListLoading, setBuildingStatusListLoading] = useState(true);
 
     return (
         <AdminApp
             activeTabId={3}
             pageTitle="設定"
             pageRole={PageRoles.Administrator}
-            loading={statusListLoading}
+            loading={statusListLoading || buildingStatusListLoading}
         >
             <div className="mt-4">
-                <StatusList setLoading={setStatusListLoading} type={StatusType.HouseOrRoom} />
+                <StatusList loaded={() => { setStatusListLoading(false); }} type={StatusType.HouseOrRoom} />
             </div>
             <div className="mt-5">
-                <StatusList setLoading={setStatusListLoading} type={StatusType.Building} />
+                <StatusList loaded={() => { setBuildingStatusListLoading(false); }} type={StatusType.Building} />
             </div>
         </AdminApp>
     );

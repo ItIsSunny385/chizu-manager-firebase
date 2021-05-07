@@ -13,7 +13,7 @@ const db = firebase.firestore();
 
 interface Props {
     type: StatusType,
-    setLoading: Dispatch<SetStateAction<boolean>>
+    loaded: () => void,
 }
 
 export default function StatusList(props: Props) {
@@ -27,7 +27,7 @@ export default function StatusList(props: Props) {
     useEffect(() => {
         db.collection(collectionName).orderBy('number', 'asc').onSnapshot((snapshot) => {
             setStatusMap(getStatusMapFromQuerySnapshot(snapshot));
-            props.setLoading(false);
+            props.loaded();
         });
     }, []);
 

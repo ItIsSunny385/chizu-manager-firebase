@@ -75,6 +75,7 @@ export default function Index() {
                         e.preventDefault();
                         const newMapRef = db.collection('maps').doc();
                         router.push(`/maps/edit?id=${newMapRef.id}`);
+                        setLoading(true);
                     }}
                     className="ml-1"
                 >
