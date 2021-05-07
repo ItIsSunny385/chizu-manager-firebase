@@ -2,11 +2,12 @@ import firebase from 'firebase';
 import { InfoWindow, Marker } from '@react-google-maps/api';
 import React, { useState } from 'react';
 import { Button, ButtonGroup, Input, InputGroup, InputGroupAddon, InputGroupText } from 'reactstrap';
-import { Building, } from '../types/map';
+import { BasicFloor, BasicRoom, Building, } from '../types/map';
 import { Status } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
 import BuildingInfoModal from './BuildingInfoModal';
 import { ChatTextFill, PencilFill, TrashFill } from 'react-bootstrap-icons';
+import { updateBuilding } from '../utils/buildingUtil';
 
 interface Props {
     docRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
@@ -116,10 +117,10 @@ export default function BuildingMarker(props: Props) {
                         }
                     </div>
                     {
-                        /*
                         displayBuildingInfoModal
                         &&
                         <BuildingInfoModal
+                            buildingRef={props.docRef}
                             title='建物情報編集'
                             data={props.data}
                             defaultStatusRef={defaultStatusRef}
@@ -127,11 +128,11 @@ export default function BuildingMarker(props: Props) {
                                 setDisplayBuildingInfoModal(false);
                             }}
                             finish={(result) => {
-                                props.set(result);
+                                /* 建物情報の更新 */
+                                updateBuilding(props.docRef, props.data, result);
                                 setDisplayBuildingInfoModal(false);
                             }}
                         />
-                        */
                     }
                 </div>
             </InfoWindow>

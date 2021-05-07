@@ -37,12 +37,20 @@ exports.onDeleteBuilding = functions.firestore
     .onDelete(async (buildingSnap, context) => {
         const batch = admin.firestore().batch()
         const floorsSnap = await buildingSnap.ref.collection('floors').get()
-        await Promise.all(floorsSnap.docs.map(async floorSnap => {
-            const roomsSnap = await floorSnap.ref.collection('rooms').get()
-            roomsSnap.docs.map(roomSnap => {
-                batch.delete(roomSnap.ref)
-            })
+        floorsSnap.docs.forEach(floorSnap => {
             batch.delete(floorSnap.ref)
-        }))
+        })
+        await batch.commit();
+    })
+
+/* フロアの削除用関数 */
+exports.onDeleteFloor = functions.firestore
+    .document('maps/{mapId}/buildings/{buildingId}/floors/{floorId}')
+    .onDelete(async (floorSnap, context) => {
+        const batch = admin.firestore().batch()
+        const roomsSnap = await floorSnap.ref.collection('rooms').get()
+        roomsSnap.forEach(roomSnap => {
+            batch.delete(roomSnap.ref)
+        })
         await batch.commit();
     })

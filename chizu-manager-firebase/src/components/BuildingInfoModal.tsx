@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { TrashFill } from 'react-bootstrap-icons';
 import { Button, FormGroup, Input, InputGroup, InputGroupAddon, Label } from 'reactstrap';
 import { Building, Room } from '../types/map';
+import { cloneBuilding } from '../utils/mapUtil';
 import MessageModal from './MessageModal';
 
 interface Props {
@@ -15,20 +16,20 @@ interface Props {
 }
 
 export default function BuildingInfoModal(props: Props) {
-    const [data, setData] = useState(props.data);
+    const [data, setData] = useState(cloneBuilding(props.data));
     const onChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newData = { ...data };
+        const newData = cloneBuilding(data);
         newData.name = e.target.value;
         setData(newData);
     };
     const onClickDeleteFloor = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        const newData = { ...data };
+        const newData = cloneBuilding(data);
         const lastFloorId = Array.from(newData.floors.keys())[newData.floors.size - 1];
         newData.floors.delete(lastFloorId);
         setData(newData);
     };
     const onClickAddFloor = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        const newData = { ...data };
+        const newData = cloneBuilding(data);
         const floorRef = props.buildingRef.collection('floors').doc();
         const roomRef = floorRef.collection('rooms').doc();
         newData.floors.set(floorRef.id, {
@@ -68,7 +69,7 @@ export default function BuildingInfoModal(props: Props) {
                 const floorRef = props.buildingRef.collection('floors').doc(floor.id);
                 const roomsRef = floorRef.collection('rooms');
                 const onClickAddRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                    const newData = { ...data };
+                    const newData = cloneBuilding(data);
                     const nextOrderNumber = floor.rooms.size > 0
                         ? Math.max(...Array.from(floor.rooms.values()).map(x => x.orderNumber)) + 1 : 1;
                     const roomRef = roomsRef.doc();
@@ -87,12 +88,12 @@ export default function BuildingInfoModal(props: Props) {
                         {
                             Array.from(floor.rooms.values()).map((room, j) => {
                                 const onChangeRoom = (e: React.ChangeEvent<HTMLInputElement>) => {
-                                    const newData = { ...data };
+                                    const newData = cloneBuilding(data);
                                     newData.floors.get(floor.id)!.rooms.get(room.id)!.roomNumber = e.target.value;
                                     setData(newData);
                                 };
                                 const onClickDeleteRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                                    const newData = { ...data };
+                                    const newData = cloneBuilding(data);
                                     newData.floors.get(floor.id)!.rooms.delete(room.id);
                                     setData(newData);
                                 };

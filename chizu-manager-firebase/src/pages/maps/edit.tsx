@@ -188,11 +188,11 @@ export default function Edit(props: Props) {
     }, [map, mapDataLoading]);
 
     useEffect(() => {
-        if (!mapDataLoading && controllerSetted) {
+        if (!mapDataLoading && statusMap.size > 0 && buildingStatusMap.size > 0 && controllerSetted) {
             /* データをロードして、地図上のボタンを配置できたらローディングアニメーションをやめる */
             setLoading(false);
         }
-    }, [mapDataLoading, controllerSetted]);
+    }, [mapDataLoading, controllerSetted, statusMap, buildingStatusMap]);
 
     useEffect(() => {
         /* ページモードの変更に応じて、地図上ボタンの活性状態を変える */

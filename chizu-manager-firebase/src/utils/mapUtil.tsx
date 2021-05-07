@@ -78,7 +78,7 @@ export function listeningMapInfoWithChildren(
             return;
         }
         if (mapDataRef.current) {
-            const newMapData: MapData = { ...mapDataRef.current };
+            const newMapData = cloneMapData(mapDataRef.current);
             newMapData.name = newData.name;
             newMapData.using = newData.using;
             newMapData.borderCoords = newData.borderCoords;
@@ -97,7 +97,8 @@ export function listeningMapInfoWithChildren(
                 if (!mapDataRef.current) {
                     return;
                 }
-                const newMapData1 = { ...mapDataRef.current };
+                const newMapData1 = cloneMapData(mapDataRef.current);
+                console.log(newMapData1);
                 for (let changeH of housesSnap.docChanges()) {
                     if (changeH.type === 'added') {
                         newMapData1.houses.set(changeH.doc.id, {
@@ -120,7 +121,7 @@ export function listeningMapInfoWithChildren(
                 if (!mapDataRef.current) {
                     return;
                 }
-                const newMapData1 = { ...mapDataRef.current };
+                const newMapData1 = cloneMapData(mapDataRef.current);
                 for (let changeB of buildingsSnap.docChanges()) {
                     if (changeB.type === 'added') {
                         newMapData1.buildings.set(changeB.doc.id, {
@@ -134,7 +135,7 @@ export function listeningMapInfoWithChildren(
                             if (!mapDataRef.current) {
                                 return;
                             }
-                            const newMapData2 = { ...mapDataRef.current };
+                            const newMapData2 = cloneMapData(mapDataRef.current);
                             const newBuilding1 = newMapData2.buildings.get(changeB.doc.id);
                             if (!newBuilding1) {
                                 return;
@@ -150,7 +151,7 @@ export function listeningMapInfoWithChildren(
                                         if (!mapDataRef.current) {
                                             return;
                                         }
-                                        const newMapData3 = { ...mapDataRef.current };
+                                        const newMapData3 = cloneMapData(mapDataRef.current);
                                         const newBuilding2 = newMapData3.buildings.get(changeB.doc.id);
                                         if (!newBuilding2) {
                                             return;
@@ -203,4 +204,63 @@ export function listeningMapInfoWithChildren(
             });
         }
     });
+}
+
+export function cloneMapData(mapData: MapData): MapData {
+    const newMapData: MapData = {
+        id: mapData.id,
+        name: mapData.name,
+        using: mapData.using,
+        borderCoords: [...mapData.borderCoords],
+        buildings: new Map<string, Building>(
+            Array.from(mapData.buildings.entries()).map(([id, building]) => [id, cloneBuilding(building)])
+        ),
+        houses: new Map<string, House>(
+            Array.from(mapData.houses.entries()).map(([id, house]) => [id, cloneHouse(house)])
+        )
+    };
+    return newMapData;
+}
+
+export function cloneHouse(house: House) {
+    const newHouse: House = {
+        id: house.id,
+        latLng: house.latLng,
+        statusRef: house.statusRef,
+    };
+    return newHouse;
+}
+
+export function cloneBuilding(building: Building) {
+    const newBuilding: Building = {
+        id: building.id,
+        name: building.name,
+        latLng: building.latLng,
+        statusRef: building.statusRef,
+        floors: new Map<string, Floor>(
+            Array.from(building.floors.entries()).map(([id, floor]) => [id, cloneFloor(floor)])
+        )
+    };
+    return newBuilding;
+}
+
+export function cloneFloor(floor: Floor) {
+    const newFloor: Floor = {
+        id: floor.id,
+        number: floor.number,
+        rooms: new Map<string, Room>(
+            Array.from(floor.rooms.entries()).map(([id, room]) => [id, cloneRoom(room)])
+        )
+    };
+    return newFloor;
+}
+
+export function cloneRoom(room: Room) {
+    const newRoom: Room = {
+        id: room.id,
+        orderNumber: room.orderNumber,
+        roomNumber: room.roomNumber,
+        statusRef: room.statusRef
+    };
+    return newRoom;
 }
