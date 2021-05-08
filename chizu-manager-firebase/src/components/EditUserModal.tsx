@@ -1,23 +1,29 @@
+import '../utils/InitializeFirebase';
 import { Fragment, useState } from "react";
 import firebase from 'firebase';
 import { Button, Form, FormFeedback, FormGroup, FormText, Input, InputGroup, InputGroupAddon, InputGroupText, Label } from "reactstrap";
 import { User } from '../types/model';
 import MessageModal from "./MessageModal";
 import { Colors } from "../types/bootstrap";
+import { cloneUser } from "../utils/userUtil";
+import { useRouter } from 'next/router';
 
 export interface Props {
-    id: string,
-    userMap: Map<string, User>,
-    setLoading: (loading: boolean) => void,
-    setFlashMessage: (color: Colors, message: any) => void,
-    toggle: () => void,
+    authUser: firebase.User;
+    id: string;
+    userMap: Map<string, User>;
+    setLoading: (loading: boolean) => void;
+    setFlashMessage: (color: Colors, message: any) => void;
+    toggle: () => void;
 }
 
 const db = firebase.firestore();
+const auth = firebase.auth();
 
 export default function EditUserModal(props: Props) {
-    const [data, setData] = useState(props.userMap.get(props.id)!);
+    const [data, setData] = useState(cloneUser(props.userMap.get(props.id)!));
     const [displayNameError, setDisplayNameError] = useState(undefined as string | undefined);
+    const router = useRouter();
 
     const onClickSaveButton = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
@@ -51,6 +57,12 @@ export default function EditUserModal(props: Props) {
         // エラーがなければデータを保存する
         try {
             await db.collection('users').doc(props.id).update(data);
+
+            // ログインユーザを一般ユーザに変更した場合はログアウト
+            if (props.id === props.authUser.uid && !data.isAdmin) {
+                auth.signOut();
+                router.push('/users/login');
+            }
             props.setFlashMessage(Colors.Success, 'ユーザを更新しました。');
         } catch (error) {
             console.log(error);

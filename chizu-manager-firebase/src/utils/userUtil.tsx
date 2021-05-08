@@ -18,3 +18,7 @@ export function getUser(uid: string, setUser: (value: React.SetStateAction<User 
         setUser(user);
     });
 }
+
+export function cloneUser(data: User) {
+    return JSON.parse(JSON.stringify(data)) as User;
+}

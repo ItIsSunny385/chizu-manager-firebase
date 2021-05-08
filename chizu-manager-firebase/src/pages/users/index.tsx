@@ -1,9 +1,9 @@
-import { useState, useEffect, MouseEvent, Fragment } from 'react';
+import { useState, useEffect, MouseEvent, Fragment, useRef } from 'react';
 import firebase from 'firebase';
 import AdminApp from '../../components/AdminApp';
 import AddUserModal from '../../components/AddUserModal';
 import EditUserModal from '../../components/EditUserModal';
-import { Button, Col, Form, FormGroup, Input, Label } from 'reactstrap';
+import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -20,6 +20,7 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 
 export default function Index() {
+    const [initial, _setInitial] = useState(true);
     const [loading, setLoading] = useState(true);
     const [userMap, setUserMap] = useState(new Map<string, User>());
     const [displayAddModal, setDisplayAddModal] = useState(false);
@@ -29,6 +30,12 @@ export default function Index() {
     const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
     const [user, setUser] = useState(undefined as User | undefined);
     const router = useRouter();
+
+    const initialRef = useRef(initial);
+    const setInitial = (data: boolean) => {
+        initialRef.current = data;
+        _setInitial(data);
+    };
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -58,7 +65,10 @@ export default function Index() {
                     });
                 });
                 setUserMap(newUserMap);
-                setLoading(false);
+                if (initialRef.current) {
+                    setInitial(false);
+                    setLoading(false);
+                }
             });
         }
     }, [user]);
@@ -83,8 +93,8 @@ export default function Index() {
                 bootstrap4
                 keyField='fullId'
                 data={Array.from(userMap.entries())
-                    .filter(([id, user]) => user.displayName.includes(keyword))
-                    .map(([id, user]) => {
+                    .filter(([id, x]) => x.displayName.includes(keyword))
+                    .map(([id, x]) => {
                         const onClickDeleteLink = async (e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
                             e.preventDefault();
                             setLoading(true);
@@ -95,6 +105,12 @@ export default function Index() {
                             batch.set(deleteAuthUserRef, { uid: id });
                             try {
                                 await batch.commit();
+                                if (authUser && id === authUser.uid) {
+                                    // ログインユーザを削除した場合はログアウト
+                                    auth.signOut();
+                                    router.push('/users/login');
+                                    return;
+                                }
                                 setFlashMessageProps({
                                     color: Colors.Success,
                                     message: 'ユーザを削除しました。',
@@ -118,8 +134,8 @@ export default function Index() {
                         return {
                             fullId: id,
                             id: id.substr(0, 10) + '...',
-                            displayName: user.displayName,
-                            role: user.isAdmin ? '管理者' : '一般ユーザ',
+                            displayName: x.displayName,
+                            role: x.isAdmin ? '管理者' : '一般ユーザ',
                             action:
                                 <Fragment>
                                     <a className="mr-1" href="#" onClick={onClickEditLink}>編集</a>
@@ -162,7 +178,10 @@ export default function Index() {
             {
                 editId
                 &&
+                authUser
+                &&
                 <EditUserModal
+                    authUser={authUser}
                     id={editId}
                     userMap={userMap}
                     setLoading={setLoading}
