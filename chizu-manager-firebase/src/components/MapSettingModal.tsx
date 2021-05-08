@@ -6,11 +6,11 @@ import { Colors } from "../types/bootstrap";
 import { ArrowRepeat, InfoCircle } from "react-bootstrap-icons";
 
 interface Props {
-    name: string,
-    using: boolean,
-    updateNameAndUsing: (name: string, using: boolean) => void
-    reset: () => void,
-    toggle: () => void,
+    name: string;
+    using: boolean;
+    updateNameAndUsing: (name: string, using: boolean) => void;
+    reset: () => void;
+    toggle: () => void;
 }
 
 export default function MapSettingModal(props: Props) {

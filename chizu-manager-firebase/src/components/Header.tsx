@@ -6,6 +6,7 @@ import { Nav, NavItem, Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Ba
 import { BoxArrowLeft, PersonCircle } from 'react-bootstrap-icons';
 import { PageRoles, PageRoleBadgeColor } from '../types/role';
 import { User } from '../types/model';
+import AccountModal from '../components/AccountModal';
 import { useRouter } from 'next/router';
 
 export interface Props {
@@ -18,6 +19,7 @@ const auth = firebase.auth();
 
 export default function Header(props: Props) {
     const [isOpen, setIsOpen] = useState(false);
+    const [displayAccountModal, setDisplayAccountModal] = useState(false);
     const router = useRouter();
 
     return (
@@ -43,7 +45,10 @@ export default function Header(props: Props) {
                     <Collapse isOpen={isOpen} navbar>
                         <Nav className="ml-auto" navbar>
                             <NavItem>
-                                <NavLink href="#">
+                                <NavLink href="#" onClick={(e) => {
+                                    e.preventDefault();
+                                    setDisplayAccountModal(true);
+                                }}>
                                     <PersonCircle className="mr-1 mb-1" />
                                     アカウント
                                 </NavLink>
@@ -59,6 +64,15 @@ export default function Header(props: Props) {
                             </NavItem>
                         </Nav>
                     </Collapse>
+                    {
+                        displayAccountModal
+                        &&
+                        <AccountModal
+                            authUser={props.authUser}
+                            user={props.user}
+                            toggle={() => { setDisplayAccountModal(false); }}
+                        />
+                    }
                 </Fragment>
             }
         </Navbar>
