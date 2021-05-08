@@ -86,7 +86,6 @@ export default function Index() {
                         };
                     })}
                 columns={[
-                    { dataField: 'id', text: 'ID', classes: 'd-none d-md-table-cell', headerClasses: 'd-none d-md-table-cell', sort: true },
                     { dataField: 'name', text: '名前', sort: true },
                     { dataField: 'using', text: '使用状況', sort: true },
                     { dataField: 'action', text: '' }

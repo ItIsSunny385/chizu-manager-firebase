@@ -65,12 +65,6 @@ export default function StatusList(props: Props) {
                     };
                 })}
                 columns={[
-                    {
-                        dataField: 'id',
-                        text: 'ID',
-                        classes: 'd-none d-md-table-cell',
-                        headerClasses: 'd-none d-md-table-cell'
-                    },
                     { dataField: 'name', text: '名前' },
                     {
                         dataField: 'pin',
@@ -85,7 +79,7 @@ export default function StatusList(props: Props) {
                             };
                         }
                     },
-                    { dataField: 'statusAfterReseting', text: 'リセット後', classes: 'd-none d-md-table-cell', headerClasses: 'd-none d-md-table-cell' },
+                    { dataField: 'statusAfterReseting', text: 'リセット後' },
                     { dataField: 'action', text: '' },
                 ]}
                 noDataIndication={() => (<div className="text-center">データがありません</div>)}
