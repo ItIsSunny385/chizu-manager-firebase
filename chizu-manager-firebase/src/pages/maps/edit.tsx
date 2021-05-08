@@ -6,12 +6,13 @@ import { useRouter } from 'next/router';
 import MapApp from '../../components/MapApp';
 import { Badge, Button, ButtonGroup } from 'reactstrap';
 import { GearFill, HeptagonFill, HouseFill, PeopleFill } from 'react-bootstrap-icons';
-import { Status } from '../../types/model';
+import { Status, User } from '../../types/model';
 import { MapBasicData, MapData } from '../../types/map';
 import BorderModeMapContents from '../../components/BorderModeMapContents';
 import MarkerModeMapContents from '../../components/MarkerModeMapContents';
 import AddMapModal from '../../components/AddMapModal';
 import { getStatusMap } from '../../utils/statusUtil';
+import { getUser } from '../../utils/userUtil';
 import { listeningMapInfoWithChildren } from '../../utils/mapUtil';
 import MapSettingModal from '../../components/MapSettingModal';
 import { PageRoles } from '../../types/role';
@@ -28,6 +29,7 @@ enum PageMode {
 }
 
 const db = firebase.firestore();
+const auth = firebase.auth();
 
 export default function Edit(props: Props) {
     const [loading, setLoading] = useState(true);
@@ -41,6 +43,8 @@ export default function Edit(props: Props) {
     const [newLatLng, setNewLatLng] = useState(undefined as google.maps.LatLng | undefined);
     const [statusMap, setStatusMap] = useState(new Map<string, Status>());
     const [buildingStatusMap, setBuildingStatusMap] = useState(new Map<string, Status>());
+    const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
+    const [user, setUser] = useState(undefined as User | undefined);
     const router = useRouter();
 
     // onSnapShot内では最新のmapDataにアクセスできないため、mapDataRef.currentを用いる
@@ -56,14 +60,37 @@ export default function Edit(props: Props) {
         _setMapDataLoading(data);
     };
 
-    useEffect(() => {
-        /* 必要なデータを取得する */
-        const f = async () => {
+    const unsubscribe = auth.onAuthStateChanged((authUser) => {
+        if (!authUser) {
+            router.push('/users/login');
+        } else {
+            setAuthUser(authUser);
+            getUser(authUser.uid, setUser);
+
             /* ステータス情報を取得 */
-            setStatusMap(await getStatusMap(db, 'statuses'));
-            setBuildingStatusMap(await getStatusMap(db, 'building_statuses'));
-        };
-        f();
+            getStatusMap(db, 'statuses', setStatusMap);
+            getStatusMap(db, 'building_statuses', setBuildingStatusMap);
+
+            /* 地図情報を監視 */
+            const mapRef = db.collection('maps').doc(id);
+            listeningMapInfoWithChildren(
+                mapRef,
+                mapDataRef,
+                (data) => {
+                    setMapData(data);
+                    if (mapDataLoadingRef.current) {
+                        setMapDataLoading(false);
+                    }
+                }
+            );
+        }
+        unsubscribe();
+    });
+
+    useEffect(() => {
+        /* ステータス情報を取得 */
+        getStatusMap(db, 'statuses', setStatusMap);
+        getStatusMap(db, 'building_statuses', setBuildingStatusMap);
 
         /* 地図情報を監視 */
         const mapRef = db.collection('maps').doc(id);
@@ -222,6 +249,8 @@ export default function Edit(props: Props) {
     return (
         <React.Fragment>
             <MapApp
+                authUser={authUser}
+                user={user}
                 title={mapData ? mapData.name + ' | 地図編集' : '地図編集'}
                 pageRole={PageRoles.Administrator}
                 loading={loading}

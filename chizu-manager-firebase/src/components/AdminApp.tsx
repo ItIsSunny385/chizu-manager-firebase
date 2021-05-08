@@ -1,11 +1,15 @@
+import firebase from 'firebase';
 import App from './App';
 import NavTabs from './NavTabs';
 import FlashMessage, { Props as FlashMessageProps } from './FlashMessage';
 import { Col, Container, Row } from 'reactstrap';
 import { GearFill, MapFill, PeopleFill } from 'react-bootstrap-icons';
 import { PageRoles } from '../types/role';
+import { User } from '../types/model';
 
 interface Props {
+    authUser: firebase.User | undefined;
+    user: User | undefined;
     pageRole: PageRoles | undefined;
     children: any,
     activeTabId: number,
@@ -29,7 +33,13 @@ export default function AdminApp(props: Props) {
     }
 
     return (
-        <App title={props.pageTitle} loading={props.loading} pageRole={props.pageRole}>
+        <App
+            authUser={props.authUser}
+            user={props.user}
+            title={props.pageTitle}
+            loading={props.loading}
+            pageRole={props.pageRole}
+        >
             <Container>
                 <Row>
                     <Col>

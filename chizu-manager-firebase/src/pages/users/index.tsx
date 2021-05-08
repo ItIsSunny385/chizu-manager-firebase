@@ -13,8 +13,11 @@ import { User } from '../../types/model';
 import { Props as FlashMessageProps } from '../../components/FlashMessage';
 import { Colors } from '../../types/bootstrap';
 import { PageRoles } from '../../types/role';
+import { useRouter } from 'next/router';
+import { getUser } from '../../utils/userUtil';
 
 const db = firebase.firestore();
+const auth = firebase.auth();
 
 export default function Index() {
     const [loading, setLoading] = useState(true);
@@ -23,24 +26,36 @@ export default function Index() {
     const [editId, setEditId] = useState(undefined as string | undefined);
     const [flashMessageProps, setFlashMessageProps] = useState(undefined as FlashMessageProps | undefined);
     const [keyword, setKeyword] = useState('');
+    const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
+    const [user, setUser] = useState(undefined as User | undefined);
+    const router = useRouter();
 
-    useEffect(() => {
-        db.collection('users').where('deleted', '==', false).onSnapshot((snapshot) => {
-            const newUserMap = new Map<string, User>();
-            snapshot.forEach((x) => {
-                newUserMap.set(x.id, {
-                    displayName: x.data().displayName,
-                    isAdmin: x.data().isAdmin,
-                    deleted: x.data().deleted,
+    const unsubscribe = auth.onAuthStateChanged((authUser) => {
+        if (!authUser) {
+            router.push('/users/login');
+        } else {
+            setAuthUser(authUser);
+            getUser(authUser.uid, setUser);
+            db.collection('users').where('deleted', '==', false).onSnapshot((snapshot) => {
+                const newUserMap = new Map<string, User>();
+                snapshot.forEach((x) => {
+                    newUserMap.set(x.id, {
+                        displayName: x.data().displayName,
+                        isAdmin: x.data().isAdmin,
+                        deleted: x.data().deleted,
+                    });
                 });
+                setUserMap(newUserMap);
+                setLoading(false);
             });
-            setUserMap(newUserMap);
-            setLoading(false);
-        });
-    }, []);
+        }
+        unsubscribe();
+    });
 
     return (
         <AdminApp
+            authUser={authUser}
+            user={user}
             activeTabId={2}
             pageTitle="ユーザ一覧"
             pageRole={PageRoles.Administrator}

@@ -1,10 +1,14 @@
+import firebase from 'firebase';
 import React, { useState } from 'react';
 import App from "./App";
 import { GoogleMap, LoadScript } from "@react-google-maps/api";
 import { MessageModalProps } from './MessageModal';
 import { PageRoles } from '../types/role';
+import { User } from '../types/model';
 
 interface Props {
+    authUser: firebase.User | undefined;
+    user: User | undefined;
     title: string;
     pageRole: PageRoles | undefined;
     loading: boolean;
@@ -34,6 +38,8 @@ export default function MapApp(props: Props) {
 
     return (
         <App
+            authUser={props.authUser}
+            user={props.user}
             title={props.title}
             pageRole={props.pageRole}
             loading={props.loading}

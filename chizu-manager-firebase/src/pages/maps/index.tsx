@@ -12,24 +12,39 @@ import Link from 'next/link';
 import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
 import { useRouter } from 'next/router';
 import { PageRoles } from '../../types/role';
+import { User } from '../../types/model';
+import { getUser } from '../../utils/userUtil';
 
 const db = firebase.firestore();
+const auth = firebase.auth();
 
 export default function Index() {
     const [loading, setLoading] = useState(true);
     const [maps, setMaps] = useState([] as Array<MapData>);
     const [keyword, setKeyword] = useState('');
+    const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
+    const [user, setUser] = useState(undefined as User | undefined);
     const router = useRouter();
 
-    useEffect(() => {
-        db.collection('maps').orderBy('name', 'asc').onSnapshot((snapshot) => {
-            setMaps(getMapDataArrayWithNoChildByQuerySnapshot(snapshot));
-            setLoading(false);
-        });
-    }, []);
+    const unsubscribe = auth.onAuthStateChanged((authUser) => {
+        if (!authUser) {
+            router.push('/users/login');
+        } else {
+            setAuthUser(authUser);
+            getUser(authUser.uid, setUser);
+
+            db.collection('maps').orderBy('name', 'asc').onSnapshot((snapshot) => {
+                setMaps(getMapDataArrayWithNoChildByQuerySnapshot(snapshot));
+                setLoading(false);
+            });
+        }
+        unsubscribe();
+    });
 
     return (
         <AdminApp
+            authUser={authUser}
+            user={user}
             activeTabId={1}
             pageTitle="地図一覧"
             pageRole={PageRoles.Administrator}
