@@ -88,25 +88,6 @@ export default function Edit(props: Props) {
     });
 
     useEffect(() => {
-        /* ステータス情報を取得 */
-        getStatusMap(db, 'statuses', setStatusMap);
-        getStatusMap(db, 'building_statuses', setBuildingStatusMap);
-
-        /* 地図情報を監視 */
-        const mapRef = db.collection('maps').doc(id);
-        listeningMapInfoWithChildren(
-            mapRef,
-            mapDataRef,
-            (data) => {
-                setMapData(data);
-                if (mapDataLoadingRef.current) {
-                    setMapDataLoading(false);
-                }
-            }
-        );
-    }, []);
-
-    useEffect(() => {
         if (map && !controllerSetted) {
             /* 地図が準備できたら地図上のボタンを配置する */
             const topLeftTitle = <div className="mt-2 ml-1 d-block d-md-none"><h4>
