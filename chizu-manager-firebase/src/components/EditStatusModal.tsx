@@ -4,6 +4,7 @@ import { Button, Form, FormGroup, FormText, Input, InputGroup, InputGroupAddon, 
 import MessageModal from "./MessageModal";
 import { Status, Pins, StatusType, StatusCollectionName } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
+import { cloneStatus } from "../utils/statusUtil";
 
 export interface Props {
     type: StatusType,
@@ -15,7 +16,7 @@ export interface Props {
 const db = firebase.firestore();
 
 export default function AddStatusModal(props: Props) {
-    const [data, setData] = useState(props.statusMap.get(props.id) as Status);
+    const [data, setData] = useState(cloneStatus(props.statusMap.get(props.id)!));
 
     const collectionName = StatusCollectionName[props.type];
     const title = props.type === StatusType.HouseOrRoom ? '家・部屋ステータス編集' : '集合住宅ステータス編集';

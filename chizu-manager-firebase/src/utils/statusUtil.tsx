@@ -20,3 +20,7 @@ export function getStatusMapFromQuerySnapshot(snapshot: firebase.firestore.Query
         statusAfterResetingRef: x.data().statusAfterResetingRef,
     }]));
 }
+
+export function cloneStatus(data: Status) {
+    return JSON.parse(JSON.stringify(data)) as Status;
+}
