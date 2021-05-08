@@ -1,3 +1,4 @@
+import '../utils/InitializeFirebase';
 import firebase from 'firebase';
 import React, { Fragment } from 'react';
 import { useState } from 'react';
@@ -5,6 +6,7 @@ import { Nav, NavItem, Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Ba
 import { BoxArrowLeft, PersonCircle } from 'react-bootstrap-icons';
 import { PageRoles, PageRoleBadgeColor } from '../types/role';
 import { User } from '../types/model';
+import { useRouter } from 'next/router';
 
 export interface Props {
     authUser: firebase.User | undefined;
@@ -12,9 +14,11 @@ export interface Props {
     pageRole: PageRoles | undefined;
 }
 
+const auth = firebase.auth();
+
 export default function Header(props: Props) {
     const [isOpen, setIsOpen] = useState(false);
-    const toggle = (() => setIsOpen(!isOpen));
+    const router = useRouter();
 
     return (
         <Navbar color="light" light expand="md">
@@ -35,20 +39,23 @@ export default function Header(props: Props) {
                 props.user
                 &&
                 <Fragment>
-                    <NavbarToggler onClick={toggle} />
+                    <NavbarToggler onClick={() => { setIsOpen(!isOpen); }} />
                     <Collapse isOpen={isOpen} navbar>
                         <Nav className="ml-auto" navbar>
                             <NavItem>
                                 <NavLink href="#">
                                     <PersonCircle className="mr-1 mb-1" />
-                            アカウント
-                        </NavLink>
+                                    アカウント
+                                </NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink href="#">
+                                <NavLink href="#" onClick={(e) => {
+                                    auth.signOut();
+                                    router.push('/users/login');
+                                }}>
                                     <BoxArrowLeft className="mr-1 mb-1" />
-                            ログアウト
-                        </NavLink>
+                                    ログアウト
+                                </NavLink>
                             </NavItem>
                         </Nav>
                     </Collapse>
