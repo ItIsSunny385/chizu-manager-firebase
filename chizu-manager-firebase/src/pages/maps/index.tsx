@@ -26,20 +26,30 @@ export default function Index() {
     const [user, setUser] = useState(undefined as User | undefined);
     const router = useRouter();
 
-    const unsubscribe = auth.onAuthStateChanged((authUser) => {
-        if (!authUser) {
-            router.push('/users/login');
-        } else {
-            setAuthUser(authUser);
-            getUser(authUser.uid, setUser);
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((authUser) => {
+            if (!authUser) {
+                router.push('/users/login');
+            } else {
+                setAuthUser(authUser);
+                getUser(authUser.uid, setUser);
+            }
+            unsubscribe();
+        });
+    }, []);
 
+    useEffect(() => {
+        if (user) {
+            if (!user.isAdmin) {
+                router.push('/users/login');
+                return;
+            }
             db.collection('maps').orderBy('name', 'asc').onSnapshot((snapshot) => {
                 setMaps(getMapDataArrayWithNoChildByQuerySnapshot(snapshot));
                 setLoading(false);
             });
         }
-        unsubscribe();
-    });
+    }, [user]);
 
     return (
         <AdminApp
@@ -88,9 +98,9 @@ export default function Index() {
                 <Button
                     onClick={(e) => {
                         e.preventDefault();
+                        setLoading(true);
                         const newMapRef = db.collection('maps').doc();
                         router.push(`/maps/edit?id=${newMapRef.id}`);
-                        setLoading(true);
                     }}
                     className="ml-1"
                 >

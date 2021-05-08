@@ -60,12 +60,24 @@ export default function Edit(props: Props) {
         _setMapDataLoading(data);
     };
 
-    const unsubscribe = auth.onAuthStateChanged((authUser) => {
-        if (!authUser) {
-            router.push('/users/login');
-        } else {
-            setAuthUser(authUser);
-            getUser(authUser.uid, setUser);
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((authUser) => {
+            if (!authUser) {
+                router.push('/users/login');
+            } else {
+                setAuthUser(authUser);
+                getUser(authUser.uid, setUser);
+            }
+            unsubscribe();
+        });
+    }, []);
+
+    useEffect(() => {
+        if (user) {
+            if (!user.isAdmin) {
+                router.push('/users/login');
+                return;
+            }
 
             /* ステータス情報を取得 */
             getStatusMap(db, 'statuses', setStatusMap);
@@ -84,8 +96,7 @@ export default function Edit(props: Props) {
                 }
             );
         }
-        unsubscribe();
-    });
+    }, [user]);
 
     useEffect(() => {
         if (map && !controllerSetted) {

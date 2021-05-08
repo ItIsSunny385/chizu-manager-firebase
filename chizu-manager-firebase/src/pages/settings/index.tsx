@@ -1,6 +1,6 @@
 import firebase from 'firebase';
 import { useRouter } from 'next/router';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import AdminApp from '../../components/AdminApp';
 import StatusList from '../../components/StatusList';
 import { StatusType, User } from '../../types/model';
@@ -17,15 +17,23 @@ export default function Index() {
     const [user, setUser] = useState(undefined as User | undefined);
     const router = useRouter();
 
-    const unsubscribe = auth.onAuthStateChanged((authUser) => {
-        if (!authUser) {
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((authUser) => {
+            if (!authUser) {
+                router.push('/users/login');
+            } else {
+                setAuthUser(authUser);
+                getUser(authUser.uid, setUser);
+            }
+            unsubscribe();
+        });
+    }, []);
+
+    useEffect(() => {
+        if (user && !user.isAdmin) {
             router.push('/users/login');
-        } else {
-            setAuthUser(authUser);
-            getUser(authUser.uid, setUser);
         }
-        unsubscribe();
-    });
+    }, [user])
 
     return (
         <AdminApp
@@ -38,6 +46,10 @@ export default function Index() {
         >
             {
                 authUser
+                &&
+                user
+                &&
+                user.isAdmin
                 &&
                 <Fragment>
                     <div className="mt-4">

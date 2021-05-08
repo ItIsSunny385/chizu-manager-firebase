@@ -30,12 +30,24 @@ export default function Index() {
     const [user, setUser] = useState(undefined as User | undefined);
     const router = useRouter();
 
-    const unsubscribe = auth.onAuthStateChanged((authUser) => {
-        if (!authUser) {
-            router.push('/users/login');
-        } else {
-            setAuthUser(authUser);
-            getUser(authUser.uid, setUser);
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((authUser) => {
+            if (!authUser) {
+                router.push('/users/login');
+            } else {
+                setAuthUser(authUser);
+                getUser(authUser.uid, setUser);
+            }
+            unsubscribe();
+        });
+    }, []);
+
+    useEffect(() => {
+        if (user) {
+            if (!user.isAdmin) {
+                router.push('/users/login');
+                return;
+            }
             db.collection('users').where('deleted', '==', false).onSnapshot((snapshot) => {
                 const newUserMap = new Map<string, User>();
                 snapshot.forEach((x) => {
@@ -49,8 +61,7 @@ export default function Index() {
                 setLoading(false);
             });
         }
-        unsubscribe();
-    });
+    }, [user]);
 
     return (
         <AdminApp
