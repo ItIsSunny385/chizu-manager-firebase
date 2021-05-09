@@ -82,7 +82,7 @@ export default function MapUsersModal(props: Props) {
                             onChange={(e) => {
                                 if (e.target.checked) {
                                     setEditorIds([]);
-                                    setAllUsable(true);
+                                    setAllUsable(false);
                                     setUserIds([]);
                                 }
                                 setAllEditable(e.target.checked);
