@@ -12,9 +12,10 @@ import BorderModeMapContents from '../../components/BorderModeMapContents';
 import MarkerModeMapContents from '../../components/MarkerModeMapContents';
 import AddMapModal from '../../components/AddMapModal';
 import { getStatusMap } from '../../utils/statusUtil';
-import { getUser } from '../../utils/userUtil';
-import { listeningMapInfoWithChildren } from '../../utils/mapUtil';
+import { getUser, listeningUserMap } from '../../utils/userUtil';
+import { cloneMapData, listeningMapInfoWithChildren } from '../../utils/mapUtil';
 import MapSettingModal from '../../components/MapSettingModal';
+import MapUsersModal from '../../components/MapUsersModal';
 import { PageRoles } from '../../types/role';
 
 interface Props {
@@ -45,6 +46,7 @@ export default function Edit(props: Props) {
     const [buildingStatusMap, setBuildingStatusMap] = useState(new Map<string, Status>());
     const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
     const [user, setUser] = useState(undefined as User | undefined);
+    const [userMap, setUserMap] = useState(new Map<string, User>());
     const router = useRouter();
 
     // onSnapShot内では最新のmapDataにアクセスできないため、mapDataRef.currentを用いる
@@ -82,6 +84,9 @@ export default function Edit(props: Props) {
             /* ステータス情報を取得 */
             getStatusMap(db, 'statuses', setStatusMap);
             getStatusMap(db, 'building_statuses', setBuildingStatusMap);
+
+            /* ユーザ情報を取得 */
+            listeningUserMap(db.collection('users').where('deleted', '==', false), setUserMap);
 
             /* 地図情報を監視 */
             const mapRef = db.collection('maps').doc(id);
@@ -300,6 +305,11 @@ export default function Edit(props: Props) {
                             name: name,
                             using: false,
                             borderCoords: [],
+                            managers: [],
+                            allEditable: false,
+                            editors: [],
+                            allUsable: false,
+                            users: [],
                         };
                         db.collection('maps').doc(id).set(newData);
                     }}
@@ -327,6 +337,32 @@ export default function Edit(props: Props) {
                     }}
                 />
             }
+            {/* ユーザボタンが押されたとき */}
+            {
+                mapData
+                &&
+                pageMode === PageMode.User
+                &&
+                userMap.size > 0
+                &&
+                <MapUsersModal
+                    userMap={userMap}
+                    data={mapData}
+                    update={(managers, allEditable, editors, allUsable, users) => {
+                        db.collection('maps').doc(id).update({
+                            managers: managers,
+                            allEditable: allEditable,
+                            editors: editors,
+                            allUsable: allUsable,
+                            users: users,
+                        });
+                    }}
+                    toggle={() => {
+                        setPageMode(prevPageMode!);
+                        setPrevPageMode(undefined);
+                    }}
+                />
+            }
             {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
             <div style={{ display: 'none' }}>
                 <Button id="finish" onClick={(e) => {
@@ -344,7 +380,12 @@ export default function Edit(props: Props) {
                     setPrevPageMode(undefined);
                     setPageMode(PageMode.Marker);
                 }} />
-                <Button id="user" />
+                <Button id="user" onClick={(e) => {
+                    e.preventDefault();
+                    setPrevPageMode(pageMode);
+                    setPageMode(PageMode.User);
+                }}
+                />
                 <Button id="setting" onClick={(e) => {
                     e.preventDefault();
                     setPrevPageMode(pageMode);

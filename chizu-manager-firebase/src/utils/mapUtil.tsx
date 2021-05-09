@@ -8,6 +8,11 @@ export function getMapDataArrayWithNoChildByQuerySnapshot(snapshot: firebase.fir
             name: x.data().name,
             using: x.data().using,
             borderCoords: x.data().borderCoords,
+            managers: x.data().managers,
+            allEditable: x.data().allEditable,
+            editors: x.data().editors,
+            allUsable: x.data().allUsable,
+            users: x.data().users,
             buildings: new Map<string, Building>(),
             houses: new Map<string, House>(),
         }
@@ -82,6 +87,11 @@ export function listeningMapInfoWithChildren(
             newMapData.name = newData.name;
             newMapData.using = newData.using;
             newMapData.borderCoords = newData.borderCoords;
+            newMapData.managers = newData.managers;
+            newMapData.allEditable = newData.allEditable;
+            newMapData.editors = newData.editors;
+            newMapData.allUsable = newData.allUsable;
+            newMapData.users = newData.users;
             setMapData(newMapData);
         } else {
             const newMapData: MapData = {
@@ -89,6 +99,11 @@ export function listeningMapInfoWithChildren(
                 name: newData.name,
                 using: newData.using,
                 borderCoords: newData.borderCoords,
+                managers: newData.managers,
+                editors: newData.editors,
+                allEditable: newData.allEditable,
+                users: newData.users,
+                allUsable: newData.allUsable,
                 buildings: new Map<string, Building>(),
                 houses: new Map<string, House>(),
             };
@@ -218,6 +233,11 @@ export function cloneMapData(mapData: MapData): MapData {
         name: mapData.name,
         using: mapData.using,
         borderCoords: [...mapData.borderCoords],
+        managers: [...mapData.managers],
+        editors: [...mapData.editors],
+        allEditable: mapData.allEditable,
+        users: [...mapData.users],
+        allUsable: mapData.allUsable,
         buildings: new Map<string, Building>(
             Array.from(mapData.buildings.entries()).map(([id, building]) => [id, cloneBuilding(building)])
         ),

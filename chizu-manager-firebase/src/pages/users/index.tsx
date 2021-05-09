@@ -14,7 +14,7 @@ import { Props as FlashMessageProps } from '../../components/FlashMessage';
 import { Colors } from '../../types/bootstrap';
 import { PageRoles } from '../../types/role';
 import { useRouter } from 'next/router';
-import { getUser } from '../../utils/userUtil';
+import { getUser, listeningUserMap } from '../../utils/userUtil';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -55,21 +55,16 @@ export default function Index() {
                 router.push('/users/login');
                 return;
             }
-            db.collection('users').where('deleted', '==', false).onSnapshot((snapshot) => {
-                const newUserMap = new Map<string, User>();
-                snapshot.forEach((x) => {
-                    newUserMap.set(x.id, {
-                        displayName: x.data().displayName,
-                        isAdmin: x.data().isAdmin,
-                        deleted: x.data().deleted,
-                    });
-                });
-                setUserMap(newUserMap);
-                if (initialRef.current) {
-                    setInitial(false);
-                    setLoading(false);
+            listeningUserMap(
+                db.collection('users').where('deleted', '==', false),
+                (newUserMap) => {
+                    setUserMap(newUserMap);
+                    if (initialRef.current) {
+                        setInitial(false);
+                        setLoading(false);
+                    }
                 }
-            });
+            );
         }
     }, [user]);
 

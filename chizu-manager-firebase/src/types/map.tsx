@@ -55,6 +55,11 @@ export interface MapBasicData {
     name: string;
     using: boolean;
     borderCoords: firebase.firestore.GeoPoint[];
+    managers: firebase.firestore.DocumentReference[];
+    allEditable: boolean;
+    editors: firebase.firestore.DocumentReference[];
+    allUsable: boolean;
+    users: firebase.firestore.DocumentReference[];
 }
 
 export interface MapData extends MapBasicData {
