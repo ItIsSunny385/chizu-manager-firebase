@@ -50,11 +50,17 @@ export default function CommentModal(props: Props) {
                             <PencilSquare className="mb-1 mr-1" />編集
                         </Button>
                 }
-                <Button onClick={(e) => { props.save(null); setEditMode(false); }}>
+                <Button onClick={(e) => {
+                    props.save(null);
+                    setData(null);
+                    (document.getElementById('comment') as HTMLInputElement).value = '';
+                    setEditMode(false);
+                }}>
                     <Trash className="mb-1 mr-1" />削除
                 </Button>
             </ButtonGroup>
             <Input
+                id="comment"
                 type="textarea"
                 value={data ? data : undefined}
                 readOnly={!editMode}

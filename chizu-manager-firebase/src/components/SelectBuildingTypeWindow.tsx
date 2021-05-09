@@ -87,6 +87,7 @@ export default function SelectBuildingTypeWindow(props: Props) {
                                             orderNumber: y.orderNumber,
                                             roomNumber: y.roomNumber,
                                             statusRef: y.statusRef,
+                                            comment: null,
                                         };
                                         batch.set(roomRef, newRoom);
                                     });

@@ -9,13 +9,14 @@ import BuildingInfoModal from './BuildingInfoModal';
 import { ChatTextFill, PencilFill, TrashFill } from 'react-bootstrap-icons';
 import { updateBuilding } from '../utils/buildingUtil';
 import CommentModal from './CommentModal';
+import BuildingMarkerRoomInfo from './BuildingMarkerRoomInfo';
 import { Colors } from '../types/bootstrap';
 
 interface Props {
-    docRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
-    data: Building,
-    statusMap: Map<string, Status>,
-    buildingStatusMap: Map<string, Status>,
+    docRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>;
+    data: Building;
+    statusMap: Map<string, Status>;
+    buildingStatusMap: Map<string, Status>;
 }
 
 const db = firebase.firestore();
@@ -107,27 +108,19 @@ export default function BuildingMarker(props: Props) {
                                 return <details key={i} className="mt-1">
                                     <summary>{x.number}階（{x.rooms.size}部屋）</summary>
                                     {
-                                        Array.from(x.rooms.values()).map((y, j) => <InputGroup size="sm">
-                                            <InputGroupAddon addonType="prepend">
-                                                <InputGroupText>{y.roomNumber}</InputGroupText>
-                                            </InputGroupAddon>
-                                            <Input
-                                                type="select"
-                                                value={y.statusRef.id}
-                                                onChange={async (e) => {
-                                                    const roomRef = floorRef.collection('rooms').doc(y.id);
-                                                    await roomRef.update({ statusRef: db.collection('statuses').doc(e.target.value) })
+                                        Array.from(x.rooms.values()).map((y, j) => {
+                                            const roomRef = floorRef.collection('rooms').doc(y.id);
+                                            return <BuildingMarkerRoomInfo
+                                                data={y}
+                                                statusMap={props.statusMap}
+                                                updateStatus={(statusId) => {
+                                                    roomRef.update({ statusRef: db.collection('statuses').doc(statusId) });
                                                 }}
-                                            >
-                                                {
-                                                    Array.from(props.statusMap.entries())
-                                                        .map(([id, y]) => <option key={id} value={id}>{y.name}</option>)
-                                                }
-                                            </Input>
-                                            <InputGroupAddon addonType="append">
-                                                <Button><ChatTextFill /></Button>
-                                            </InputGroupAddon>
-                                        </InputGroup>)
+                                                updateComment={(comment) => {
+                                                    roomRef.update({ comment: comment });
+                                                }}
+                                            />
+                                        })
                                     }
                                 </details>;
                             })

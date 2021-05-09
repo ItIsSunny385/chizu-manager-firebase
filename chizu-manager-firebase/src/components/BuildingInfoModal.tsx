@@ -32,13 +32,17 @@ export default function BuildingInfoModal(props: Props) {
         const newData = cloneBuilding(data);
         const floorRef = props.buildingRef.collection('floors').doc();
         const roomRef = floorRef.collection('rooms').doc();
+        const newRoom: Room = {
+            id: roomRef.id,
+            orderNumber: 1,
+            roomNumber: '',
+            statusRef: props.defaultStatusRef,
+            comment: null,
+        };
         newData.floors.set(floorRef.id, {
             id: floorRef.id,
             number: newData.floors.size + 1,
-            rooms: new Map<string, Room>([[
-                roomRef.id,
-                { id: roomRef.id, orderNumber: 1, roomNumber: '', statusRef: props.defaultStatusRef }
-            ]]),
+            rooms: new Map<string, Room>([[roomRef.id, newRoom]]),
         });
         setData(newData);
     };
@@ -77,7 +81,8 @@ export default function BuildingInfoModal(props: Props) {
                         id: roomRef.id,
                         orderNumber: nextOrderNumber,
                         roomNumber: '',
-                        statusRef: props.defaultStatusRef
+                        statusRef: props.defaultStatusRef,
+                        comment: null,
                     };
                     newData.floors.get(floor.id)!.rooms.set(roomRef.id, newRoom);
                     setData(newData);

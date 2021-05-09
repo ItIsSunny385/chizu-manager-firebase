@@ -30,6 +30,7 @@ export function updateBuilding(
                         roomNumber: newRoom.roomNumber,
                         orderNumber: newRoom.orderNumber,
                         statusRef: newRoom.statusRef,
+                        comment: newRoom.comment,
                     }
                     batch.set(newRoomRef, newBasicRoom);
                 }

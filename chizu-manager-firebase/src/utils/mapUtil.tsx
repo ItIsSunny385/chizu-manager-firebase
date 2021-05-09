@@ -169,13 +169,15 @@ export function listeningMapInfoWithChildren(
                                                     id: changeR.doc.id,
                                                     orderNumber: changeR.doc.data().orderNumber,
                                                     roomNumber: changeR.doc.data().roomNumber,
-                                                    statusRef: changeR.doc.data().statusRef
+                                                    statusRef: changeR.doc.data().statusRef,
+                                                    comment: changeR.doc.data().comment,
                                                 })
                                             } else if (changeR.type === 'modified') {
                                                 const newRoom = { ...newFloor.rooms.get(changeR.doc.id) } as Room;
                                                 newRoom.orderNumber = changeR.doc.data().orderNumber;
                                                 newRoom.roomNumber = changeR.doc.data().roomNumber;
                                                 newRoom.statusRef = changeR.doc.data().statusRef;
+                                                newRoom.comment = changeR.doc.data().comment;
                                                 newFloor.rooms.set(changeR.doc.id, newRoom);
                                             } else if (changeR.type === 'removed') {
                                                 newFloor.rooms.delete(changeR.doc.id);
@@ -266,7 +268,8 @@ export function cloneRoom(room: Room) {
         id: room.id,
         orderNumber: room.orderNumber,
         roomNumber: room.roomNumber,
-        statusRef: room.statusRef
+        statusRef: room.statusRef,
+        comment: room.comment,
     };
     return newRoom;
 }

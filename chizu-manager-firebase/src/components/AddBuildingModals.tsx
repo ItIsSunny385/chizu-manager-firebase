@@ -44,7 +44,8 @@ export default function AddBuildingModals(props: Props) {
                                 id: roomRef.id,
                                 orderNumber: 1,
                                 roomNumber: '',
-                                statusRef: props.defaultStatusRef
+                                statusRef: props.defaultStatusRef,
+                                comment: null,
                             };
                             const newRooms = new Map<string, Room>([[roomRef.id, newRoom]]);
                             const newFloor: Floor = {
@@ -99,7 +100,8 @@ export default function AddBuildingModals(props: Props) {
                                     id: roomRef.id,
                                     orderNumber: j,
                                     roomNumber: `${x.floorNumber}${j.toString().padStart(2, '0')}`,
-                                    statusRef: props.defaultStatusRef
+                                    statusRef: props.defaultStatusRef,
+                                    comment: null,
                                 };
                                 return [roomRef.id, newRoom];
                             }));

@@ -34,30 +34,31 @@ export interface Floor extends BasicFloor {
 }
 
 export interface BasicRoom {
-    orderNumber: number,
-    roomNumber: string,
-    statusRef: firebase.firestore.DocumentReference
+    orderNumber: number;
+    roomNumber: string;
+    statusRef: firebase.firestore.DocumentReference;
+    comment: string | null;
 }
 
 export interface Room extends BasicRoom {
-    id: string,
+    id: string;
 }
 
 export interface House {
-    id?: string,
-    latLng: firebase.firestore.GeoPoint,
-    comment: string | null,
-    statusRef: firebase.firestore.DocumentReference
+    id?: string;
+    latLng: firebase.firestore.GeoPoint;
+    comment: string | null;
+    statusRef: firebase.firestore.DocumentReference;
 }
 
 export interface MapBasicData {
-    name: string,
-    using: boolean,
-    borderCoords: firebase.firestore.GeoPoint[],
+    name: string;
+    using: boolean;
+    borderCoords: firebase.firestore.GeoPoint[];
 }
 
 export interface MapData extends MapBasicData {
-    id: string,
-    buildings: Map<string, Building>,
-    houses: Map<string, House>,
+    id: string;
+    buildings: Map<string, Building>;
+    houses: Map<string, House>;
 }
