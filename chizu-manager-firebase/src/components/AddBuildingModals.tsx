@@ -50,12 +50,7 @@ export default function AddBuildingModals(props: Props) {
                             const newFloor: Floor = {
                                 id: floorRef.id,
                                 number: i + 1,
-                                rooms: new Map<string, Room>([[roomRef.id, {
-                                    id: roomRef.id,
-                                    orderNumber: 1,
-                                    roomNumber: '',
-                                    statusRef: props.defaultStatusRef
-                                } as Room]])
+                                rooms: newRooms
                             };
                             return [floorRef.id, newFloor];
                         }));
@@ -63,6 +58,7 @@ export default function AddBuildingModals(props: Props) {
                             id: props.buildingRef.id,
                             statusRef: props.defaultBuildingStatusRef,
                             name: result.name,
+                            comment: null,
                             latLng: new firebase.firestore.GeoPoint(props.latLng.lat(), props.latLng.lng()),
                             floors: floors,
                         };
@@ -118,6 +114,7 @@ export default function AddBuildingModals(props: Props) {
                         id: props.buildingRef.id,
                         statusRef: props.defaultBuildingStatusRef,
                         name: basicInfo.name,
+                        comment: null,
                         latLng: new firebase.firestore.GeoPoint(props.latLng.lat(), props.latLng.lng()),
                         floors: floors,
                     };

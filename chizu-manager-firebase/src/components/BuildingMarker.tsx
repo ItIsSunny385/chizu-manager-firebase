@@ -2,12 +2,14 @@ import firebase from 'firebase';
 import { InfoWindow, Marker } from '@react-google-maps/api';
 import React, { useState } from 'react';
 import { Button, ButtonGroup, Input, InputGroup, InputGroupAddon, InputGroupText } from 'reactstrap';
-import { BasicFloor, BasicRoom, Building, } from '../types/map';
+import { Building } from '../types/map';
 import { Status } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
 import BuildingInfoModal from './BuildingInfoModal';
 import { ChatTextFill, PencilFill, TrashFill } from 'react-bootstrap-icons';
 import { updateBuilding } from '../utils/buildingUtil';
+import CommentModal from './CommentModal';
+import { Colors } from '../types/bootstrap';
 
 interface Props {
     docRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
@@ -21,6 +23,7 @@ const db = firebase.firestore();
 export default function BuildingMarker(props: Props) {
     const [openWindow, setOpenWindow] = useState(false);
     const [displayBuildingInfoModal, setDisplayBuildingInfoModal] = useState(false);
+    const [displayCommentModal, setDisplayCommentModal] = useState(false);
     const buildingStatusId = props.data.statusRef.id;
     const buildingStatus = props.buildingStatusMap.get(buildingStatusId)!;
     const defaultStatusId = props.statusMap.keys().next().value as string;
@@ -80,9 +83,23 @@ export default function BuildingMarker(props: Props) {
                             }
                         </Input>
                         <InputGroupAddon addonType="append">
-                            <Button><ChatTextFill /></Button>
+                            <Button
+                                color={props.data.comment ? Colors.Danger : Colors.Secondary}
+                                onClick={(e) => { setDisplayCommentModal(true); }}
+                            >
+                                <ChatTextFill />
+                            </Button>
                         </InputGroupAddon>
                     </InputGroup>
+                    {
+                        displayCommentModal
+                        &&
+                        <CommentModal
+                            data={props.data.comment}
+                            save={(newData) => { props.docRef.update({ comment: newData }); }}
+                            toggle={() => { setDisplayCommentModal(false); }}
+                        />
+                    }
                     <div className="mt-1">
                         {
                             Array.from(props.data.floors.values()).map((x, i) => {

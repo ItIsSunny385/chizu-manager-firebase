@@ -71,6 +71,7 @@ export default function SelectBuildingTypeWindow(props: Props) {
                                 const newBuilding: BasicBuilding = {
                                     name: result.name,
                                     latLng: result.latLng,
+                                    comment: null,
                                     statusRef: result.statusRef,
                                 };
                                 batch.set(buildingRef, newBuilding);

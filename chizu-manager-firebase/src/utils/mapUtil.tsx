@@ -125,25 +125,27 @@ export function listeningMapInfoWithChildren(
                 const newMapData1 = cloneMapData(mapDataRef.current);
                 for (let changeB of buildingsSnap.docChanges()) {
                     if (changeB.type === 'added') {
-                        newMapData1.buildings.set(changeB.doc.id, {
+                        const newBuilding1: Building = {
                             id: changeB.doc.id,
                             name: changeB.doc.data().name,
+                            comment: changeB.doc.data().comment,
                             latLng: changeB.doc.data().latLng,
                             statusRef: changeB.doc.data().statusRef,
                             floors: new Map<string, Floor>(),
-                        } as Building);
+                        };
+                        newMapData1.buildings.set(changeB.doc.id, newBuilding1);
                         changeB.doc.ref.collection('floors').orderBy('number', 'asc').onSnapshot((floorsSnap) => {
                             if (!mapDataRef.current) {
                                 return;
                             }
                             const newMapData2 = cloneMapData(mapDataRef.current);
-                            const newBuilding1 = newMapData2.buildings.get(changeB.doc.id);
-                            if (!newBuilding1) {
+                            const newBuilding2 = newMapData2.buildings.get(changeB.doc.id);
+                            if (!newBuilding2) {
                                 return;
                             }
                             for (let changeF of floorsSnap.docChanges()) {
                                 if (changeF.type === 'added') {
-                                    newBuilding1.floors.set(changeF.doc.id, {
+                                    newBuilding2.floors.set(changeF.doc.id, {
                                         id: changeF.doc.id,
                                         number: changeF.doc.data().number,
                                         rooms: new Map<string, Room>(),
@@ -153,11 +155,11 @@ export function listeningMapInfoWithChildren(
                                             return;
                                         }
                                         const newMapData3 = cloneMapData(mapDataRef.current);
-                                        const newBuilding2 = newMapData3.buildings.get(changeB.doc.id);
-                                        if (!newBuilding2) {
+                                        const newBuilding3 = newMapData3.buildings.get(changeB.doc.id);
+                                        if (!newBuilding3) {
                                             return;
                                         }
-                                        const newFloor = newBuilding2.floors.get(changeF.doc.id);
+                                        const newFloor = newBuilding3.floors.get(changeF.doc.id);
                                         if (!newFloor) {
                                             return;
                                         }
@@ -182,11 +184,11 @@ export function listeningMapInfoWithChildren(
                                         setMapData(newMapData3);
                                     });
                                 } else if (changeF.type === 'modified') {
-                                    const newFloor = { ...newBuilding1.floors.get(changeF.doc.id) } as Floor;
+                                    const newFloor = { ...newBuilding2.floors.get(changeF.doc.id) } as Floor;
                                     newFloor.number = changeF.doc.data().number;
-                                    newBuilding1.floors.set(changeF.doc.id, newFloor);
+                                    newBuilding2.floors.set(changeF.doc.id, newFloor);
                                 } else if (changeF.type === 'removed') {
-                                    newBuilding1.floors.delete(changeF.doc.id);
+                                    newBuilding2.floors.delete(changeF.doc.id);
                                 }
                             }
                             setMapData(newMapData2);
@@ -194,6 +196,7 @@ export function listeningMapInfoWithChildren(
                     } else if (changeB.type === 'modified') {
                         const newBuilding = { ...newMapData1.buildings.get(changeB.doc.id) } as Building;
                         newBuilding.name = changeB.doc.data().name;
+                        newBuilding.comment = changeB.doc.data().comment;
                         newBuilding.latLng = changeB.doc.data().latLng;
                         newBuilding.statusRef = changeB.doc.data().statusRef;
                         newMapData1.buildings.set(changeB.doc.id, newBuilding);
@@ -237,6 +240,7 @@ export function cloneBuilding(building: Building) {
     const newBuilding: Building = {
         id: building.id,
         name: building.name,
+        comment: building.comment,
         latLng: building.latLng,
         statusRef: building.statusRef,
         floors: new Map<string, Floor>(

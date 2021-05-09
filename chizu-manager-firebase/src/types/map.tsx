@@ -8,28 +8,29 @@ export enum RoomNumberTypes {
 }
 
 export interface BuildingBasicInfo {
-    name: string,
-    numberOfFloors: number,
-    roomNumberType: RoomNumberTypes,
+    name: string;
+    numberOfFloors: number;
+    roomNumberType: RoomNumberTypes;
 }
 
 export interface BasicBuilding {
-    name: string,
-    latLng: firebase.firestore.GeoPoint,
-    statusRef: firebase.firestore.DocumentReference
+    name: string;
+    latLng: firebase.firestore.GeoPoint;
+    comment: string | null;
+    statusRef: firebase.firestore.DocumentReference;
 }
 
 export interface Building extends BasicBuilding {
-    id: string,
-    floors: Map<string, Floor>,
+    id: string;
+    floors: Map<string, Floor>;
 }
 
 export interface BasicFloor {
-    number: number,
+    number: number;
 }
 export interface Floor extends BasicFloor {
-    id: string,
-    rooms: Map<string, Room>
+    id: string;
+    rooms: Map<string, Room>;
 }
 
 export interface BasicRoom {
