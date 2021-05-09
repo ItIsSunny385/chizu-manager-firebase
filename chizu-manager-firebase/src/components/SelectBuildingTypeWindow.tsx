@@ -32,6 +32,7 @@ export default function SelectBuildingTypeWindow(props: Props) {
                                 onClick={(e) => {
                                     const newHouse: House = {
                                         latLng: new firebase.firestore.GeoPoint(props.latLng.lat(), props.latLng.lng()),
+                                        comment: null,
                                         statusRef: props.defaultStatusRef,
                                     };
                                     const docRef = props.mapRef.collection('houses').doc();

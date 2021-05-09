@@ -45,6 +45,7 @@ export interface Room extends BasicRoom {
 export interface House {
     id?: string,
     latLng: firebase.firestore.GeoPoint,
+    comment: string | null,
     statusRef: firebase.firestore.DocumentReference
 }
 

@@ -98,17 +98,18 @@ export function listeningMapInfoWithChildren(
                     return;
                 }
                 const newMapData1 = cloneMapData(mapDataRef.current);
-                console.log(newMapData1);
                 for (let changeH of housesSnap.docChanges()) {
                     if (changeH.type === 'added') {
                         newMapData1.houses.set(changeH.doc.id, {
                             id: changeH.doc.id,
                             latLng: changeH.doc.data().latLng,
+                            comment: changeH.doc.data().comment,
                             statusRef: changeH.doc.data().statusRef,
                         });
                     } else if (changeH.type === 'modified') {
                         const newHouse = { ...newMapData1.houses.get(changeH.doc.id) } as House;
                         newHouse.latLng = changeH.doc.data().latLng;
+                        newHouse.comment = changeH.doc.data().comment;
                         newHouse.statusRef = changeH.doc.data().statusRef;
                         newMapData1.houses.set(changeH.doc.id, newHouse);
                     } else if (changeH.type === "removed") {
@@ -226,6 +227,7 @@ export function cloneHouse(house: House) {
     const newHouse: House = {
         id: house.id,
         latLng: house.latLng,
+        comment: house.comment,
         statusRef: house.statusRef,
     };
     return newHouse;
