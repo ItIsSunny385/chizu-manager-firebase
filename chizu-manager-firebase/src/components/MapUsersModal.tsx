@@ -27,9 +27,7 @@ const db = firebase.firestore();
 export default function MapUsersModal(props: Props) {
     const [flashMessageProps, setFlashMessageProps] = useState(undefined as FlashMessageProps | undefined);
     const [options] = useState(
-        Array.from(props.userMap.entries()).filter(([id, x]) => {
-            return !x.isAdmin;
-        }).map(([id, x]) => {
+        Array.from(props.userMap.entries()).map(([id, x]) => {
             return { value: id, label: x.displayName };
         })
     );

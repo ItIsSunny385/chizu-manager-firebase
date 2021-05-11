@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom';
 import { useRouter } from 'next/router';
 import { Status, User } from '../../types/model';
 import { PageRoles } from '../../types/role';
-import { getUser } from '../../utils/userUtil';
+import { getUser, listeningUserMap } from '../../utils/userUtil';
 import MapApp from '../../components/MapApp';
 import SelectMapModal from '../../components/SelectMapModal';
 import { MapData } from '../../types/map';
@@ -14,6 +14,7 @@ import MarkerModeMapContents from '../../components/MarkerModeMapContents';
 import { getStatusMap } from '../../utils/statusUtil';
 import { Badge, Button, ButtonGroup } from 'reactstrap';
 import { ListTask, PeopleFill } from 'react-bootstrap-icons';
+import MapUsersModal from '../../components/MapUsersModal';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -21,7 +22,7 @@ const auth = firebase.auth();
 export default function Index() {
     const [loading, setLoading] = useState(true);
     const [controllerSetted, setControllerSetted] = useState(false);
-    const [title, setTitle] = useState('メイン');
+    const [title, setTitle] = useState('地図選択');
     const [pageRole, setPageRole] = useState(undefined as PageRoles | undefined);
     const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
     const [user, setUser] = useState(undefined as User | undefined);
@@ -31,9 +32,11 @@ export default function Index() {
     const [listeningMapIds, _setListeningMapIds] = useState(new Array<string>());
     const [map, setMap] = useState(undefined as google.maps.Map<Element> | undefined);
     const [displaySelectMapModal, setDisplaySelectMapModal] = useState(true);
+    const [displayUsersModal, setDisplayUsersModal] = useState(false);
     const [newLatLng, setNewLatLng] = useState(undefined as google.maps.LatLng | undefined);
     const [statusMap, setStatusMap] = useState(new Map<string, Status>());
     const [buildingStatusMap, setBuildingStatusMap] = useState(new Map<string, Status>());
+    const [userMap, setUserMap] = useState(new Map<string, User>());
     const router = useRouter();
 
     const mapDataMapRef = useRef(mapDataMap);
@@ -76,6 +79,12 @@ export default function Index() {
             /* ステータス情報を取得 */
             getStatusMap(db, 'statuses', setStatusMap);
             getStatusMap(db, 'building_statuses', setBuildingStatusMap);
+
+            /* ユーザ情報を取得 */
+            listeningUserMap(
+                db.collection('users').where('deleted', '==', false).where('isAdmin', '==', false),
+                setUserMap
+            );
 
             const userRef = db.collection('users').doc(authUser.uid);
             const resetMapData = (targetMapId: string) => {
@@ -181,7 +190,6 @@ export default function Index() {
             setMapDataMap
         );
         setListeningMapIds([...listeningMapIds, mapId]);
-        setDisplaySelectMapModal(false);
     }, [mapId]);
 
     useEffect(() => {
@@ -200,6 +208,8 @@ export default function Index() {
             }
         } else {
             setMapData(undefined);
+            setDisplayUsersModal(false);
+            setDisplaySelectMapModal(true);
         }
     }, [mapDataMap, mapId]);
 
@@ -235,7 +245,7 @@ export default function Index() {
             mapNameBadgeLeft.classList.add('d-none');
             mapNameCenter.innerHTML = '';
             mapNameCenter.classList.add('d-none');
-            setTitle('メイン');
+            setTitle('地図選択');
             setPageRole(undefined);
         }
     }, [mapData, controllerSetted]);
@@ -282,10 +292,33 @@ export default function Index() {
                 toggle={() => { setDisplaySelectMapModal(false); }}
             />
         }
+        {
+            displayUsersModal
+            &&
+            mapData
+            &&
+            <MapUsersModal
+                userMap={userMap}
+                data={mapData}
+                update={(managers, allEditable, editors, allUsable, users) => {
+                    db.collection('maps').doc(mapId).update({
+                        managers: managers,
+                        allEditable: allEditable,
+                        editors: editors,
+                        allUsable: allUsable,
+                        users: users,
+                    });
+                }}
+                toggle={() => {
+                    setDisplayUsersModal(false);
+                }}
+            />
+        }
         {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
         <div style={{ display: 'none' }}>
             <Button id="user" onClick={(e) => {
                 e.preventDefault();
+                setDisplayUsersModal(true);
             }}
             />
             <Button id="list" onClick={(e) => {

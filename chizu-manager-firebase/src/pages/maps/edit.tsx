@@ -86,7 +86,10 @@ export default function Edit(props: Props) {
             getStatusMap(db, 'building_statuses', setBuildingStatusMap);
 
             /* ユーザ情報を取得 */
-            listeningUserMap(db.collection('users').where('deleted', '==', false), setUserMap);
+            listeningUserMap(
+                db.collection('users').where('deleted', '==', false).where('isAdmin', '==', false),
+                setUserMap
+            );
 
             /* 地図情報を監視 */
             const mapRef = db.collection('maps').doc(id);
@@ -342,8 +345,6 @@ export default function Edit(props: Props) {
                 mapData
                 &&
                 pageMode === PageMode.User
-                &&
-                userMap.size > 0
                 &&
                 <MapUsersModal
                     userMap={userMap}
