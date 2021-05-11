@@ -23,29 +23,53 @@ export function getMapDataArrayWithNoChildByQuerySnapshot(snapshot: firebase.fir
 export function listeningMapQueryWithNoChildren(
     query: firebase.firestore.Query<firebase.firestore.DocumentData>,
     mapDataMapRef: React.MutableRefObject<Map<string, MapData>>,
-    setMapDataMap: (data: Map<string, MapData>) => void
+    setMapDataMap: (data: Map<string, MapData>) => void,
+    reset: (mapId: string) => void,
 ) {
     query.onSnapshot((snapshot) => {
         const newMapDataMap = cloneMapDataMap(mapDataMapRef.current);
         for (let change of snapshot.docChanges()) {
             if (change.type === 'added') {
                 if (newMapDataMap.get(change.doc.id)) {
-                    continue;
+                    // 権限を変更した場合に、deletedより先に add が動いてしまった場合
+                    const intervalId = setInterval(() => {
+                        const newMapDataMap2 = cloneMapDataMap(mapDataMapRef.current);
+                        if (newMapDataMap2.get(change.doc.id)) {
+                            return;
+                        }
+                        const newMapData: MapData = {
+                            id: change.doc.id,
+                            name: change.doc.data().name,
+                            using: change.doc.data().using,
+                            borderCoords: change.doc.data().borderCoords,
+                            managers: change.doc.data().managers,
+                            editors: change.doc.data().editors,
+                            allEditable: change.doc.data().allEditable,
+                            users: change.doc.data().users,
+                            allUsable: change.doc.data().allUsable,
+                            buildings: new Map<string, Building>(),
+                            houses: new Map<string, House>(),
+                        };
+                        newMapDataMap2.set(change.doc.id, newMapData);
+                        setMapDataMap(newMapDataMap2);
+                        clearInterval(intervalId);
+                    }, 1000);
+                } else {
+                    const newMapData: MapData = {
+                        id: change.doc.id,
+                        name: change.doc.data().name,
+                        using: change.doc.data().using,
+                        borderCoords: change.doc.data().borderCoords,
+                        managers: change.doc.data().managers,
+                        editors: change.doc.data().editors,
+                        allEditable: change.doc.data().allEditable,
+                        users: change.doc.data().users,
+                        allUsable: change.doc.data().allUsable,
+                        buildings: new Map<string, Building>(),
+                        houses: new Map<string, House>(),
+                    };
+                    newMapDataMap.set(change.doc.id, newMapData);
                 }
-                const newMapData: MapData = {
-                    id: change.doc.id,
-                    name: change.doc.data().name,
-                    using: change.doc.data().using,
-                    borderCoords: change.doc.data().borderCoords,
-                    managers: change.doc.data().managers,
-                    editors: change.doc.data().editors,
-                    allEditable: change.doc.data().allEditable,
-                    users: change.doc.data().users,
-                    allUsable: change.doc.data().allUsable,
-                    buildings: new Map<string, Building>(),
-                    houses: new Map<string, House>(),
-                };
-                newMapDataMap.set(change.doc.id, newMapData);
             } else if (change.type === 'modified') {
                 const newMMapData = newMapDataMap.get(change.doc.id)!;
                 newMMapData.name = change.doc.data().name;
@@ -61,6 +85,7 @@ export function listeningMapQueryWithNoChildren(
                     continue;
                 }
                 newMapDataMap.delete(change.doc.id);
+                reset(change.doc.id);
             }
         }
         setMapDataMap(newMapDataMap);

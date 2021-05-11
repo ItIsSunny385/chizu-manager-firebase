@@ -47,9 +47,9 @@ export default function SelectMapModal(props: Props) {
         <ListGroup>
             {props.mapDataArray.filter(x => x.name.includes(keyword)).map(x => {
                 let role = PageRoles.User;
-                if (x.managers.some(x => x.isEqual(props.userRef))) {
+                if (x.managers.some(y => y.isEqual(props.userRef))) {
                     role = PageRoles.Manager;
-                } else if (x.allEditable || x.editors.some(x => x.isEqual(props.userRef))) {
+                } else if (x.allEditable || x.editors.some(y => y.isEqual(props.userRef))) {
                     role = PageRoles.Editor;
                 }
                 return <ListGroupItem

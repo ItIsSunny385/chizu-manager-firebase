@@ -26,9 +26,9 @@ export default function Index() {
     const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
     const [user, setUser] = useState(undefined as User | undefined);
     const [mapDataMap, _setMapDataMap] = useState(new Map<string, MapData>());
-    const [mapId, setMapId] = useState(undefined as string | undefined);
+    const [mapId, _setMapId] = useState(undefined as string | undefined);
     const [mapData, setMapData] = useState(undefined as MapData | undefined);
-    const [listeningMapIds, setListeningMapIds] = useState(new Array<string>());
+    const [listeningMapIds, _setListeningMapIds] = useState(new Array<string>());
     const [map, setMap] = useState(undefined as google.maps.Map<Element> | undefined);
     const [displaySelectMapModal, setDisplaySelectMapModal] = useState(true);
     const [newLatLng, setNewLatLng] = useState(undefined as google.maps.LatLng | undefined);
@@ -41,6 +41,18 @@ export default function Index() {
         mapDataMapRef.current = data;
         _setMapDataMap(data);
     };
+
+    const mapIdRef = useRef(mapId);
+    const setMapId = (data: string | undefined) => {
+        mapIdRef.current = data;
+        _setMapId(data);
+    }
+
+    const listeningMapIdsRef = useRef(listeningMapIds);
+    const setListeningMapIds = (data: string[]) => {
+        listeningMapIdsRef.current = data;
+        _setListeningMapIds(data);
+    }
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -66,36 +78,51 @@ export default function Index() {
             getStatusMap(db, 'building_statuses', setBuildingStatusMap);
 
             const userRef = db.collection('users').doc(authUser.uid);
+            const resetMapData = (targetMapId: string) => {
+                if (mapIdRef.current === targetMapId) {
+                    setMapId(undefined);
+                }
+                if (listeningMapIdsRef.current.includes(targetMapId)) {
+                    const newListeningMapIds = [...listeningMapIdsRef.current];
+                    newListeningMapIds.splice(newListeningMapIds.indexOf(targetMapId), 1);
+                    setListeningMapIds(newListeningMapIds);
+                }
+            };
 
             /* マネージャとしての地図 */
             listeningMapQueryWithNoChildren(
                 db.collection('maps').where('managers', 'array-contains', userRef),
                 mapDataMapRef,
-                setMapDataMap
+                setMapDataMap,
+                resetMapData
             );
 
             /* 編集者としての地図 */
             listeningMapQueryWithNoChildren(
                 db.collection('maps').where('allEditable', '==', true),
                 mapDataMapRef,
-                setMapDataMap
+                setMapDataMap,
+                resetMapData
             );
             listeningMapQueryWithNoChildren(
                 db.collection('maps').where('editors', 'array-contains', userRef),
                 mapDataMapRef,
-                setMapDataMap
+                setMapDataMap,
+                resetMapData
             );
 
             /* 利用者としての地図 */
             listeningMapQueryWithNoChildren(
                 db.collection('maps').where('allUsable', '==', true),
                 mapDataMapRef,
-                setMapDataMap
+                setMapDataMap,
+                resetMapData
             );
             listeningMapQueryWithNoChildren(
                 db.collection('maps').where('users', 'array-contains', userRef),
                 mapDataMapRef,
-                setMapDataMap
+                setMapDataMap,
+                resetMapData
             );
 
             setLoading(false);
@@ -191,12 +218,25 @@ export default function Index() {
             mapNameCenter.innerHTML = mapData.name;
             mapNameCenter.classList.remove('d-none');
             setTitle(mapData.name);
+            if (authUser) {
+                const userRef = db.collection('users').doc(authUser.uid)
+                let role = PageRoles.User;
+                if (mapData.managers.some(x => x.isEqual(userRef))) {
+                    role = PageRoles.Manager;
+                } else if (mapData.allEditable || mapData.editors.some(x => x.isEqual(userRef))) {
+                    role = PageRoles.Editor;
+                }
+                setPageRole(role);
+            } else {
+                setPageRole(undefined);
+            }
         } else {
             mapNameBadgeLeft.innerHTML = '';
             mapNameBadgeLeft.classList.add('d-none');
             mapNameCenter.innerHTML = '';
             mapNameCenter.classList.add('d-none');
             setTitle('メイン');
+            setPageRole(undefined);
         }
     }, [mapData, controllerSetted]);
 

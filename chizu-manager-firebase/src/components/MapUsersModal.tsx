@@ -119,7 +119,7 @@ export default function MapUsersModal(props: Props) {
                     </Label>
                 </FormGroup>
                 <Select
-                    isDisabled={allUsable}
+                    isDisabled={allUsable || allEditable}
                     value={userIds.map(x => ({ value: x, label: props.userMap.get(x)!.displayName }))}
                     isMulti
                     name="users"
