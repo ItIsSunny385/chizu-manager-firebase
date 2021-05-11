@@ -8,6 +8,7 @@ import { Colors } from '../../types/bootstrap';
 import { useRouter } from 'next/router';
 
 const auth = firebase.auth();
+const db = firebase.firestore();
 
 export default function Login() {
     const [loading, setLoading] = useState(true);
@@ -51,7 +52,18 @@ export default function Login() {
                                 onClick={async (e) => {
                                     try {
                                         setLoading(true);
-                                        await auth.signInWithEmailAndPassword(email, password);
+                                        const userAuth = await auth.signInWithEmailAndPassword(email, password);
+                                        if (userAuth.user) {
+                                            const user = await db.collection('users').doc(userAuth.user?.uid).get();
+                                            const userData = user.data();
+                                            if (userData) {
+                                                if (userData.isAdmin) {
+                                                    router.push('/maps');
+                                                } else {
+                                                    router.push('/main');
+                                                }
+                                            }
+                                        }
                                     } catch (error) {
                                         let message = '';
                                         switch (error.code) {
@@ -74,9 +86,7 @@ export default function Login() {
                                             close: () => { setFlashMessageProps(undefined); }
                                         });
                                         setLoading(false);
-                                        return;
                                     }
-                                    router.push('/maps');
                                 }}
                             >ログイン</Button>
                         </Form>

@@ -7,7 +7,7 @@ import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
 import { MapData } from '../../types/map';
-import { getMapDataArrayWithNoChildByQuerySnapshot } from '../../utils/mapUtil'
+import { getMapDataArrayWithNoChildByQuerySnapshot } from '../../utils/mapUtil';
 import Link from 'next/link';
 import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
 import { useRouter } from 'next/router';

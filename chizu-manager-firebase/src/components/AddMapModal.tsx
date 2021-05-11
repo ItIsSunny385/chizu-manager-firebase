@@ -4,8 +4,8 @@ import MessageModal from "./MessageModal";
 import { Button, Form, FormFeedback, FormGroup, FormText, Input, Label } from "reactstrap";
 
 interface Props {
-    back: () => void,
-    save: (name: string) => void,
+    back: () => void;
+    save: (name: string) => void;
 }
 
 export default function AddMapModal(props: Props) {

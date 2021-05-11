@@ -20,56 +20,209 @@ export function getMapDataArrayWithNoChildByQuerySnapshot(snapshot: firebase.fir
     });
 }
 
-/*
-export async function getMapDataWithChildrenById(db: firebase.firestore.Firestore, id: string): Promise<MapData | undefined> {
-    const mapSnap = await db.collection('maps').doc(id).get();
-    const mapData = mapSnap.data();
-    if (!mapData) {
-        return undefined;
-    }
-    const housesSnap = await mapSnap.ref.collection('houses').get();
-    const houses = housesSnap.docs.map(x => ({
-        id: x.id,
-        latLng: x.data().latLng,
-        statusRef: x.data().statusRef,
-    }));
-    const buildingsSnap = await mapSnap.ref.collection('buildings').get();
-    const buildings = await Promise.all(buildingsSnap.docs.map(async x => {
-        const floorsSnap = await x.ref.collection('floors').orderBy('number', 'asc').get();
-        const floors = await Promise.all(floorsSnap.docs.map(async y => {
-            const roomsSnap = await y.ref.collection('rooms').orderBy('orderNumber', 'asc').get();
-            const rooms = roomsSnap.docs.map(z => ({
-                id: z.id,
-                orderNumber: z.data().orderNumber,
-                roomNumber: z.data().roomNumber,
-                statusRef: z.data().statusRef,
-            }));
-            return {
-                id: y.id,
-                number: y.data().number,
-                rooms: rooms,
-            };
-        }));
-        return {
-            id: x.id,
-            name: x.data().name,
-            latLng: x.data().latLng,
-            statusRef: x.data().statusRef,
-            floors: floors,
-        };
-    }));
-    return {
-        id: mapSnap.id,
-        orderNumber: mapData.orderNumber,
-        name: mapData.name,
-        status: mapData.status,
-        borderCoords: mapData.borderCoords,
-        badgeLatLng: mapData.badgeLatLng,
-        buildings: buildings,
-        houses: houses,
-    } as MapData;
+export function listeningMapQueryWithNoChildren(
+    query: firebase.firestore.Query<firebase.firestore.DocumentData>,
+    mapDataMapRef: React.MutableRefObject<Map<string, MapData>>,
+    setMapDataMap: (data: Map<string, MapData>) => void
+) {
+    query.onSnapshot((snapshot) => {
+        const newMapDataMap = cloneMapDataMap(mapDataMapRef.current);
+        for (let change of snapshot.docChanges()) {
+            if (change.type === 'added') {
+                if (newMapDataMap.get(change.doc.id)) {
+                    continue;
+                }
+                const newMapData: MapData = {
+                    id: change.doc.id,
+                    name: change.doc.data().name,
+                    using: change.doc.data().using,
+                    borderCoords: change.doc.data().borderCoords,
+                    managers: change.doc.data().managers,
+                    editors: change.doc.data().editors,
+                    allEditable: change.doc.data().allEditable,
+                    users: change.doc.data().users,
+                    allUsable: change.doc.data().allUsable,
+                    buildings: new Map<string, Building>(),
+                    houses: new Map<string, House>(),
+                };
+                newMapDataMap.set(change.doc.id, newMapData);
+            } else if (change.type === 'modified') {
+                const newMMapData = newMapDataMap.get(change.doc.id)!;
+                newMMapData.name = change.doc.data().name;
+                newMMapData.using = change.doc.data().using;
+                newMMapData.borderCoords = change.doc.data().borderCoords;
+                newMMapData.managers = change.doc.data().managers;
+                newMMapData.editors = change.doc.data().editors;
+                newMMapData.allEditable = change.doc.data().allEditable;
+                newMMapData.users = change.doc.data().users;
+                newMMapData.allUsable = change.doc.data().allUsable;
+            } else if (change.type === 'removed') {
+                if (!newMapDataMap.get(change.doc.id)) {
+                    continue;
+                }
+                newMapDataMap.delete(change.doc.id);
+            }
+        }
+        setMapDataMap(newMapDataMap);
+    });
 }
-*/
+
+export function listeningHouseMap(
+    getHouseMap: () => Map<string, House> | undefined,
+    housesSnap: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>,
+    setHouseMap: (houseMap: Map<string, House>) => void
+) {
+    const houses = getHouseMap();
+    if (!houses) return;
+    for (let changeH of housesSnap.docChanges()) {
+        if (changeH.type === 'added') {
+            houses.set(changeH.doc.id, {
+                id: changeH.doc.id,
+                latLng: changeH.doc.data().latLng,
+                comment: changeH.doc.data().comment,
+                statusRef: changeH.doc.data().statusRef,
+            });
+        } else if (changeH.type === 'modified') {
+            const newHouse = houses.get(changeH.doc.id)!;
+            newHouse.latLng = changeH.doc.data().latLng;
+            newHouse.comment = changeH.doc.data().comment;
+            newHouse.statusRef = changeH.doc.data().statusRef;
+        } else if (changeH.type === "removed") {
+            houses.delete(changeH.doc.id);
+        }
+    }
+    setHouseMap(houses);
+}
+
+export function listeningBuildingMap(
+    getBuildingMap: () => Map<string, Building> | undefined,
+    buildingsSnap: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>,
+    setBuildingMap: (buildingMap: Map<string, Building>) => void
+) {
+    const buildings1 = getBuildingMap();
+    if (!buildings1) return;
+    for (let changeB of buildingsSnap.docChanges()) {
+        if (changeB.type === 'added') {
+            const newBuilding1: Building = {
+                id: changeB.doc.id,
+                name: changeB.doc.data().name,
+                comment: changeB.doc.data().comment,
+                latLng: changeB.doc.data().latLng,
+                statusRef: changeB.doc.data().statusRef,
+                floors: new Map<string, Floor>(),
+            };
+            buildings1.set(changeB.doc.id, newBuilding1);
+            changeB.doc.ref.collection('floors').orderBy('number', 'asc').onSnapshot((floorsSnap) => {
+                const buildings2 = getBuildingMap();
+                if (!buildings2) return;
+                const newBuilding2 = buildings2.get(changeB.doc.id);
+                if (!newBuilding2) {
+                    return;
+                }
+                for (let changeF of floorsSnap.docChanges()) {
+                    if (changeF.type === 'added') {
+                        newBuilding2.floors.set(changeF.doc.id, {
+                            id: changeF.doc.id,
+                            number: changeF.doc.data().number,
+                            rooms: new Map<string, Room>(),
+                        });
+                        changeF.doc.ref.collection('rooms').orderBy('orderNumber', 'asc').onSnapshot((roomsSnap) => {
+                            const buildings3 = getBuildingMap();
+                            if (!buildings3) return;
+                            const newBuilding3 = buildings3.get(changeB.doc.id);
+                            if (!newBuilding3) {
+                                return;
+                            }
+                            const newFloor = newBuilding3.floors.get(changeF.doc.id);
+                            if (!newFloor) {
+                                return;
+                            }
+                            for (let changeR of roomsSnap.docChanges()) {
+                                if (changeR.type === 'added') {
+                                    newFloor.rooms.set(changeR.doc.id, {
+                                        id: changeR.doc.id,
+                                        orderNumber: changeR.doc.data().orderNumber,
+                                        roomNumber: changeR.doc.data().roomNumber,
+                                        statusRef: changeR.doc.data().statusRef,
+                                        comment: changeR.doc.data().comment,
+                                    })
+                                } else if (changeR.type === 'modified') {
+                                    const newRoom = { ...newFloor.rooms.get(changeR.doc.id) } as Room;
+                                    newRoom.orderNumber = changeR.doc.data().orderNumber;
+                                    newRoom.roomNumber = changeR.doc.data().roomNumber;
+                                    newRoom.statusRef = changeR.doc.data().statusRef;
+                                    newRoom.comment = changeR.doc.data().comment;
+                                    newFloor.rooms.set(changeR.doc.id, newRoom);
+                                } else if (changeR.type === 'removed') {
+                                    newFloor.rooms.delete(changeR.doc.id);
+                                }
+                            }
+                            setBuildingMap(buildings3);
+                        });
+                    } else if (changeF.type === 'modified') {
+                        const newFloor = { ...newBuilding2.floors.get(changeF.doc.id) } as Floor;
+                        newFloor.number = changeF.doc.data().number;
+                        newBuilding2.floors.set(changeF.doc.id, newFloor);
+                    } else if (changeF.type === 'removed') {
+                        newBuilding2.floors.delete(changeF.doc.id);
+                    }
+                }
+                setBuildingMap(buildings2);
+            });
+        } else if (changeB.type === 'modified') {
+            const newBuilding = buildings1.get(changeB.doc.id)!;
+            newBuilding.name = changeB.doc.data().name;
+            newBuilding.comment = changeB.doc.data().comment;
+            newBuilding.latLng = changeB.doc.data().latLng;
+            newBuilding.statusRef = changeB.doc.data().statusRef;
+        } else if (changeB.type === "removed") {
+            buildings1.delete(changeB.doc.id);
+        }
+    }
+    setBuildingMap(buildings1);
+}
+
+export function listeningMapChildrenAndSetMapDataMap(
+    mapRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
+    mapDataMapRef: React.MutableRefObject<Map<string, MapData>>,
+    setMapDataMap: (data: Map<string, MapData>) => void
+) {
+    mapRef.collection('houses').onSnapshot((housesSnap) => {
+        listeningHouseMap(
+            (): Map<string, House> | undefined => {
+                const newMapDataMap1 = cloneMapDataMap(mapDataMapRef.current);
+                const newMapData1 = newMapDataMap1.get(mapRef.id);
+                return newMapData1 ? newMapData1.houses : undefined;
+            },
+            housesSnap,
+            (houseMap: Map<string, House>) => {
+                const newMapDataMap2 = cloneMapDataMap(mapDataMapRef.current);
+                const newMapData2 = newMapDataMap2.get(mapRef.id);
+                if (!newMapData2) return;
+                newMapData2.houses = houseMap;
+                setMapDataMap(newMapDataMap2);
+            }
+        );
+    });
+
+    mapRef.collection('buildings').onSnapshot((buildingsSnap) => {
+        listeningBuildingMap(
+            (): Map<string, Building> | undefined => {
+                const newMapDataMap1 = cloneMapDataMap(mapDataMapRef.current);
+                const newMapData1 = newMapDataMap1.get(mapRef.id);
+                return newMapData1 ? newMapData1.buildings : undefined;
+            },
+            buildingsSnap,
+            (buildingMap: Map<string, Building>) => {
+                const newMapDataMap2 = cloneMapDataMap(mapDataMapRef.current);
+                const newMapData2 = newMapDataMap2.get(mapRef.id);
+                if (!newMapData2) return;
+                newMapData2.buildings = buildingMap;
+                setMapDataMap(newMapDataMap2);
+            }
+        );
+    });
+}
 
 export function listeningMapInfoWithChildren(
     mapRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
@@ -109,122 +262,48 @@ export function listeningMapInfoWithChildren(
             };
             setMapData(newMapData);
             mapRef.collection('houses').onSnapshot((housesSnap) => {
-                if (!mapDataRef.current) {
-                    return;
-                }
-                const newMapData1 = cloneMapData(mapDataRef.current);
-                for (let changeH of housesSnap.docChanges()) {
-                    if (changeH.type === 'added') {
-                        newMapData1.houses.set(changeH.doc.id, {
-                            id: changeH.doc.id,
-                            latLng: changeH.doc.data().latLng,
-                            comment: changeH.doc.data().comment,
-                            statusRef: changeH.doc.data().statusRef,
-                        });
-                    } else if (changeH.type === 'modified') {
-                        const newHouse = { ...newMapData1.houses.get(changeH.doc.id) } as House;
-                        newHouse.latLng = changeH.doc.data().latLng;
-                        newHouse.comment = changeH.doc.data().comment;
-                        newHouse.statusRef = changeH.doc.data().statusRef;
-                        newMapData1.houses.set(changeH.doc.id, newHouse);
-                    } else if (changeH.type === "removed") {
-                        newMapData1.houses.delete(changeH.doc.id);
+                listeningHouseMap(
+                    () => {
+                        if (!mapDataRef.current) return undefined;
+                        const newMapData1 = cloneMapData(mapDataRef.current);
+                        return newMapData1.houses;
+                    },
+                    housesSnap,
+                    (houseMap) => {
+                        if (!mapDataRef.current) return;
+                        const newMapData2 = cloneMapData(mapDataRef.current);
+                        newMapData2.houses = houseMap;
+                        setMapData(newMapData2);
                     }
-                }
-                setMapData(newMapData1);
+                )
             });
             mapRef.collection('buildings').onSnapshot((buildingsSnap) => {
-                if (!mapDataRef.current) {
-                    return;
-                }
-                const newMapData1 = cloneMapData(mapDataRef.current);
-                for (let changeB of buildingsSnap.docChanges()) {
-                    if (changeB.type === 'added') {
-                        const newBuilding1: Building = {
-                            id: changeB.doc.id,
-                            name: changeB.doc.data().name,
-                            comment: changeB.doc.data().comment,
-                            latLng: changeB.doc.data().latLng,
-                            statusRef: changeB.doc.data().statusRef,
-                            floors: new Map<string, Floor>(),
-                        };
-                        newMapData1.buildings.set(changeB.doc.id, newBuilding1);
-                        changeB.doc.ref.collection('floors').orderBy('number', 'asc').onSnapshot((floorsSnap) => {
-                            if (!mapDataRef.current) {
-                                return;
-                            }
-                            const newMapData2 = cloneMapData(mapDataRef.current);
-                            const newBuilding2 = newMapData2.buildings.get(changeB.doc.id);
-                            if (!newBuilding2) {
-                                return;
-                            }
-                            for (let changeF of floorsSnap.docChanges()) {
-                                if (changeF.type === 'added') {
-                                    newBuilding2.floors.set(changeF.doc.id, {
-                                        id: changeF.doc.id,
-                                        number: changeF.doc.data().number,
-                                        rooms: new Map<string, Room>(),
-                                    });
-                                    changeF.doc.ref.collection('rooms').orderBy('orderNumber', 'asc').onSnapshot((roomsSnap) => {
-                                        if (!mapDataRef.current) {
-                                            return;
-                                        }
-                                        const newMapData3 = cloneMapData(mapDataRef.current);
-                                        const newBuilding3 = newMapData3.buildings.get(changeB.doc.id);
-                                        if (!newBuilding3) {
-                                            return;
-                                        }
-                                        const newFloor = newBuilding3.floors.get(changeF.doc.id);
-                                        if (!newFloor) {
-                                            return;
-                                        }
-                                        for (let changeR of roomsSnap.docChanges()) {
-                                            if (changeR.type === 'added') {
-                                                newFloor.rooms.set(changeR.doc.id, {
-                                                    id: changeR.doc.id,
-                                                    orderNumber: changeR.doc.data().orderNumber,
-                                                    roomNumber: changeR.doc.data().roomNumber,
-                                                    statusRef: changeR.doc.data().statusRef,
-                                                    comment: changeR.doc.data().comment,
-                                                })
-                                            } else if (changeR.type === 'modified') {
-                                                const newRoom = { ...newFloor.rooms.get(changeR.doc.id) } as Room;
-                                                newRoom.orderNumber = changeR.doc.data().orderNumber;
-                                                newRoom.roomNumber = changeR.doc.data().roomNumber;
-                                                newRoom.statusRef = changeR.doc.data().statusRef;
-                                                newRoom.comment = changeR.doc.data().comment;
-                                                newFloor.rooms.set(changeR.doc.id, newRoom);
-                                            } else if (changeR.type === 'removed') {
-                                                newFloor.rooms.delete(changeR.doc.id);
-                                            }
-                                        }
-                                        setMapData(newMapData3);
-                                    });
-                                } else if (changeF.type === 'modified') {
-                                    const newFloor = { ...newBuilding2.floors.get(changeF.doc.id) } as Floor;
-                                    newFloor.number = changeF.doc.data().number;
-                                    newBuilding2.floors.set(changeF.doc.id, newFloor);
-                                } else if (changeF.type === 'removed') {
-                                    newBuilding2.floors.delete(changeF.doc.id);
-                                }
-                            }
-                            setMapData(newMapData2);
-                        });
-                    } else if (changeB.type === 'modified') {
-                        const newBuilding = { ...newMapData1.buildings.get(changeB.doc.id) } as Building;
-                        newBuilding.name = changeB.doc.data().name;
-                        newBuilding.comment = changeB.doc.data().comment;
-                        newBuilding.latLng = changeB.doc.data().latLng;
-                        newBuilding.statusRef = changeB.doc.data().statusRef;
-                        newMapData1.buildings.set(changeB.doc.id, newBuilding);
-                    } else if (changeB.type === "removed") {
-                        newMapData1.buildings.delete(changeB.doc.id);
+                listeningBuildingMap(
+                    () => {
+                        if (!mapDataRef.current) return undefined;
+                        const newMapData1 = cloneMapData(mapDataRef.current);
+                        return newMapData1.buildings;
+                    },
+                    buildingsSnap,
+                    (buildingMap) => {
+                        if (!mapDataRef.current) return;
+                        const newMapData2 = cloneMapData(mapDataRef.current);
+                        newMapData2.buildings = buildingMap;
+                        setMapData(newMapData2);
                     }
-                }
-                setMapData(newMapData1);
+                )
             });
         }
     });
+}
+
+export function cloneMapDataMap(mapDataMap: Map<string, MapData>): Map<string, MapData> {
+    const newMapDataMap = new Map<string, MapData>(
+        Array.from(mapDataMap.entries()).map(([id, x]) => {
+            return [id, cloneMapData(x)];
+        })
+    );
+    return newMapDataMap;
 }
 
 export function cloneMapData(mapData: MapData): MapData {
