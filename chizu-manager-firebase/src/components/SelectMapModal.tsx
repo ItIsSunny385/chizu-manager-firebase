@@ -10,7 +10,7 @@ interface Props {
     userRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>;
     mapDataArray: MapData[];
     select: (id: string) => void;
-    toggle: (() => void) | undefined;
+    toggle: () => void;
 }
 
 export default function SelectMapModal(props: Props) {
@@ -60,6 +60,7 @@ export default function SelectMapModal(props: Props) {
                     onClick={(e) => {
                         e.preventDefault();
                         props.select(x.id);
+                        props.toggle();
                     }}
                 >
                     <Badge color={PageRoleBadgeColor[role]} className="mr-3">{role}</Badge>

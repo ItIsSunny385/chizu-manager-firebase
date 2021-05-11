@@ -13,7 +13,7 @@ import MarkerModeMapContents from '../../components/MarkerModeMapContents';
 import AddMapModal from '../../components/AddMapModal';
 import { getStatusMap } from '../../utils/statusUtil';
 import { getUser, listeningUserMap } from '../../utils/userUtil';
-import { cloneMapData, listeningMapInfoWithChildren } from '../../utils/mapUtil';
+import { listeningMapInfoWithChildren } from '../../utils/mapUtil';
 import MapSettingModal from '../../components/MapSettingModal';
 import MapUsersModal from '../../components/MapUsersModal';
 import { PageRoles } from '../../types/role';
@@ -369,7 +369,6 @@ export default function Edit(props: Props) {
                     e.preventDefault();
                     router.push('/maps');
                 }} />
-                <Button id="showInfoModal" onClick={(e) => { }} />
                 <Button id="border" onClick={(e) => {
                     e.preventDefault();
                     setPrevPageMode(undefined);
