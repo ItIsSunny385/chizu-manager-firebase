@@ -45,6 +45,11 @@ export default function SelectMapModal(props: Props) {
             </FormGroup>
         </Form>
         <ListGroup>
+            {
+                props.mapDataArray.length === 0
+                &&
+                <ListGroupItem key={0} className="text-center">利用できる地図がありません。</ListGroupItem>
+            }
             {props.mapDataArray.filter(x => x.name.includes(keyword)).map(x => {
                 let role = PageRoles.User;
                 if (x.managers.some(y => y.isEqual(props.userRef))) {
