@@ -12,6 +12,7 @@ import { MapData } from '../types/map';
 interface Props {
     userMap: Map<string, User>;
     data: MapData;
+    editable: boolean;
     update: (
         managers: firebase.firestore.DocumentReference[],
         allEditable: boolean,
@@ -61,6 +62,7 @@ export default function MapUsersModal(props: Props) {
             <div className="mb-4">
                 <h5>マネージャ</h5>
                 <Select
+                    isDisabled={!props.editable}
                     value={managerIds.map(x => ({ value: x, label: props.userMap.get(x)!.displayName }))}
                     isMulti
                     name="managers"
@@ -76,6 +78,7 @@ export default function MapUsersModal(props: Props) {
                     <Label check>
                         <Input
                             type="checkbox"
+                            disabled={!props.editable}
                             checked={allEditable}
                             onChange={(e) => {
                                 if (e.target.checked) {
@@ -89,7 +92,7 @@ export default function MapUsersModal(props: Props) {
                     </Label>
                 </FormGroup>
                 <Select
-                    isDisabled={allEditable}
+                    isDisabled={allEditable || !props.editable}
                     value={editorIds.map(x => ({ value: x, label: props.userMap.get(x)!.displayName }))}
                     isMulti
                     name="editors"
@@ -104,7 +107,7 @@ export default function MapUsersModal(props: Props) {
                 <FormGroup check className="mb-1">
                     <Label check>
                         <Input
-                            disabled={allEditable}
+                            disabled={allEditable || !props.editable}
                             type="checkbox"
                             checked={allUsable}
                             onChange={(e) => {
@@ -117,7 +120,7 @@ export default function MapUsersModal(props: Props) {
                     </Label>
                 </FormGroup>
                 <Select
-                    isDisabled={allUsable || allEditable}
+                    isDisabled={allUsable || allEditable || !props.editable}
                     value={userIds.map(x => ({ value: x, label: props.userMap.get(x)!.displayName }))}
                     isMulti
                     name="users"
@@ -127,21 +130,25 @@ export default function MapUsersModal(props: Props) {
                     onChange={(value) => { setUserIds(value.map(x => x.value)); }}
                 />
             </div>
-            <Button onClick={(e) => {
-                props.update(
-                    managerIds.map(x => db.collection('users').doc(x)),
-                    allEditable,
-                    editorIds.map(x => db.collection('users').doc(x)),
-                    allUsable,
-                    userIds.map(x => db.collection('users').doc(x))
-                );
-                setFlashMessageProps({
-                    color: Colors.Success,
-                    message: 'ユーザ設定を更新しました。',
-                    className: 'mt-0',
-                    close: () => { setFlashMessageProps(undefined); }
-                });
-            }}>更新</Button>
+            {
+                props.editable
+                &&
+                <Button onClick={(e) => {
+                    props.update(
+                        managerIds.map(x => db.collection('users').doc(x)),
+                        allEditable,
+                        editorIds.map(x => db.collection('users').doc(x)),
+                        allUsable,
+                        userIds.map(x => db.collection('users').doc(x))
+                    );
+                    setFlashMessageProps({
+                        color: Colors.Success,
+                        message: 'ユーザ設定を更新しました。',
+                        className: 'mt-0',
+                        close: () => { setFlashMessageProps(undefined); }
+                    });
+                }}>更新</Button>
+            }
         </Form>
     </MessageModal>;
 }

@@ -300,6 +300,7 @@ export default function Index() {
             <MapUsersModal
                 userMap={userMap}
                 data={mapData}
+                editable={pageRole === PageRoles.Manager}
                 update={(managers, allEditable, editors, allUsable, users) => {
                     db.collection('maps').doc(mapId).update({
                         managers: managers,

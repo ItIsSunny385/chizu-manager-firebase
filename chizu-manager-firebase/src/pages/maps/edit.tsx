@@ -349,6 +349,7 @@ export default function Edit(props: Props) {
                 <MapUsersModal
                     userMap={userMap}
                     data={mapData}
+                    editable={true}
                     update={(managers, allEditable, editors, allUsable, users) => {
                         db.collection('maps').doc(id).update({
                             managers: managers,
