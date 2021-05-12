@@ -2,8 +2,8 @@ import '../utils/InitializeFirebase';
 import firebase from 'firebase';
 import { Fragment, useState } from "react";
 import MessageModal from "./MessageModal";
-import { Button, Form, FormFeedback, FormGroup, FormText, Input, Label } from "reactstrap";
-import FlashMessage, { Props as FlashMessageProps } from "./FlashMessage";
+import { Button, Form, FormGroup, Input, Label } from "reactstrap";
+import FlashMessage from "./FlashMessage";
 import { Colors } from "../types/bootstrap";
 import Select from 'react-select';
 import { User } from '../types/model';
@@ -27,15 +27,24 @@ const db = firebase.firestore();
 
 export default function MapUsersModal(props: Props) {
     const [flashMessageProps, setFlashMessageProps] = useState(
-        props.editable ?
-            undefined
+        props.data.using ?
+            props.editable ?
+                undefined
+                :
+                {
+                    color: Colors.Info,
+                    message: 'ユーザ設定は管理者かマネージャにご依頼ください。',
+                    className: 'mt-0',
+                    close: () => { setFlashMessageProps(undefined); }
+                }
             :
             {
-                color: Colors.Info,
-                message: 'ユーザ設定は管理者かマネージャにご依頼ください。',
+                color: Colors.Warning,
+                message: '使用中ではないため、ユーザ設定をしてもユーザは利用できません。',
                 className: 'mt-0',
                 close: () => { setFlashMessageProps(undefined); }
             }
+
     );
     const [options] = useState(
         Array.from(props.userMap.entries()).map(([id, x]) => {

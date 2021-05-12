@@ -100,7 +100,7 @@ export default function Index() {
 
             /* マネージャとしての地図 */
             listeningMapQueryWithNoChildren(
-                db.collection('maps').where('managers', 'array-contains', userRef),
+                db.collection('maps').where('managers', 'array-contains', userRef).where('using', '==', true),
                 mapDataMapRef,
                 setMapDataMap,
                 resetMapData
@@ -108,13 +108,13 @@ export default function Index() {
 
             /* 編集者としての地図 */
             listeningMapQueryWithNoChildren(
-                db.collection('maps').where('allEditable', '==', true),
+                db.collection('maps').where('allEditable', '==', true).where('using', '==', true),
                 mapDataMapRef,
                 setMapDataMap,
                 resetMapData
             );
             listeningMapQueryWithNoChildren(
-                db.collection('maps').where('editors', 'array-contains', userRef),
+                db.collection('maps').where('editors', 'array-contains', userRef).where('using', '==', true),
                 mapDataMapRef,
                 setMapDataMap,
                 resetMapData
@@ -122,13 +122,13 @@ export default function Index() {
 
             /* 利用者としての地図 */
             listeningMapQueryWithNoChildren(
-                db.collection('maps').where('allUsable', '==', true),
+                db.collection('maps').where('allUsable', '==', true).where('using', '==', true),
                 mapDataMapRef,
                 setMapDataMap,
                 resetMapData
             );
             listeningMapQueryWithNoChildren(
-                db.collection('maps').where('users', 'array-contains', userRef),
+                db.collection('maps').where('users', 'array-contains', userRef).where('using', '==', true),
                 mapDataMapRef,
                 setMapDataMap,
                 resetMapData
