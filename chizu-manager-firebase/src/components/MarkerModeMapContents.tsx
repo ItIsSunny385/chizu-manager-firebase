@@ -62,6 +62,8 @@ export default function MarkerModeMapContents(props: Props) {
         {
             props.newLatLng
             &&
+            props.editable
+            &&
             <SelectBuildingTypeWindow
                 mapRef={props.mapRef}
                 defaultStatusRef={
