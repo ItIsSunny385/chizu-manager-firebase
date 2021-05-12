@@ -282,6 +282,7 @@ export default function Edit(props: Props) {
                             (pageMode === PageMode.Marker || prevPageMode === PageMode.Marker)
                             &&
                             <MarkerModeMapContents
+                                editable={true}
                                 mapRef={db.collection('maps').doc(id)}
                                 borderCoords={mapData.borderCoords.map(x => new google.maps.LatLng({ lat: x.latitude, lng: x.longitude }))}
                                 statusMap={statusMap}

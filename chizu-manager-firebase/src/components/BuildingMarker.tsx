@@ -13,6 +13,7 @@ import BuildingMarkerRoomInfo from './BuildingMarkerRoomInfo';
 import { Colors } from '../types/bootstrap';
 
 interface Props {
+    editable: boolean;
     docRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>;
     data: Building;
     statusMap: Map<string, Status>;
@@ -56,19 +57,23 @@ export default function BuildingMarker(props: Props) {
             &&
             <InfoWindow onCloseClick={() => { setOpenWindow(false); }}>
                 <div>
-                    <ButtonGroup size="sm" className="text-right d-block">
-                        <Button
-                            outline
-                            onClick={(e) => { setDisplayBuildingInfoModal(true); }}
-                        >
-                            <PencilFill />
-                        </Button>
-                        <Button
-                            outline
-                            onClick={(e) => { props.docRef.delete(); }}>
-                            <TrashFill />
-                        </Button>
-                    </ButtonGroup>
+                    {
+                        props.editable
+                        &&
+                        <ButtonGroup size="sm" className="text-right d-block">
+                            <Button
+                                outline
+                                onClick={(e) => { setDisplayBuildingInfoModal(true); }}
+                            >
+                                <PencilFill />
+                            </Button>
+                            <Button
+                                outline
+                                onClick={(e) => { props.docRef.delete(); }}>
+                                <TrashFill />
+                            </Button>
+                        </ButtonGroup>
+                    }
                     <h6 className="mt-2">{props.data.name}</h6>
                     <InputGroup size="sm">
                         <Input

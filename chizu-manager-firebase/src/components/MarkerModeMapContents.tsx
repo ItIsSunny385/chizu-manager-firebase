@@ -9,6 +9,7 @@ import SelectBuildingTypeWindow from './SelectBuildingTypeWindow';
 import BuildingMarker from './BuildingMarker';
 
 interface Props {
+    editable: boolean;
     mapRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
     borderCoords: google.maps.LatLng[],
     statusMap: Map<string, Status>,
@@ -36,6 +37,7 @@ export default function MarkerModeMapContents(props: Props) {
         {
             props.houses.map((x, i) => {
                 return <HouseMarker
+                    editable={props.editable}
                     docRef={props.mapRef.collection('houses').doc(x.id)}
                     key={i}
                     data={x}
@@ -47,6 +49,7 @@ export default function MarkerModeMapContents(props: Props) {
         {
             props.buildings.map((x, i) => {
                 return <BuildingMarker
+                    editable={props.editable}
                     docRef={props.mapRef.collection('buildings').doc(x.id)}
                     key={i}
                     data={x}

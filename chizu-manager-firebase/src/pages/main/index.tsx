@@ -268,6 +268,7 @@ export default function Index() {
                 mapData
                 &&
                 <MarkerModeMapContents
+                    editable={pageRole === PageRoles.Manager || pageRole === PageRoles.Editor}
                     mapRef={db.collection('maps').doc(mapId)}
                     borderCoords={mapData.borderCoords.map(x => new google.maps.LatLng({ lat: x.latitude, lng: x.longitude }))}
                     statusMap={statusMap}

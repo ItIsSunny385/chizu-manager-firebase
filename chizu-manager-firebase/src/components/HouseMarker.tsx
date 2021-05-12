@@ -11,9 +11,10 @@ import CommentModal from '../components/CommentModal';
 import { Colors } from '../types/bootstrap';
 
 interface Props {
-    docRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
-    data: House,
-    statusMap: Map<string, Status>,
+    editable: boolean;
+    docRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>;
+    data: House;
+    statusMap: Map<string, Status>;
 }
 
 const db = firebase.firestore();
@@ -71,9 +72,13 @@ export default function HouseMarker(props: Props) {
                                 <ChatTextFill />
                             </Button>
                         </InputGroupAddon>
-                        <InputGroupAddon addonType="append">
-                            <Button onClick={(e) => { props.docRef.delete(); }}><TrashFill /></Button>
-                        </InputGroupAddon>
+                        {
+                            props.editable
+                            &&
+                            <InputGroupAddon addonType="append">
+                                <Button onClick={(e) => { props.docRef.delete(); }}><TrashFill /></Button>
+                            </InputGroupAddon>
+                        }
                     </InputGroup>
                     {
                         displayCommentModal
