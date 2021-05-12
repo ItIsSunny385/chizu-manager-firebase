@@ -65,7 +65,9 @@ export default function BorderModeMapContents(props: Props) {
 
     useEffect(() => {
         if (props.newLatLng) {
-            setCorners([...corners, props.newLatLng]);
+            if (props.borderCoords.length === 0) {
+                setCorners([...corners, props.newLatLng]);
+            }
             props.resetNewLatLng();
         }
     });

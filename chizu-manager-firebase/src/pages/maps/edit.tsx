@@ -47,6 +47,7 @@ export default function Edit(props: Props) {
     const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
     const [user, setUser] = useState(undefined as User | undefined);
     const [userMap, setUserMap] = useState(new Map<string, User>());
+    const [mouseDownTime, _setMouseDownTime] = useState(undefined as number | undefined);
     const router = useRouter();
 
     // onSnapShot内では最新のmapDataにアクセスできないため、mapDataRef.currentを用いる
@@ -60,6 +61,11 @@ export default function Edit(props: Props) {
     const setMapDataLoading = (data: boolean) => {
         mapDataLoadingRef.current = data;
         _setMapDataLoading(data);
+    };
+    const mouseDownTimeRef = useRef(mouseDownTime);
+    const setMouseDownTime = (data: number | undefined) => {
+        mouseDownTimeRef.current = data;
+        _setMouseDownTime(data);
     };
 
     useEffect(() => {
@@ -182,6 +188,19 @@ export default function Edit(props: Props) {
             map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(leftBottomButtonDiv);
 
             setControllerSetted(true);
+
+            /* ロングタップ時の処理を実装 */
+            google.maps.event.addListener(map, "mousedown", (e) => {
+                setMouseDownTime(new Date().getTime());
+            });
+
+            google.maps.event.addListener(map, "mouseup", (e) => {
+                const nowTime = new Date().getTime();
+                if (mouseDownTimeRef.current && (nowTime - mouseDownTimeRef.current) >= 1000) {
+                    setNewLatLng(e.latLng);
+                    setMouseDownTime(undefined);
+                }
+            });
         }
     }, [map]);
 

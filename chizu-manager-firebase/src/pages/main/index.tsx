@@ -37,6 +37,7 @@ export default function Index() {
     const [statusMap, setStatusMap] = useState(new Map<string, Status>());
     const [buildingStatusMap, setBuildingStatusMap] = useState(new Map<string, Status>());
     const [userMap, setUserMap] = useState(new Map<string, User>());
+    const [mouseDownTime, _setMouseDownTime] = useState(undefined as number | undefined);
     const router = useRouter();
 
     const mapDataMapRef = useRef(mapDataMap);
@@ -55,6 +56,12 @@ export default function Index() {
     const setListeningMapIds = (data: string[]) => {
         listeningMapIdsRef.current = data;
         _setListeningMapIds(data);
+    };
+
+    const mouseDownTimeRef = useRef(mouseDownTime);
+    const setMouseDownTime = (data: number | undefined) => {
+        mouseDownTimeRef.current = data;
+        _setMouseDownTime(data);
     };
 
     useEffect(() => {
@@ -175,6 +182,19 @@ export default function Index() {
         ReactDOM.render(rightTopButtons, rightTopButtonDiv);
         map.controls[google.maps.ControlPosition.RIGHT_TOP].push(rightTopButtonDiv);
         setControllerSetted(true);
+
+        /* ロングタップ時の処理を実装 */
+        google.maps.event.addListener(map, "mousedown", (e) => {
+            setMouseDownTime(new Date().getTime());
+        });
+
+        google.maps.event.addListener(map, "mouseup", (e) => {
+            const nowTime = new Date().getTime();
+            if (mouseDownTimeRef.current && (nowTime - mouseDownTimeRef.current) >= 1000) {
+                setNewLatLng(e.latLng);
+                setMouseDownTime(undefined);
+            }
+        });
     }, [map]);
 
     useEffect(() => {

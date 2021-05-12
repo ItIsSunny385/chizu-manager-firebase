@@ -13,8 +13,8 @@ interface Props {
     pageRole: PageRoles | undefined;
     loading: boolean;
     children?: any;
-    onLoadMap?: (map: google.maps.Map<Element>) => void | Promise<void>;
-    onRightClick?: (e: google.maps.MapMouseEvent) => void;
+    onLoadMap: (map: google.maps.Map<Element>) => void | Promise<void>;
+    onRightClick: (e: google.maps.MapMouseEvent) => void;
     messageModalProps?: MessageModalProps;
 }
 
