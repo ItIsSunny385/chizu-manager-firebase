@@ -1,9 +1,7 @@
-import React, {
-    useState,
-    useEffect
-} from 'react';
+import React, { Fragment, useState } from 'react';
 import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
 import MessageModal from './MessageModal';
+import { Building as BuildingIcon } from 'react-bootstrap-icons';
 
 export interface FloorInfoA {
     floorNumber: number,
@@ -33,7 +31,9 @@ export default function BuildingFloorInfoModal(props: Props) {
         modalHeaderProps: {
             toggle: props.toggle,
         },
-        modalHeaderContents: '集合住宅追加（フロア情報）',
+        modalHeaderContents: <Fragment>
+            <BuildingIcon className="mb-1 mr-2" />集合住宅追加（フロア情報）
+        </Fragment>,
         modalProps: {
             isOpen: true,
             toggle: props.toggle,

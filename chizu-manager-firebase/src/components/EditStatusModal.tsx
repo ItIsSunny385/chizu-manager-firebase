@@ -5,6 +5,7 @@ import MessageModal from "./MessageModal";
 import { Status, Pins, StatusType, StatusCollectionName } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
 import { cloneStatus } from "../utils/statusUtil";
+import { Gear } from "react-bootstrap-icons";
 
 export interface Props {
     type: StatusType,
@@ -19,7 +20,10 @@ export default function AddStatusModal(props: Props) {
     const [data, setData] = useState(cloneStatus(props.statusMap.get(props.id)!));
 
     const collectionName = StatusCollectionName[props.type];
-    const title = props.type === StatusType.HouseOrRoom ? '家・部屋ステータス編集' : '集合住宅ステータス編集';
+    const title = <Fragment>
+        <Gear className="mb-1 mr-2" />
+        {props.type === StatusType.HouseOrRoom ? '家・部屋ステータス編集' : '集合住宅ステータス編集'}
+    </Fragment>;
 
 
     const onClickSaveButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

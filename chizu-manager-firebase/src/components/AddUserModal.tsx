@@ -5,6 +5,7 @@ import { Button, Form, FormFeedback, FormGroup, FormText, Input, Label } from "r
 import MessageModal from "./MessageModal";
 import { Colors } from '../types/bootstrap';
 import { User } from '../types/model';
+import { Person } from 'react-bootstrap-icons';
 
 interface Props {
     userMap: Map<string, User>,
@@ -123,7 +124,9 @@ export default function AddUserModal(props: Props) {
         modalHeaderProps: {
             toggle: props.toggle,
         },
-        modalHeaderContents: 'ユーザ追加',
+        modalHeaderContents: <Fragment>
+            <Person className="mb-1 mr-2" />ユーザ追加
+        </Fragment>,
         modalProps: {
             isOpen: true,
             toggle: props.toggle,

@@ -3,7 +3,7 @@ import MessageModal from "./MessageModal";
 import { Button, Form, FormFeedback, FormGroup, FormText, Input, Label } from "reactstrap";
 import FlashMessage, { Props as FlashMessageProps } from "./FlashMessage";
 import { Colors } from "../types/bootstrap";
-import { ArrowRepeat, InfoCircle } from "react-bootstrap-icons";
+import { ArrowRepeat, Gear, InfoCircle } from "react-bootstrap-icons";
 
 interface Props {
     name: string;
@@ -23,7 +23,9 @@ export default function MapSettingModal(props: Props) {
         modalHeaderProps: {
             toggle: props.toggle,
         },
-        modalHeaderContents: '地図設定',
+        modalHeaderContents: <Fragment>
+            <Gear className="mb-1 mr-2" />地図設定
+        </Fragment>,
         modalProps: {
             isOpen: true,
             toggle: props.toggle,

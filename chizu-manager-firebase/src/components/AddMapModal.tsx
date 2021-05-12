@@ -2,6 +2,7 @@ import firebase from 'firebase';
 import { Fragment, useState } from "react";
 import MessageModal from "./MessageModal";
 import { Button, Form, FormFeedback, FormGroup, FormText, Input, Label } from "reactstrap";
+import { Map as MapIcon } from 'react-bootstrap-icons';
 
 interface Props {
     back: () => void;
@@ -13,7 +14,9 @@ export default function AddMapModal(props: Props) {
     const [displayNameError, setDisplayNameError] = useState(undefined as string | undefined);
 
     const messageModalProps = {
-        modalHeaderContents: '地図追加',
+        modalHeaderContents: <Fragment>
+            <MapIcon className="mb-1 mr-2" />地図追加
+        </Fragment>,
         modalProps: {
             isOpen: true,
             backdrop: 'static' as (boolean | 'static'),

@@ -1,10 +1,8 @@
-import React, {
-    useState,
-    useEffect
-} from 'react';
+import React, { Fragment, useState } from 'react';
 import MessageModal from './MessageModal';
 import { Button, Form, FormGroup, FormText, Input, Label } from 'reactstrap';
 import { BuildingBasicInfo, RoomNumberTypes } from '../types/map';
+import { Building as BuildingIcon } from 'react-bootstrap-icons';
 
 const MAX_FLOOR_NUMBER = 30;
 
@@ -46,7 +44,9 @@ export default function BuildingBasicInfoModal(props: Props) {
         modalHeaderProps: {
             toggle: props.toggle,
         },
-        modalHeaderContents: '集合住宅追加（基本情報）',
+        modalHeaderContents: <Fragment>
+            <BuildingIcon className="mb-1 mr-2" />集合住宅追加（基本情報）
+        </Fragment>,
         modalProps: {
             isOpen: true,
             toggle: props.toggle,

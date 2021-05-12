@@ -3,7 +3,8 @@ import MessageModal from "./MessageModal";
 import { Badge, Button, Form, FormGroup, Input, Label, ListGroup, ListGroupItem } from "reactstrap";
 import { MapData } from '../types/map';
 import { PageRoleBadgeColor, PageRoles } from '../types/role';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
+import { ListTask } from 'react-bootstrap-icons';
 
 interface Props {
     staticMode: boolean;
@@ -29,7 +30,9 @@ export default function SelectMapModal(props: Props) {
             modalHeaderProps: {
                 toggle: props.toggle,
             },
-            modalHeaderContents: '地図選択',
+            modalHeaderContents: <Fragment>
+                <ListTask className="mb-1 mr-2" />地図選択
+            </Fragment>,
             modalProps: {
                 isOpen: true,
                 toggle: props.toggle,

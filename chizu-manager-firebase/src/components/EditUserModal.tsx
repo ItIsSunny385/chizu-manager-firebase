@@ -7,6 +7,7 @@ import MessageModal from "./MessageModal";
 import { Colors } from "../types/bootstrap";
 import { cloneUser } from "../utils/userUtil";
 import { useRouter } from 'next/router';
+import { Person } from 'react-bootstrap-icons';
 
 export interface Props {
     authUser: firebase.User;
@@ -75,7 +76,9 @@ export default function EditUserModal(props: Props) {
         modalHeaderProps: {
             toggle: props.toggle,
         },
-        modalHeaderContents: 'ユーザ編集',
+        modalHeaderContents: <Fragment>
+            <Person className="mb-1 mr-2" />ユーザ編集
+        </Fragment>,
         modalProps: {
             isOpen: true,
             toggle: props.toggle,

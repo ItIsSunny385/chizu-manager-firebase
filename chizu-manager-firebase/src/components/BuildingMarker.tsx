@@ -1,12 +1,12 @@
 import firebase from 'firebase';
 import { InfoWindow, Marker } from '@react-google-maps/api';
-import React, { useState } from 'react';
-import { Button, ButtonGroup, Input, InputGroup, InputGroupAddon, InputGroupText } from 'reactstrap';
+import React, { Fragment, useState } from 'react';
+import { Button, ButtonGroup, Input, InputGroup, InputGroupAddon } from 'reactstrap';
 import { Building } from '../types/map';
 import { Status } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
 import BuildingInfoModal from './BuildingInfoModal';
-import { ChatTextFill, PencilFill, TrashFill } from 'react-bootstrap-icons';
+import { ChatTextFill, PencilFill, TrashFill, Building as BuildingIcon } from 'react-bootstrap-icons';
 import { updateBuilding } from '../utils/buildingUtil';
 import CommentModal from './CommentModal';
 import BuildingMarkerRoomInfo from './BuildingMarkerRoomInfo';
@@ -136,7 +136,9 @@ export default function BuildingMarker(props: Props) {
                         &&
                         <BuildingInfoModal
                             buildingRef={props.docRef}
-                            title='建物情報編集'
+                            title={<Fragment>
+                                <BuildingIcon className="mb-1 mr-2" />建物情報編集
+                            </Fragment>}
                             data={props.data}
                             defaultStatusRef={defaultStatusRef}
                             toggle={() => {

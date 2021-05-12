@@ -8,6 +8,7 @@ import { Colors } from "../types/bootstrap";
 import Select from 'react-select';
 import { User } from '../types/model';
 import { MapData } from '../types/map';
+import { People } from 'react-bootstrap-icons';
 
 interface Props {
     userMap: Map<string, User>;
@@ -61,7 +62,9 @@ export default function MapUsersModal(props: Props) {
         modalHeaderProps: {
             toggle: props.toggle,
         },
-        modalHeaderContents: 'ユーザ設定',
+        modalHeaderContents: <Fragment>
+            <People className="mb-1 mr-2" />ユーザ設定
+        </Fragment>,
         modalProps: {
             isOpen: true,
             toggle: props.toggle,

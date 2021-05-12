@@ -24,7 +24,9 @@ export default function AccountModal(props: Props) {
         modalHeaderProps: {
             toggle: props.toggle,
         },
-        modalHeaderContents: 'アカウント',
+        modalHeaderContents: <Fragment>
+            <PersonCircle className="mb-1 mr-2" />アカウント
+        </Fragment>,
         modalProps: {
             isOpen: true,
             toggle: props.toggle,

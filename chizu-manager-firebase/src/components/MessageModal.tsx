@@ -1,4 +1,3 @@
-import { Children } from 'react';
 import { Modal, ModalHeader, ModalHeaderProps, ModalBodyProps, ModalBody, ModalFooter, ModalFooterProps, ModalProps } from 'reactstrap';
 
 export interface MessageModalProps {

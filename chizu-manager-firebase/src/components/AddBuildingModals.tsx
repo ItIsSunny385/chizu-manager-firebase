@@ -1,9 +1,10 @@
 import '../utils/InitializeFirebase'; // comoponent中では import firebase の前に書く
 import firebase from 'firebase';
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import BuildingBasicInfoModal from './BuildingBasicInfoModal';
 import BuildingFloorInfoModal, { FloorInfoA } from './BuildingFloorInfoModal';
 import BuildingInfoModal from './BuildingInfoModal';
+import { Building as BuildingIcon } from 'react-bootstrap-icons';
 import { BuildingBasicInfo, Building, Floor, Room, RoomNumberTypes } from '../types/map';
 
 const db = firebase.firestore();
@@ -130,7 +131,9 @@ export default function AddBuildingModals(props: Props) {
             &&
             <BuildingInfoModal
                 buildingRef={props.buildingRef}
-                title='集合住宅追加（最終調整）'
+                title={<Fragment>
+                    <BuildingIcon className="mb-1 mr-2" />集合住宅追加（最終調整）
+                </Fragment>}
                 data={building}
                 defaultStatusRef={props.defaultStatusRef}
                 toggle={() => {

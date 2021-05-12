@@ -1,7 +1,7 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import MessageModal from "./MessageModal";
-import { Button, ButtonGroup, Form, FormFeedback, FormGroup, FormText, Input, Label } from "reactstrap";
-import { PencilSquare, Save, Trash } from 'react-bootstrap-icons';
+import { Button, ButtonGroup, Form, FormFeedback, FormText, Input } from "reactstrap";
+import { ChatText, PencilSquare, Save, Trash } from 'react-bootstrap-icons';
 
 interface Props {
     data: string | null;
@@ -18,7 +18,9 @@ export default function CommentModal(props: Props) {
         modalHeaderProps: {
             toggle: props.toggle,
         },
-        modalHeaderContents: 'コメント',
+        modalHeaderContents: <Fragment>
+            <ChatText className="mb-1 mr-2" />コメント
+        </Fragment>,
         modalProps: {
             isOpen: true,
             toggle: props.toggle,

@@ -8,7 +8,7 @@ import MessageModal from './MessageModal';
 
 interface Props {
     buildingRef: firebase.firestore.DocumentReference,
-    title: string,
+    title: any,
     data: Building,
     defaultStatusRef: firebase.firestore.DocumentReference,
     toggle: () => void,

@@ -4,6 +4,7 @@ import { Button, Form, FormGroup, FormText, Input, InputGroup, InputGroupAddon, 
 import MessageModal from "./MessageModal";
 import { Status, Pins, StatusType, StatusCollectionName } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
+import { Gear } from "react-bootstrap-icons";
 
 interface Props {
     type: StatusType,
@@ -23,7 +24,10 @@ export default function AddStatusModal(props: Props) {
     } as Status);
 
     const collectionName = StatusCollectionName[props.type];
-    const title = props.type === StatusType.HouseOrRoom ? '家・部屋ステータス追加' : '集合住宅ステータス追加';
+    const title = <Fragment>
+        <Gear className="mb-1 mr-2" />
+        {props.type === StatusType.HouseOrRoom ? '家・部屋ステータス追加' : '集合住宅ステータス追加'}
+    </Fragment>;
 
     const onClickSaveButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         const batch = firebase.firestore().batch();
