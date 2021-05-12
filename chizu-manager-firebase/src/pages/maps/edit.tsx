@@ -357,8 +357,8 @@ export default function Edit(props: Props) {
                         const batch = db.batch();
                         const docRef = db.collection('maps').doc(id);
                         mapData.houses.forEach((x) => {
-                            const status = statusMap.get(x.statusRef.id)!;
-                            if (status.statusAfterResetingRef) {
+                            const status = statusMap.get(x.statusRef.id);
+                            if (status && status.statusAfterResetingRef) {
                                 batch.update(
                                     docRef.collection('houses').doc(x.id),
                                     { statusRef: status.statusAfterResetingRef }
@@ -366,9 +366,9 @@ export default function Edit(props: Props) {
                             }
                         });
                         mapData.buildings.forEach((x) => {
-                            const bStatus = buildingStatusMap.get(x.statusRef.id)!;
+                            const bStatus = buildingStatusMap.get(x.statusRef.id);
                             const buildingDocRef = docRef.collection('buildings').doc(x.id);
-                            if (bStatus.statusAfterResetingRef) {
+                            if (bStatus && bStatus.statusAfterResetingRef) {
                                 batch.update(
                                     buildingDocRef,
                                     { statusRef: bStatus.statusAfterResetingRef }
@@ -377,9 +377,9 @@ export default function Edit(props: Props) {
                             x.floors.forEach((y) => {
                                 const floorDocRef = buildingDocRef.collection('floors').doc(y.id);
                                 y.rooms.forEach((z) => {
-                                    const rStatus = statusMap.get(z.statusRef.id)!;
+                                    const rStatus = statusMap.get(z.statusRef.id);
                                     const roomDocRef = floorDocRef.collection('rooms').doc(z.id);
-                                    if (rStatus.statusAfterResetingRef) {
+                                    if (rStatus && rStatus.statusAfterResetingRef) {
                                         batch.update(
                                             roomDocRef,
                                             { statusRef: rStatus.statusAfterResetingRef }
