@@ -353,7 +353,43 @@ export default function Edit(props: Props) {
                             using: using
                         })
                     }}
-                    reset={() => { }}
+                    reset={() => {
+                        const batch = db.batch();
+                        const docRef = db.collection('maps').doc(id);
+                        mapData.houses.forEach((x) => {
+                            const status = statusMap.get(x.statusRef.id)!;
+                            if (status.statusAfterResetingRef) {
+                                batch.update(
+                                    docRef.collection('houses').doc(x.id),
+                                    { statusRef: status.statusAfterResetingRef }
+                                );
+                            }
+                        });
+                        mapData.buildings.forEach((x) => {
+                            const bStatus = buildingStatusMap.get(x.statusRef.id)!;
+                            const buildingDocRef = docRef.collection('buildings').doc(x.id);
+                            if (bStatus.statusAfterResetingRef) {
+                                batch.update(
+                                    buildingDocRef,
+                                    { statusRef: bStatus.statusAfterResetingRef }
+                                );
+                            }
+                            x.floors.forEach((y) => {
+                                const floorDocRef = buildingDocRef.collection('floors').doc(y.id);
+                                y.rooms.forEach((z) => {
+                                    const rStatus = statusMap.get(z.statusRef.id)!;
+                                    const roomDocRef = floorDocRef.collection('rooms').doc(z.id);
+                                    if (rStatus.statusAfterResetingRef) {
+                                        batch.update(
+                                            roomDocRef,
+                                            { statusRef: rStatus.statusAfterResetingRef }
+                                        );
+                                    }
+                                });
+                            });
+                        });
+                        batch.commit();
+                    }}
                     toggle={() => {
                         setPageMode(prevPageMode!);
                         setPrevPageMode(undefined);

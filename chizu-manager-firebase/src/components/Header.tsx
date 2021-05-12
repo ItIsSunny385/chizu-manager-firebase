@@ -24,7 +24,7 @@ export default function Header(props: Props) {
 
     return (
         <Navbar color="light" light expand="md">
-            <NavbarBrand href="#" className="mr-2">地図マネージャ</NavbarBrand>
+            <NavbarBrand className="mr-2">地図マネージャ</NavbarBrand>
             {
                 props.pageRole
                 &&
