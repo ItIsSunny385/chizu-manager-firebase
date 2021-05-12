@@ -26,7 +26,17 @@ interface Props {
 const db = firebase.firestore();
 
 export default function MapUsersModal(props: Props) {
-    const [flashMessageProps, setFlashMessageProps] = useState(undefined as FlashMessageProps | undefined);
+    const [flashMessageProps, setFlashMessageProps] = useState(
+        props.editable ?
+            undefined
+            :
+            {
+                color: Colors.Info,
+                message: 'ユーザ設定は管理者かマネージャにご依頼ください。',
+                className: 'mt-0',
+                close: () => { setFlashMessageProps(undefined); }
+            }
+    );
     const [options] = useState(
         Array.from(props.userMap.entries()).map(([id, x]) => {
             return { value: id, label: x.displayName };
