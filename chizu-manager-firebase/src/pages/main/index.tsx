@@ -49,13 +49,13 @@ export default function Index() {
     const setMapId = (data: string | undefined) => {
         mapIdRef.current = data;
         _setMapId(data);
-    }
+    };
 
     const listeningMapIdsRef = useRef(listeningMapIds);
     const setListeningMapIds = (data: string[]) => {
         listeningMapIdsRef.current = data;
         _setListeningMapIds(data);
-    }
+    };
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -193,25 +193,38 @@ export default function Index() {
     }, [mapId]);
 
     useEffect(() => {
-        if (mapId) {
-            const newMapData = mapDataMap.get(mapId);
-            setMapData(mapDataMap.get(mapId));
-            if (newMapData && map) {
-                const minLat = Math.min(...newMapData.borderCoords.map(x => x.latitude));
-                const minLng = Math.min(...newMapData.borderCoords.map(x => x.longitude));
-                const maxLat = Math.max(...newMapData.borderCoords.map(x => x.latitude));
-                const maxLng = Math.max(...newMapData.borderCoords.map(x => x.longitude));
-                map.fitBounds(new google.maps.LatLngBounds(
-                    new google.maps.LatLng(minLat, minLng),
-                    new google.maps.LatLng(maxLat, maxLng)
-                ));
-            }
-        } else {
-            setMapData(undefined);
-            setDisplayUsersModal(false);
-            setDisplaySelectMapModal(true);
+        if (!mapId || !map) {
+            return;
         }
-    }, [mapDataMap, mapId]);
+        const newMapData = mapDataMap.get(mapId);
+        if (!newMapData) {
+            return;
+        }
+        const minLat = Math.min(...newMapData.borderCoords.map(x => x.latitude));
+        const minLng = Math.min(...newMapData.borderCoords.map(x => x.longitude));
+        const maxLat = Math.max(...newMapData.borderCoords.map(x => x.latitude));
+        const maxLng = Math.max(...newMapData.borderCoords.map(x => x.longitude));
+        map.fitBounds(new google.maps.LatLngBounds(
+            new google.maps.LatLng(minLat, minLng),
+            new google.maps.LatLng(maxLat, maxLng)
+        ));
+    }, [mapId]);
+
+    useEffect(() => {
+        if (mapId) {
+            return;
+        }
+        setMapData(undefined);
+        setDisplayUsersModal(false);
+        setDisplaySelectMapModal(true);
+    }, [mapId]);
+
+    useEffect(() => {
+        if (!mapId) {
+            return;
+        }
+        setMapData(mapDataMap.get(mapId));
+    }, [mapId, mapDataMap]);
 
     useEffect(() => {
         if (!controllerSetted) {
