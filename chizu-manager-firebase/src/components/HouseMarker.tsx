@@ -38,7 +38,7 @@ export default function HouseMarker(props: Props) {
             color: '#000000',
             fontWeight: 'bold',
         }}
-        draggable={true}
+        draggable={props.editable}
         onDragEnd={async (e) => {
             await props.docRef.update({ latLng: new firebase.firestore.GeoPoint(e.latLng.lat(), e.latLng.lng()) });
         }}
