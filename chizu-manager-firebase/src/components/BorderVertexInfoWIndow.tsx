@@ -1,7 +1,5 @@
 import { InfoWindow } from '@react-google-maps/api';
-import { Button } from 'reactstrap';
-import { CheckSquareFill, TrashFill } from 'react-bootstrap-icons';
-import { Fragment } from 'react';
+import { CheckSquare, Trash } from 'react-bootstrap-icons';
 
 export interface Props {
     latLng: google.maps.LatLng,
@@ -13,13 +11,17 @@ export interface Props {
 
 export default function BorderVertexInfoWindow(props: Props) {
     return <InfoWindow position={props.latLng} onCloseClick={props.toggle}>
-        <Fragment>
-            <Button onClick={props.delete}><TrashFill /></Button>
+        <div className="h4 mt-2">
+            <a href="#" className="ml-2" onClick={(e) => { e.preventDefault(); props.delete(); }}>
+                <Trash />
+            </a>
             {
                 props.displayCheck
                 &&
-                <Button onClick={props.check} className="ml-1"><CheckSquareFill /></Button>
+                <a href="#" className="ml-4" onClick={(e) => { e.preventDefault(); props.check(); }}>
+                    <CheckSquare />
+                </a>
             }
-        </Fragment>
+        </div>
     </InfoWindow>;
 }
