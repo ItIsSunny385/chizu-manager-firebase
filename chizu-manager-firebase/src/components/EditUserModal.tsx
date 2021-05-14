@@ -14,6 +14,7 @@ export interface Props {
     id: string;
     userMap: Map<string, User>;
     setLoading: (loading: boolean) => void;
+    update: (removeMapUserFlg: boolean, newData: User) => Promise<void>;
     setFlashMessage: (color: Colors, message: any) => void;
     toggle: () => void;
 }
@@ -57,10 +58,11 @@ export default function EditUserModal(props: Props) {
 
         // エラーがなければデータを保存する
         try {
-            await db.collection('users').doc(props.id).update(data);
+            const signOut = props.id === props.authUser.uid && !data.isAdmin;
+            await props.update(!props.userMap.get(props.id)!.isAdmin && data.isAdmin, data);
 
             // ログインユーザを一般ユーザに変更した場合はログアウト
-            if (props.id === props.authUser.uid && !data.isAdmin) {
+            if (signOut) {
                 auth.signOut();
                 router.push('/users/login');
             }

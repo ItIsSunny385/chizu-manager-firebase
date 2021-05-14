@@ -1,6 +1,37 @@
 import firebase from 'firebase';
 import { Building, Floor, House, MapData, Room } from '../types/map';
 
+export async function removeMapUser(
+    mapsRef: firebase.firestore.CollectionReference<firebase.firestore.DocumentData>,
+    batch: firebase.firestore.WriteBatch,
+    userRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>
+) {
+    const mMapDataMap = getMapDataMapWithNoChildByQuerySnapshot(
+        await mapsRef.where('managers', 'array-contains', userRef).get()
+    );
+    const eMapDataMap = getMapDataMapWithNoChildByQuerySnapshot(
+        await mapsRef.where('editors', 'array-contains', userRef).get()
+    );
+    const uMapDataMap = getMapDataMapWithNoChildByQuerySnapshot(
+        await mapsRef.where('users', 'array-contains', userRef).get()
+    );
+    const mapDataMap = new Map<string, MapData>(
+        Array.from(mMapDataMap.entries())
+            .concat(Array.from(eMapDataMap.entries()))
+            .concat(Array.from(uMapDataMap.entries()))
+    );
+    mapDataMap.forEach(x => {
+        batch.update(
+            mapsRef.doc(x.id),
+            {
+                'managers': firebase.firestore.FieldValue.arrayRemove(userRef),
+                'editors': firebase.firestore.FieldValue.arrayRemove(userRef),
+                'users': firebase.firestore.FieldValue.arrayRemove(userRef),
+            }
+        )
+    });
+}
+
 export function getMapDataArrayWithNoChildByQuerySnapshot(snapshot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>): Array<MapData> {
     return snapshot.docs.map(x => {
         const mapData: MapData = {
@@ -18,6 +49,12 @@ export function getMapDataArrayWithNoChildByQuerySnapshot(snapshot: firebase.fir
         }
         return mapData;
     });
+}
+
+export function getMapDataMapWithNoChildByQuerySnapshot(snapshot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>) {
+    return new Map<string, MapData>(
+        getMapDataArrayWithNoChildByQuerySnapshot(snapshot).map(x => [x.id, x])
+    );
 }
 
 export function listeningMapQueryWithNoChildren(

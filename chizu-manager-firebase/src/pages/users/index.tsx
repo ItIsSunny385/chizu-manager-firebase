@@ -15,6 +15,7 @@ import { Colors } from '../../types/bootstrap';
 import { PageRoles } from '../../types/role';
 import { useRouter } from 'next/router';
 import { getUser, listeningUserMap } from '../../utils/userUtil';
+import { removeMapUser } from '../../utils/mapUtil';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -98,6 +99,10 @@ export default function Index() {
                             batch.update(userRef, { deleted: true });
                             const deleteAuthUserRef = db.collection('delete_auth_users').doc(id);
                             batch.set(deleteAuthUserRef, { uid: id });
+                            /* 地図にユーザが設定されていた場合は地図から削除 */
+                            if (!x.isAdmin) {
+                                await removeMapUser(db.collection('maps'), batch, userRef);
+                            }
                             try {
                                 await batch.commit();
                                 if (authUser && id === authUser.uid) {
@@ -183,6 +188,15 @@ export default function Index() {
                         setEditId(undefined);
                         document.scrollingElement!.scrollTop = 0;
                         setLoading(false);
+                    }}
+                    update={async (removeMapUserFlg, newData) => {
+                        const batch = db.batch();
+                        batch.update(db.collection('users').doc(editId), newData);
+                        if (removeMapUserFlg) {
+                            const userRef = db.collection('users').doc(editId);
+                            await removeMapUser(db.collection('maps'), batch, userRef);
+                        }
+                        await batch.commit();
                     }}
                     setFlashMessage={(color, message) => {
                         setFlashMessageProps({
