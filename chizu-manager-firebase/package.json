@@ -1,6 +1,6 @@
 {
     "name": "chizu-manager-firebase",
-    "version": "0.0.2",
+    "version": "0.1.0",
     "description": "Chizu Manager Application by Firebase",
     "main": "firebaseFunctions.js",
     "scripts": {
@@ -9,7 +9,7 @@
         "start": "next start src/",
         "serve": "npm run build && firebase emulators:start --only functions,hosting,auth,firestore --import=data --export-on-exit",
         "shell": "npm run build && firebase functions:shell",
-        "deploy": "firebase deploy --only functions,hosting,auth,firestore",
+        "deploy": "firebase deploy --only functions,hosting,firestore",
         "logs": "firebase functions:log"
     },
     "dependencies": {
@@ -18,8 +18,9 @@
         "bootstrap": "^4.6.0",
         "express": "^4.17.1",
         "firebase-admin": "^9.4.2",
-        "firebase-functions": "^3.13.1",
-        "next": "latest",
+        "firebase-functions": "^3.14.0",
+        "missing": "0.0.1",
+        "next": "^10.2.0",
         "next-routes": "^1.4.2",
         "nookies": "^2.5.2",
         "react": "^17.0.1",

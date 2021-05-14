@@ -12,7 +12,7 @@ const firebaseConfig = {
 if (firebase.apps.length === 0) {
     firebase.initializeApp(firebaseConfig);
 
-    if (process.env.debug) {
+    if (process.env.debug === 'true') {
         firebase.auth().useEmulator("http://localhost:9099");
         firebase.functions().useEmulator("localhost", 5001);
         firebase.firestore().useEmulator("localhost", 8080);

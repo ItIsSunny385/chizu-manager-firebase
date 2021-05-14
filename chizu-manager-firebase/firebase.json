@@ -19,7 +19,16 @@
       "npm --prefix \"$PROJECT_DIR\" install",
       "npm --prefix \"$PROJECT_DIR\" run build"
     ],
-    "runtime": "nodejs14"
+    "runtime": "nodejs14",
+    "ignore": [
+      "**/.vscode/**",
+      ".firebase/**",
+      ".firebaserc",
+      "firebase.json",
+      "**/node_modules/**",
+      "**/public/**",
+      "**/.next/cache/**"
+    ]
   },
   "firestore": {
     "rules": "firestore.rules",

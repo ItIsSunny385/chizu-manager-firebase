@@ -54,7 +54,7 @@ export default function Login() {
                                         setLoading(true);
                                         const userAuth = await auth.signInWithEmailAndPassword(email, password);
                                         if (userAuth.user) {
-                                            const user = await db.collection('users').doc(userAuth.user?.uid).get();
+                                            const user = await db.collection('users').doc(userAuth.user.uid).get();
                                             const userData = user.data();
                                             if (userData) {
                                                 if (userData.isAdmin) {
@@ -65,6 +65,7 @@ export default function Login() {
                                             }
                                         }
                                     } catch (error) {
+                                        console.log(error);
                                         let message = '';
                                         switch (error.code) {
                                             case 'auth/user-not-found':
