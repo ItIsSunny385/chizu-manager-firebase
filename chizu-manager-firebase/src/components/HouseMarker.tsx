@@ -1,12 +1,12 @@
 import '../utils/InitializeFirebase';
 import firebase from 'firebase';
 import { InfoWindow, Marker } from "@react-google-maps/api";
-import { Fragment, useEffect, useState } from "react";
-import { ChatTextFill, TrashFill } from "react-bootstrap-icons";
+import { Fragment, useState } from "react";
+import { ChatTextFill, Signpost2Fill, TrashFill } from "react-bootstrap-icons";
 import { Button, Input, InputGroup, InputGroupAddon } from "reactstrap";
 import { House } from '../types/map';
 import { Status } from "../types/model";
-import { getMarkerUrl } from '../utils/markerUtil';
+import { getGoogleMapRouteUrl, getMarkerUrl } from '../utils/markerUtil';
 import CommentModal from '../components/CommentModal';
 import { Colors } from '../types/bootstrap';
 
@@ -52,6 +52,15 @@ export default function HouseMarker(props: Props) {
             &&
             <InfoWindow onCloseClick={() => { setOpenWindow(false); }}>
                 <Fragment>
+                    {
+                        props.editable
+                        &&
+                        <div className="text-right mb-2">
+                            <Button outline size="sm" onClick={(e) => { props.docRef.delete(); }}>
+                                <TrashFill />
+                            </Button>
+                        </div>
+                    }
                     <InputGroup size="sm">
                         <Input
                             type="select"
@@ -72,13 +81,13 @@ export default function HouseMarker(props: Props) {
                                 <ChatTextFill />
                             </Button>
                         </InputGroupAddon>
-                        {
-                            props.editable
-                            &&
-                            <InputGroupAddon addonType="append">
-                                <Button onClick={(e) => { props.docRef.delete(); }}><TrashFill /></Button>
-                            </InputGroupAddon>
-                        }
+                        <InputGroupAddon addonType="append">
+                            <Button
+                                onClick={() => { window.open(getGoogleMapRouteUrl(props.data.latLng), '_blank'); }}
+                            >
+                                <Signpost2Fill />
+                            </Button>
+                        </InputGroupAddon>
                     </InputGroup>
                     {
                         displayCommentModal

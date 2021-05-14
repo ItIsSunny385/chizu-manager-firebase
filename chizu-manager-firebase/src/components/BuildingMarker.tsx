@@ -4,9 +4,9 @@ import React, { Fragment, useState } from 'react';
 import { Button, ButtonGroup, Input, InputGroup, InputGroupAddon } from 'reactstrap';
 import { Building } from '../types/map';
 import { Status } from '../types/model';
-import { getMarkerUrl } from '../utils/markerUtil';
+import { getGoogleMapRouteUrl, getMarkerUrl } from '../utils/markerUtil';
 import BuildingInfoModal from './BuildingInfoModal';
-import { ChatTextFill, PencilFill, TrashFill, Building as BuildingIcon } from 'react-bootstrap-icons';
+import { ChatTextFill, PencilFill, TrashFill, Building as BuildingIcon, Signpost2Fill } from 'react-bootstrap-icons';
 import { updateBuilding } from '../utils/buildingUtil';
 import CommentModal from './CommentModal';
 import BuildingMarkerRoomInfo from './BuildingMarkerRoomInfo';
@@ -75,7 +75,7 @@ export default function BuildingMarker(props: Props) {
                         </ButtonGroup>
                     }
                     <h6 className="mt-2">{props.data.name}</h6>
-                    <InputGroup size="sm">
+                    <InputGroup size="sm" className="mb-1">
                         <Input
                             type="select"
                             defaultValue={props.data.statusRef.id}
@@ -94,6 +94,13 @@ export default function BuildingMarker(props: Props) {
                                 onClick={(e) => { setDisplayCommentModal(true); }}
                             >
                                 <ChatTextFill />
+                            </Button>
+                        </InputGroupAddon>
+                        <InputGroupAddon addonType="append">
+                            <Button
+                                onClick={() => { window.open(getGoogleMapRouteUrl(props.data.latLng), '_blank'); }}
+                            >
+                                <Signpost2Fill />
                             </Button>
                         </InputGroupAddon>
                     </InputGroup>
