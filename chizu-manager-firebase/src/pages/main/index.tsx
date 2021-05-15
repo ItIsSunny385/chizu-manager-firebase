@@ -15,6 +15,7 @@ import { getStatusMap } from '../../utils/statusUtil';
 import { Badge, Button, ButtonGroup } from 'reactstrap';
 import { ListTask, PeopleFill } from 'react-bootstrap-icons';
 import MapUsersModal from '../../components/MapUsersModal';
+import CurrentPositionMarker from '../../components/CurrentPositionMarker';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -38,6 +39,7 @@ export default function Index() {
     const [buildingStatusMap, setBuildingStatusMap] = useState(new Map<string, Status>());
     const [userMap, setUserMap] = useState(new Map<string, User>());
     const [mouseDownTime, _setMouseDownTime] = useState(undefined as number | undefined);
+    const [currentPosition, setCurrentPosition] = useState(undefined as google.maps.LatLng | undefined);
     const router = useRouter();
 
     const mapDataMapRef = useRef(mapDataMap);
@@ -198,6 +200,24 @@ export default function Index() {
     }, [map]);
 
     useEffect(() => {
+        if (!map) {
+            return;
+        }
+        if (!navigator.geolocation) {
+            alert("あなたの端末では、現在位置を取得できません。");
+            return;
+        }
+        navigator.geolocation.watchPosition(
+            (position) => {
+                setCurrentPosition(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+            },
+            () => {
+                setCurrentPosition(undefined);
+            }
+        );
+    }, [map]);
+
+    useEffect(() => {
         if (!mapId) {
             return;
         }
@@ -311,6 +331,13 @@ export default function Index() {
                     newLatLng={newLatLng}
                     resetNewLatLng={() => { setNewLatLng(undefined); }}
                 />
+            }
+            {
+                map
+                &&
+                currentPosition
+                &&
+                <CurrentPositionMarker latLng={currentPosition} />
             }
         </MapApp>
         {

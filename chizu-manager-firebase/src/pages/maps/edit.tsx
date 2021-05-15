@@ -17,6 +17,7 @@ import { listeningMapInfoWithChildren } from '../../utils/mapUtil';
 import MapSettingModal from '../../components/MapSettingModal';
 import MapUsersModal from '../../components/MapUsersModal';
 import { PageRoles } from '../../types/role';
+import CurrentPositionMarker from '../../components/CurrentPositionMarker';
 
 interface Props {
     query: any
@@ -48,6 +49,7 @@ export default function Edit(props: Props) {
     const [user, setUser] = useState(undefined as User | undefined);
     const [userMap, setUserMap] = useState(new Map<string, User>());
     const [mouseDownTime, _setMouseDownTime] = useState(undefined as number | undefined);
+    const [currentPosition, setCurrentPosition] = useState(undefined as google.maps.LatLng | undefined);
     const router = useRouter();
 
     // onSnapShot内では最新のmapDataにアクセスできないため、mapDataRef.currentを用いる
@@ -79,6 +81,24 @@ export default function Edit(props: Props) {
             unsubscribe();
         });
     }, []);
+
+    useEffect(() => {
+        if (!map) {
+            return;
+        }
+        if (!navigator.geolocation) {
+            alert("あなたの端末では、現在位置を取得できません。");
+            return;
+        }
+        navigator.geolocation.watchPosition(
+            (position) => {
+                setCurrentPosition(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+            },
+            () => {
+                setCurrentPosition(undefined);
+            }
+        );
+    }, [map]);
 
     useEffect(() => {
         if (user) {
@@ -313,6 +333,13 @@ export default function Edit(props: Props) {
                             />
                         }
                     </Fragment>
+                }
+                {
+                    map
+                    &&
+                    currentPosition
+                    &&
+                    <CurrentPositionMarker latLng={currentPosition} />
                 }
             </MapApp>
             {/* mapDataをロードしたがデータが空の場合は地図追加モーダルを表示する */}
