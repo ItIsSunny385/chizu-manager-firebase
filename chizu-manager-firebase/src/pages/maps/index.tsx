@@ -83,7 +83,7 @@ export default function Index() {
                                     onClick={(e) => {
                                         e.preventDefault();
                                         setLoading(true);
-                                        router.push(`/maps/edit?id=${x.id}`);
+                                        router.push(`/maps/${x.id}`);
                                     }}
                                 >編集</a>
                                 <a href="#" onClick={(e) => {
@@ -107,7 +107,7 @@ export default function Index() {
                         e.preventDefault();
                         setLoading(true);
                         const newMapRef = db.collection('maps').doc();
-                        router.push(`/maps/edit?id=${newMapRef.id}`);
+                        router.push(`/maps/${newMapRef.id}`);
                     }}
                     className="ml-1"
                 >

@@ -19,10 +19,6 @@ import MapUsersModal from '../../components/MapUsersModal';
 import { PageRoles } from '../../types/role';
 import CurrentPositionMarker from '../../components/CurrentPositionMarker';
 
-interface Props {
-    query: any
-}
-
 enum PageMode {
     Marker = 'Marker',
     Border = 'Border',
@@ -33,10 +29,9 @@ enum PageMode {
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-export default function Edit(props: Props) {
+export default function View() {
     const [loading, setLoading] = useState(true);
     const [controllerSetted, setControllerSetted] = useState(false);
-    const [id] = useState(props.query.id);
     const [mapData, _setMapData] = useState(undefined as MapData | undefined);
     const [mapDataLoading, _setMapDataLoading] = useState(true);
     const [map, setMap] = useState(undefined as google.maps.Map<Element> | undefined);
@@ -51,6 +46,7 @@ export default function Edit(props: Props) {
     const [mouseDownTime, _setMouseDownTime] = useState(undefined as number | undefined);
     const [currentPosition, setCurrentPosition] = useState(undefined as google.maps.LatLng | undefined);
     const router = useRouter();
+    const { id } = router.query as { id: string };
 
     // onSnapShot内では最新のmapDataにアクセスできないため、mapDataRef.currentを用いる
     // https://medium.com/geographit/accessing-react-state-in-event-listeners-with-usestate-and-useref-hooks-8cceee73c559
@@ -478,12 +474,4 @@ export default function Edit(props: Props) {
             </div>
         </React.Fragment >
     );
-}
-
-export async function getServerSideProps(ctx: any) {
-    return {
-        props: {
-            query: ctx.query
-        }
-    };
 }
