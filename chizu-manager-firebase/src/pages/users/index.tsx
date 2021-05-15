@@ -57,7 +57,7 @@ export default function Index() {
                 return;
             }
             listeningUserMap(
-                db.collection('users').where('deleted', '==', false),
+                db.collection('users').where('deleted', '==', false).orderBy('displayName', 'asc'),
                 (newUserMap) => {
                     setUserMap(newUserMap);
                     if (initialRef.current) {
