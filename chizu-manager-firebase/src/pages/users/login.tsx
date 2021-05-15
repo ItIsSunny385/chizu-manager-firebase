@@ -6,6 +6,7 @@ import { Button, Col, Container, Form, FormGroup, Input, Label, Row } from 'reac
 import FlashMessage, { Props as FlashMessageProps } from '../../components/FlashMessage';
 import { Colors } from '../../types/bootstrap';
 import { useRouter } from 'next/router';
+import packageJson from '../../../package.json';
 
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -91,6 +92,7 @@ export default function Login() {
                                 }}
                             >ログイン</Button>
                         </Form>
+                        <div className="text-center mt-3">v{packageJson.version}</div>
                     </Col>
                     <Col className="d-none d-md-block" />
                 </Row>
