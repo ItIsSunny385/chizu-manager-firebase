@@ -13,6 +13,7 @@ interface Props {
 
 export default function BorderModeMapContents(props: Props) {
     const [corners, setCorners] = useState(props.borderCoords);
+    const [clickVertixStart, setClickVertixStart] = useState(undefined as number | undefined);
     const [infoWindwProps, setInfoWindowProps] = useState(undefined as InfoWindowProps | undefined);
 
     const onMouseUp = (e: google.maps.PolyMouseEvent) => {
@@ -39,8 +40,12 @@ export default function BorderModeMapContents(props: Props) {
             setCorners(newCorners);
         }
 
-        /* 頂点を右クリックされた場合 */
-        if ((e.domEvent as globalThis.MouseEvent).button === 2 && typeof vertex === 'number') {
+        /* 頂点をクリックされた場合 */
+        if (typeof vertex === 'number') {
+            setClickVertixStart(undefined);
+            if (!clickVertixStart || new Date().getTime() - clickVertixStart > 200) {
+                return;
+            }
             setInfoWindowProps({
                 latLng: e.latLng,
                 displayCheck: vertex === 0 && props.borderCoords.length === 0,
@@ -60,6 +65,13 @@ export default function BorderModeMapContents(props: Props) {
                     setInfoWindowProps(undefined);
                 },
             });
+        }
+    }
+
+    const onMouesDown = (e: google.maps.PolyMouseEvent) => {
+        const vertex = e.vertex;
+        if (typeof vertex === 'number') {
+            setClickVertixStart(new Date().getTime());
         }
     }
 
@@ -89,6 +101,7 @@ export default function BorderModeMapContents(props: Props) {
                     editable={true}
                     options={{ strokeColor: "red" }}
                     onMouseUp={onMouseUp}
+                    onMouseDown={onMouesDown}
                 />
                 :
                 <Polygon
@@ -96,6 +109,7 @@ export default function BorderModeMapContents(props: Props) {
                     editable={true}
                     options={{ strokeColor: "red", fillColor: "red" }}
                     onMouseUp={onMouseUp}
+                    onMouseDown={onMouesDown}
                 />
         }
         {
