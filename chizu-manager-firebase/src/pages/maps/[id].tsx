@@ -18,6 +18,7 @@ import MapSettingModal from '../../components/MapSettingModal';
 import MapUsersModal from '../../components/MapUsersModal';
 import { PageRoles } from '../../types/role';
 import CurrentPositionMarker from '../../components/CurrentPositionMarker';
+import Link from 'next/link';
 
 enum PageMode {
     Marker = 'Marker',
@@ -446,10 +447,7 @@ export default function View() {
             }
             {/* カスタムコントロール内は Reactで制御できないためカスタムコントロールからこちらのボタンを押させる */}
             <div style={{ display: 'none' }}>
-                <Button id="finish" onClick={(e) => {
-                    e.preventDefault();
-                    router.push('/maps');
-                }} />
+                <Link href='/maps'><a id="finish"></a></Link>
                 <Button id="border" onClick={(e) => {
                     e.preventDefault();
                     setPrevPageMode(undefined);

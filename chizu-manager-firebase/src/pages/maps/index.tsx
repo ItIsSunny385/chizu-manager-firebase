@@ -13,6 +13,7 @@ import { useRouter } from 'next/router';
 import { PageRoles } from '../../types/role';
 import { User } from '../../types/model';
 import { getUser } from '../../utils/userUtil';
+import Link from 'next/link';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -23,6 +24,7 @@ export default function Index() {
     const [keyword, setKeyword] = useState('');
     const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
     const [user, setUser] = useState(undefined as User | undefined);
+    const [newMapRef] = useState(db.collection('maps').doc());
     const router = useRouter();
 
     useEffect(() => {
@@ -76,15 +78,12 @@ export default function Index() {
                             name: x.name,
                             using: x.using ? '使用中' : '不使用',
                             action: <Fragment>
-                                <a
-                                    className="mr-1"
-                                    href="#"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        setLoading(true);
-                                        router.push(`/maps/${x.id}`);
-                                    }}
-                                >編集</a>
+                                <Link
+                                    href='/maps/[id]'
+                                    as={`/maps/${x.id}`}
+                                >
+                                    <a className="mr-1">編集</a>
+                                </Link>
                                 <a href="#" onClick={(e) => {
                                     e.preventDefault();
                                     db.collection('maps').doc(x.id).delete();
@@ -101,17 +100,9 @@ export default function Index() {
                 noDataIndication={() => (<div className="text-center">データがありません</div>)}
             />
             <div className="text-left mb-2 mt-2">
-                <Button
-                    onClick={(e) => {
-                        e.preventDefault();
-                        setLoading(true);
-                        const newMapRef = db.collection('maps').doc();
-                        router.push(`/maps/${newMapRef.id}`);
-                    }}
-                    className="ml-1"
-                >
-                    追加
-                </Button>
+                <Link href="/maps/[id]" as={`/maps/${newMapRef.id}`} passHref>
+                    <Button tag="a">追加</Button>
+                </Link>
             </div>
         </AdminApp>
     );
