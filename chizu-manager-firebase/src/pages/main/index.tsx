@@ -91,7 +91,7 @@ export default function Index() {
 
             /* ユーザ情報を取得 */
             listeningUserMap(
-                db.collection('users').where('deleted', '==', false).where('isAdmin', '==', false),
+                db.collection('users').where('deleted', '==', false).where('isAdmin', '==', false).orderBy('displayName', 'asc'),
                 setUserMap
             );
 
