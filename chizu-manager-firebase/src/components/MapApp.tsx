@@ -1,5 +1,5 @@
 import firebase from 'firebase';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import App from "./App";
 import { GoogleMap, LoadScript } from "@react-google-maps/api";
 import { MessageModalProps } from './MessageModal';
@@ -25,16 +25,13 @@ export default function MapApp(props: Props) {
         lat: Number(process.env.googleMapsCenterLat),
         lng: Number(process.env.googleMapsCenterLng),
     });
+    const [height, setHeight] = useState(undefined as number | undefined);
 
-    const appStyle = {
-        width: '100%',
-        height: '100vh',
-    }
-
-    const containerDivStyle = {
-        width: '100%',
-        height: 'calc(100vh - 4rem)',
-    }
+    useEffect(() => {
+        window.addEventListener('resize', () => {
+            setHeight(window.innerHeight);
+        });
+    }, []);
 
     return (
         <App
@@ -43,15 +40,24 @@ export default function MapApp(props: Props) {
             title={props.title}
             pageRole={props.pageRole}
             loading={props.loading}
-            containerStyle={appStyle}
+            containerStyle={{
+                width: '100%',
+                height: height ? `${height}px` : '100vh',
+            }}
             messageModalProps={props.messageModalProps}
         >
             <LoadScript googleMapsApiKey={apiKey}>
                 <GoogleMap
-                    mapContainerStyle={containerDivStyle}
+                    mapContainerStyle={{
+                        width: '100%',
+                        height: height ? `calc(${height}px - 4rem)` : 'calc(100vh - 4rem)'
+                    }}
                     center={center}
                     zoom={zoom}
-                    onLoad={props.onLoadMap}
+                    onLoad={(map) => {
+                        props.onLoadMap(map);
+                        setHeight(window.innerHeight);
+                    }}
                     onRightClick={props.onRightClick}
                     options={{
                         mapTypeControl: false,
