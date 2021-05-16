@@ -46,6 +46,7 @@ export default function View() {
     const [userMap, setUserMap] = useState(new Map<string, User>());
     const [mouseDownTime, _setMouseDownTime] = useState(undefined as number | undefined);
     const [currentPosition, setCurrentPosition] = useState(undefined as google.maps.LatLng | undefined);
+    const [saveBorder, setSaveBorder] = useState(false);
     const router = useRouter();
     const { id } = router.query as { id: string };
 
@@ -306,12 +307,22 @@ export default function View() {
                             (pageMode === PageMode.Border || prevPageMode === PageMode.Border)
                             &&
                             <BorderModeMapContents
-                                mapRef={db.collection('maps').doc(id)}
                                 borderCoords={mapData.borderCoords.map(x =>
                                     new google.maps.LatLng({ lat: x.latitude, lng: x.longitude }))
                                 }
                                 newLatLng={newLatLng}
+                                update={(newBorderCoods) => {
+                                    db.collection('maps').doc(id).update({
+                                        borderCoords: newBorderCoods
+                                    });
+                                }}
+                                forceSave={saveBorder}
                                 resetNewLatLng={() => { setNewLatLng(undefined); }}
+                                finishForceSave={() => {
+                                    setPrevPageMode(undefined);
+                                    setPageMode(PageMode.Marker);
+                                    setSaveBorder(false);
+                                }}
                             />
                         }
                         {
@@ -455,6 +466,10 @@ export default function View() {
                 }} />
                 <Button id="marker" onClick={(e) => {
                     e.preventDefault();
+                    if (pageMode === PageMode.Border) {
+                        setSaveBorder(true);
+                        return;
+                    }
                     setPrevPageMode(undefined);
                     setPageMode(PageMode.Marker);
                 }} />

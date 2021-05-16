@@ -5,10 +5,12 @@ import { Fragment, useEffect, useState } from "react";
 import BorderVertexInfoWindow, { Props as InfoWindowProps } from "./BorderVertexInfoWIndow";
 
 interface Props {
-    mapRef: firebase.firestore.DocumentReference,
-    borderCoords: google.maps.LatLng[],
-    newLatLng: google.maps.LatLng | undefined,
-    resetNewLatLng: () => void,
+    borderCoords: google.maps.LatLng[];
+    newLatLng: google.maps.LatLng | undefined;
+    forceSave: boolean;
+    update: (newBorderCoods: firebase.firestore.GeoPoint[]) => void;
+    resetNewLatLng: () => void;
+    finishForceSave: () => void;
 }
 
 export default function BorderModeMapContents(props: Props) {
@@ -59,9 +61,7 @@ export default function BorderModeMapContents(props: Props) {
                     setInfoWindowProps(undefined);
                 },
                 check: () => {
-                    props.mapRef.update({
-                        borderCoords: corners.map(x => new firebase.firestore.GeoPoint(x.lat(), x.lng()))
-                    });
+                    props.update(corners.map(x => new firebase.firestore.GeoPoint(x.lat(), x.lng())));
                     setInfoWindowProps(undefined);
                 },
             });
@@ -85,10 +85,15 @@ export default function BorderModeMapContents(props: Props) {
     });
 
     useEffect(() => {
+        if (props.forceSave) {
+            props.update(corners.map(x => new firebase.firestore.GeoPoint(x.lat(), x.lng())));
+            props.finishForceSave();
+        }
+    });
+
+    useEffect(() => {
         if (props.borderCoords.length > 0) {
-            props.mapRef.update({
-                borderCoords: corners.map(x => new firebase.firestore.GeoPoint(x.lat(), x.lng()))
-            });
+            props.update(corners.map(x => new firebase.firestore.GeoPoint(x.lat(), x.lng())));
         }
     }, [corners])
 
