@@ -1,6 +1,6 @@
 import '../utils/InitializeFirebase';
 import firebase from 'firebase';
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Polyline } from "@react-google-maps/api";
 import { Building, House } from '../types/map';
 import { Status } from "../types/model";
@@ -28,7 +28,7 @@ export default function MarkerModeMapContents(props: Props) {
         polylinePath.push(polylinePath[0]);
     }
 
-    useState(() => {
+    useEffect(() => {
         if (!props.editable && props.newLatLng) {
             props.resetNewLatLng();
         }
