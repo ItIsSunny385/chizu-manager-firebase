@@ -18,12 +18,13 @@ interface Props {
     data: Building;
     statusMap: Map<string, Status>;
     buildingStatusMap: Map<string, Status>;
+    open: boolean;
+    toggle: () => void;
 }
 
 const db = firebase.firestore();
 
 export default function BuildingMarker(props: Props) {
-    const [openWindow, setOpenWindow] = useState(false);
     const [displayBuildingInfoModal, setDisplayBuildingInfoModal] = useState(false);
     const [displayCommentModal, setDisplayCommentModal] = useState(false);
     const buildingStatusId = props.data.statusRef.id;
@@ -48,14 +49,14 @@ export default function BuildingMarker(props: Props) {
             await props.docRef.update({ latLng: new firebase.firestore.GeoPoint(e.latLng.lat(), e.latLng.lng()) })
         }}
         onClick={(e) => {
-            setOpenWindow(!openWindow);
+            props.toggle();
         }}
         zIndex={2}
     >
         {
-            openWindow
+            props.open
             &&
-            <InfoWindow onCloseClick={() => { setOpenWindow(false); }}>
+            <InfoWindow onCloseClick={() => { props.toggle(); }}>
                 <div>
                     {
                         props.editable

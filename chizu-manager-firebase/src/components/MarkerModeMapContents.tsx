@@ -20,6 +20,16 @@ interface Props {
     resetNewLatLng: () => void,
 }
 
+enum InfoWindowType {
+    House = 'House',
+    Building = 'Building',
+}
+
+interface InfoWindowProps {
+    type: InfoWindowType;
+    id: string;
+}
+
 const db = firebase.firestore();
 
 export default function MarkerModeMapContents(props: Props) {
@@ -28,9 +38,13 @@ export default function MarkerModeMapContents(props: Props) {
         polylinePath.push(polylinePath[0]);
     }
 
+    const [infoWindowProps, setInfoWindowProps] = useState<InfoWindowProps | undefined>(undefined);
+
     useEffect(() => {
         if (!props.editable && props.newLatLng) {
             props.resetNewLatLng();
+        } else if (props.editable && props.newLatLng) {
+            setInfoWindowProps(undefined);
         }
     });
 
@@ -42,26 +56,72 @@ export default function MarkerModeMapContents(props: Props) {
         />
         {/* 家 */}
         {
-            props.houses.map((x, i) => {
+            props.houses.map(x => {
                 return <HouseMarker
                     editable={props.editable}
                     docRef={props.mapRef.collection('houses').doc(x.id)}
-                    key={i}
+                    key={x.id}
                     data={x}
                     statusMap={props.statusMap}
+                    open={
+                        !!infoWindowProps
+                        &&
+                        infoWindowProps.type === InfoWindowType.House
+                        &&
+                        x.id === infoWindowProps.id
+                    }
+                    toggle={() => {
+                        if (
+                            infoWindowProps
+                            &&
+                            infoWindowProps.type === InfoWindowType.House
+                            &&
+                            x.id === infoWindowProps.id
+                        ) {
+                            setInfoWindowProps(undefined);
+                        } else {
+                            setInfoWindowProps({
+                                type: InfoWindowType.House,
+                                id: x.id!,
+                            });
+                        }
+                    }}
                 />;
             })
         }
         {/* 集合住宅 */}
         {
-            props.buildings.map((x, i) => {
+            props.buildings.map(x => {
                 return <BuildingMarker
                     editable={props.editable}
                     docRef={props.mapRef.collection('buildings').doc(x.id)}
-                    key={i}
+                    key={x.id}
                     data={x}
                     statusMap={props.statusMap}
                     buildingStatusMap={props.buildingStatusMap}
+                    open={
+                        !!infoWindowProps
+                        &&
+                        infoWindowProps.type === InfoWindowType.Building
+                        &&
+                        x.id === infoWindowProps.id
+                    }
+                    toggle={() => {
+                        if (
+                            infoWindowProps
+                            &&
+                            infoWindowProps.type === InfoWindowType.Building
+                            &&
+                            x.id === infoWindowProps.id
+                        ) {
+                            setInfoWindowProps(undefined);
+                        } else {
+                            setInfoWindowProps({
+                                type: InfoWindowType.Building,
+                                id: x.id,
+                            });
+                        }
+                    }}
                 />;
             })
         }

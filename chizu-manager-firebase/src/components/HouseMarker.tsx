@@ -15,12 +15,13 @@ interface Props {
     docRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>;
     data: House;
     statusMap: Map<string, Status>;
+    open: boolean;
+    toggle: () => void;
 }
 
 const db = firebase.firestore();
 
 export default function HouseMarker(props: Props) {
-    const [openWindow, setOpenWindow] = useState(false);
     const [displayCommentModal, setDisplayCommentModal] = useState(false);
 
     const statusId = props.data.statusRef.id;
@@ -43,14 +44,14 @@ export default function HouseMarker(props: Props) {
             await props.docRef.update({ latLng: new firebase.firestore.GeoPoint(e.latLng.lat(), e.latLng.lng()) });
         }}
         onClick={(e) => {
-            setOpenWindow(!openWindow);
+            props.toggle();
         }}
         zIndex={2}
     >
         {
-            openWindow
+            props.open
             &&
-            <InfoWindow onCloseClick={() => { setOpenWindow(false); }}>
+            <InfoWindow onCloseClick={() => { props.toggle(); }}>
                 <Fragment>
                     {
                         props.editable
