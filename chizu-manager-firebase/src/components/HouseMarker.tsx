@@ -9,6 +9,7 @@ import { Status } from "../types/model";
 import { getGoogleMapRouteUrl, getMarkerUrl } from '../utils/markerUtil';
 import CommentModal from '../components/CommentModal';
 import { Colors } from '../types/bootstrap';
+import ConfirmDeletionModal from './ConfirmDeletionModal';
 
 interface Props {
     editable: boolean;
@@ -23,6 +24,7 @@ const db = firebase.firestore();
 
 export default function HouseMarker(props: Props) {
     const [displayCommentModal, setDisplayCommentModal] = useState(false);
+    const [displayDeleteModal, setDisplayDeleteModal] = useState(false);
 
     const statusId = props.data.statusRef.id;
     const status = props.statusMap.get(statusId)!;
@@ -57,7 +59,9 @@ export default function HouseMarker(props: Props) {
                         props.editable
                         &&
                         <div className="text-right mb-2">
-                            <Button outline size="sm" onClick={(e) => { props.docRef.delete(); }}>
+                            <Button outline size="sm" onClick={(e) => {
+                                setDisplayDeleteModal(true);
+                            }}>
                                 <TrashFill />
                             </Button>
                         </div>
@@ -97,6 +101,19 @@ export default function HouseMarker(props: Props) {
                             data={props.data.comment}
                             save={(newData) => { props.docRef.update({ comment: newData }); }}
                             toggle={() => { setDisplayCommentModal(false); }}
+                        />
+                    }
+                    {
+                        displayDeleteModal
+                        &&
+                        <ConfirmDeletionModal
+                            toggle={() => {
+                                setDisplayDeleteModal(false);
+                            }}
+                            delete={() => {
+                                props.docRef.delete();
+                                setDisplayDeleteModal(false);
+                            }}
                         />
                     }
                 </Fragment>

@@ -11,6 +11,7 @@ import { updateBuilding } from '../utils/buildingUtil';
 import CommentModal from './CommentModal';
 import BuildingMarkerRoomInfo from './BuildingMarkerRoomInfo';
 import { Colors } from '../types/bootstrap';
+import ConfirmDeletionModal from './ConfirmDeletionModal';
 
 interface Props {
     editable: boolean;
@@ -27,6 +28,7 @@ const db = firebase.firestore();
 export default function BuildingMarker(props: Props) {
     const [displayBuildingInfoModal, setDisplayBuildingInfoModal] = useState(false);
     const [displayCommentModal, setDisplayCommentModal] = useState(false);
+    const [displayDeleteModal, setDisplayDeleteModal] = useState(false);
     const buildingStatusId = props.data.statusRef.id;
     const buildingStatus = props.buildingStatusMap.get(buildingStatusId)!;
     const defaultStatusId = props.statusMap.keys().next().value as string;
@@ -70,7 +72,7 @@ export default function BuildingMarker(props: Props) {
                             </Button>
                             <Button
                                 outline
-                                onClick={(e) => { props.docRef.delete(); }}>
+                                onClick={(e) => { setDisplayDeleteModal(true); }}>
                                 <TrashFill />
                             </Button>
                         </ButtonGroup>
@@ -156,6 +158,17 @@ export default function BuildingMarker(props: Props) {
                                 /* 建物情報の更新 */
                                 updateBuilding(props.docRef, props.data, result);
                                 setDisplayBuildingInfoModal(false);
+                            }}
+                        />
+                    }
+                    {
+                        displayDeleteModal
+                        &&
+                        <ConfirmDeletionModal
+                            toggle={() => { setDisplayDeleteModal(false); }}
+                            delete={() => {
+                                props.docRef.delete();
+                                setDisplayDeleteModal(false);
                             }}
                         />
                     }

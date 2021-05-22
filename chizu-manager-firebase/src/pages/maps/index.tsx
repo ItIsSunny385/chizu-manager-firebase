@@ -14,6 +14,7 @@ import { PageRoles } from '../../types/role';
 import { User } from '../../types/model';
 import { getUser } from '../../utils/userUtil';
 import Link from 'next/link';
+import ConfirmDeletionModal from '../../components/ConfirmDeletionModal';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -24,6 +25,7 @@ export default function Index() {
     const [keyword, setKeyword] = useState('');
     const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
     const [user, setUser] = useState(undefined as User | undefined);
+    const [deleteId, setDeleteId] = useState(undefined as string | undefined);
     const [newMapRef] = useState(db.collection('maps').doc());
     const router = useRouter();
 
@@ -86,7 +88,7 @@ export default function Index() {
                                 </Link>
                                 <a href="#" onClick={(e) => {
                                     e.preventDefault();
-                                    db.collection('maps').doc(x.id).delete();
+                                    setDeleteId(x.id);
                                 }}>削除</a>
                             </Fragment>
                         };
@@ -104,6 +106,19 @@ export default function Index() {
                     <Button tag="a">追加</Button>
                 </Link>
             </div>
+            {
+                deleteId
+                &&
+                <ConfirmDeletionModal
+                    toggle={() => {
+                        setDeleteId(undefined);
+                    }}
+                    delete={() => {
+                        db.collection('maps').doc(deleteId).delete();
+                        setDeleteId(undefined);
+                    }}
+                />
+            }
         </AdminApp>
     );
 }
