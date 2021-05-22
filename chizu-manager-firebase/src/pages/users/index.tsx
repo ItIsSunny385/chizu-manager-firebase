@@ -3,6 +3,7 @@ import firebase from 'firebase';
 import AdminApp from '../../components/AdminApp';
 import AddUserModal from '../../components/AddUserModal';
 import EditUserModal from '../../components/EditUserModal';
+import ConfirmDeletionModal from '../../components/ConfirmDeletionModal';
 import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
@@ -26,6 +27,7 @@ export default function Index() {
     const [userMap, setUserMap] = useState(new Map<string, User>());
     const [displayAddModal, setDisplayAddModal] = useState(false);
     const [editId, setEditId] = useState(undefined as string | undefined);
+    const [deleteId, setDeleteId] = useState(undefined as string | undefined);
     const [flashMessageProps, setFlashMessageProps] = useState(undefined as FlashMessageProps | undefined);
     const [keyword, setKeyword] = useState('');
     const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
@@ -91,46 +93,6 @@ export default function Index() {
                 data={Array.from(userMap.entries())
                     .filter(([id, x]) => x.displayName.includes(keyword))
                     .map(([id, x]) => {
-                        const onClickDeleteLink = async (e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
-                            e.preventDefault();
-                            setLoading(true);
-                            const batch = db.batch();
-                            const userRef = db.collection('users').doc(id);
-                            batch.update(userRef, { deleted: true });
-                            const deleteAuthUserRef = db.collection('delete_auth_users').doc(id);
-                            batch.set(deleteAuthUserRef, { uid: id });
-                            /* 地図にユーザが設定されていた場合は地図から削除 */
-                            if (!x.isAdmin) {
-                                await removeMapUser(db.collection('maps'), batch, userRef);
-                            }
-                            try {
-                                await batch.commit();
-                                if (authUser && id === authUser.uid) {
-                                    // ログインユーザを削除した場合はログアウト
-                                    auth.signOut();
-                                    router.push('/users/login');
-                                    return;
-                                }
-                                setFlashMessageProps({
-                                    color: Colors.Success,
-                                    message: 'ユーザを削除しました。',
-                                    close: () => { setFlashMessageProps(undefined); }
-                                });
-                            } catch (error) {
-                                console.log(error);
-                                setFlashMessageProps({
-                                    color: Colors.Danger,
-                                    message: 'ユーザの削除に失敗しました。',
-                                    close: () => { setFlashMessageProps(undefined); }
-                                });
-                            }
-                            document.scrollingElement!.scrollTop = 0;
-                            setLoading(false);
-                        };
-                        const onClickEditLink = (e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
-                            e.preventDefault();
-                            setEditId(id);
-                        };
                         return {
                             fullId: id,
                             id: id.substr(0, 10) + '...',
@@ -138,8 +100,14 @@ export default function Index() {
                             role: x.isAdmin ? '管理者' : '一般ユーザ',
                             action:
                                 <Fragment>
-                                    <a className="mr-1" href="#" onClick={onClickEditLink}>編集</a>
-                                    <a href="#" onClick={onClickDeleteLink}>削除</a>
+                                    <a className="mr-1" href="#" onClick={(e) => {
+                                        e.preventDefault();
+                                        setEditId(id);
+                                    }}>編集</a>
+                                    <a href="#" onClick={(e) => {
+                                        e.preventDefault();
+                                        setDeleteId(id);
+                                    }}>削除</a>
                                 </Fragment>,
                         };
                     })}
@@ -204,6 +172,50 @@ export default function Index() {
                             message: message,
                             close: () => { setFlashMessageProps(undefined); }
                         });
+                    }}
+                />
+            }
+            {
+                deleteId
+                &&
+                <ConfirmDeletionModal
+                    toggle={() => { setDeleteId(undefined); }}
+                    delete={() => {
+                        const deleteFunc = async () => {
+                            const batch = db.batch();
+                            const userRef = db.collection('users').doc(deleteId);
+                            batch.update(userRef, { deleted: true });
+                            const deleteAuthUserRef = db.collection('delete_auth_users').doc(deleteId);
+                            batch.set(deleteAuthUserRef, { uid: deleteId });
+                            /* 地図にユーザが設定されていた場合は地図から削除 */
+                            const targetUser = userMap.get(deleteId);
+                            if (!targetUser!.isAdmin) {
+                                await removeMapUser(db.collection('maps'), batch, userRef);
+                            }
+                            try {
+                                await batch.commit();
+                                if (authUser && deleteId === authUser.uid) {
+                                    // ログインユーザを削除した場合はログアウト
+                                    auth.signOut();
+                                    router.push('/users/login');
+                                    return;
+                                }
+                                setFlashMessageProps({
+                                    color: Colors.Success,
+                                    message: 'ユーザを削除しました。',
+                                    close: () => { setFlashMessageProps(undefined); }
+                                });
+                            } catch (error) {
+                                console.log(error);
+                                setFlashMessageProps({
+                                    color: Colors.Danger,
+                                    message: 'ユーザの削除に失敗しました。',
+                                    close: () => { setFlashMessageProps(undefined); }
+                                });
+                            }
+                        };
+                        deleteFunc();
+                        setDeleteId(undefined);
                     }}
                 />
             }
