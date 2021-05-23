@@ -23,6 +23,7 @@ const auth = firebase.auth();
 export default function Index() {
     const [loading, setLoading] = useState(true);
     const [controllerSetted, setControllerSetted] = useState(false);
+    const [nameSetted, setNameSetted] = useState(false);
     const [title, setTitle] = useState('地図選択');
     const [pageRole, setPageRole] = useState(undefined as PageRoles | undefined);
     const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
@@ -152,18 +153,6 @@ export default function Index() {
             return;
         }
 
-        const topLeftTitle = <div className="mt-2 ml-1 d-block d-md-none"><h4>
-            <Badge color="light" id="mapNameLeft" className="d-none border border-dark" />
-        </h4></div>;
-        const topLeftTitleDiv = document.createElement('div');
-        ReactDOM.render(topLeftTitle, topLeftTitleDiv);
-        map.controls[google.maps.ControlPosition.TOP_LEFT].push(topLeftTitleDiv);
-        const topCenterTitle = <div className="mt-2 d-none d-md-block"><h4>
-            <Badge color="light" id="mapNameCenter" className="d-none border border-dark" />
-        </h4></div>;
-        const topCenterTitleDiv = document.createElement('div');
-        ReactDOM.render(topCenterTitle, topCenterTitleDiv);
-        map.controls[google.maps.ControlPosition.TOP_CENTER].push(topCenterTitleDiv);
         const rightTopButtons = <ButtonGroup className="mt-1 mr-1">
             <Button
                 id="listButton"
@@ -270,16 +259,7 @@ export default function Index() {
         if (!controllerSetted) {
             return;
         }
-        const mapNameBadgeLeft = document.getElementById('mapNameLeft');
-        const mapNameCenter = document.getElementById('mapNameCenter');
-        if (!mapNameBadgeLeft || !mapNameCenter) {
-            return;
-        }
         if (mapData) {
-            mapNameBadgeLeft.innerHTML = mapData.name;
-            mapNameBadgeLeft.classList.remove('d-none');
-            mapNameCenter.innerHTML = mapData.name;
-            mapNameCenter.classList.remove('d-none');
             setTitle(mapData.name);
             if (authUser) {
                 const userRef = db.collection('users').doc(authUser.uid)
@@ -294,14 +274,44 @@ export default function Index() {
                 setPageRole(undefined);
             }
         } else {
-            mapNameBadgeLeft.innerHTML = '';
-            mapNameBadgeLeft.classList.add('d-none');
-            mapNameCenter.innerHTML = '';
-            mapNameCenter.classList.add('d-none');
             setTitle('地図選択');
             setPageRole(undefined);
         }
     }, [mapData, controllerSetted]);
+
+    useEffect(() => {
+        if (!map || (!mapData && !nameSetted)) {
+            return;
+        }
+        if (nameSetted) {
+            const mapNameBadgeLeft = document.getElementById('mapNameLeft');
+            if (mapNameBadgeLeft) {
+                mapNameBadgeLeft.innerHTML = mapData ? mapData.name : '';
+            }
+            const mapNameCenter = document.getElementById('mapNameCenter');
+            if (mapNameCenter) {
+                mapNameCenter.innerHTML = mapData ? mapData.name : '';
+            }
+        } else {
+            const topLeftTitle = <div className="mt-2 ml-1 d-block d-md-none"><h4>
+                <Badge color="light" id="mapNameLeft" className="border border-dark">
+                    {mapData ? mapData.name : ''}
+                </Badge>
+            </h4></div>;
+            const topLeftTitleDiv = document.createElement('div');
+            ReactDOM.render(topLeftTitle, topLeftTitleDiv);
+            map.controls[google.maps.ControlPosition.TOP_LEFT].push(topLeftTitleDiv);
+            const topCenterTitle = <div className="mt-2 d-none d-md-block"><h4>
+                <Badge color="light" id="mapNameCenter" className="border border-dark">
+                    {mapData ? mapData.name : ''}
+                </Badge>
+            </h4></div>;
+            const topCenterTitleDiv = document.createElement('div');
+            ReactDOM.render(topCenterTitle, topCenterTitleDiv);
+            map.controls[google.maps.ControlPosition.TOP_CENTER].push(topCenterTitleDiv);
+            setNameSetted(true);
+        }
+    }, [map, mapData]);
 
     return <Fragment>
         <MapApp

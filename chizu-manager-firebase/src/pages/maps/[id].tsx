@@ -33,6 +33,7 @@ const auth = firebase.auth();
 export default function View() {
     const [loading, setLoading] = useState(true);
     const [controllerSetted, setControllerSetted] = useState(false);
+    const [nameSetted, setNameSetted] = useState(false);
     const [mapData, _setMapData] = useState(undefined as MapData | undefined);
     const [mapDataLoading, _setMapDataLoading] = useState(true);
     const [map, setMap] = useState(undefined as google.maps.Map<Element> | undefined);
@@ -133,30 +134,6 @@ export default function View() {
     useEffect(() => {
         if (map && !controllerSetted) {
             /* 地図が準備できたら地図上のボタンを配置する */
-            const topLeftTitle = <div className="mt-2 ml-1 d-block d-md-none"><h4>
-                {
-                    mapData
-                        ?
-                        <Badge color="light" id="mapNameLeft" className="border border-dark">{mapData.name}</Badge>
-                        :
-                        <Badge color="light" id="mapNameLeft" className="d-none border border-dark" />
-                }
-            </h4></div>;
-            const topLeftTitleDiv = document.createElement('div');
-            ReactDOM.render(topLeftTitle, topLeftTitleDiv);
-            map.controls[google.maps.ControlPosition.TOP_LEFT].push(topLeftTitleDiv);
-            const topCenterTitle = <div className="mt-2 d-none d-md-block"><h4>
-                {
-                    mapData
-                        ?
-                        <Badge color="light" id="mapNameCenter" className="border border-dark">{mapData.name}</Badge>
-                        :
-                        <Badge color="light" id="mapNameCenter" className="d-none border border-dark" />
-                }
-            </h4></div>;
-            const topCenterTitleDiv = document.createElement('div');
-            ReactDOM.render(topCenterTitle, topCenterTitleDiv);
-            map.controls[google.maps.ControlPosition.TOP_CENTER].push(topCenterTitleDiv);
             const rightTopButtons = <ButtonGroup className="mt-1 mr-1">
                 <Button
                     id="borderButton"
@@ -223,19 +200,38 @@ export default function View() {
     }, [map]);
 
     useEffect(() => {
-        if (mapData && !mapDataLoading && controllerSetted) {
+        if (!map || (!mapData && !nameSetted)) {
+            return;
+        }
+        if (nameSetted) {
             const mapNameBadgeLeft = document.getElementById('mapNameLeft');
             if (mapNameBadgeLeft) {
-                mapNameBadgeLeft.innerHTML = mapData.name;
-                mapNameBadgeLeft.classList.remove('d-none');
+                mapNameBadgeLeft.innerHTML = mapData ? mapData.name : '';
             }
             const mapNameCenter = document.getElementById('mapNameCenter');
             if (mapNameCenter) {
-                mapNameCenter.innerHTML = mapData.name;
-                mapNameCenter.classList.remove('d-none');
+                mapNameCenter.innerHTML = mapData ? mapData.name : '';
             }
+        } else {
+            const topLeftTitle = <div className="mt-2 ml-1 d-block d-md-none"><h4>
+                <Badge color="light" id="mapNameLeft" className="border border-dark">
+                    {mapData ? mapData.name : ''}
+                </Badge>
+            </h4></div>;
+            const topLeftTitleDiv = document.createElement('div');
+            ReactDOM.render(topLeftTitle, topLeftTitleDiv);
+            map.controls[google.maps.ControlPosition.TOP_LEFT].push(topLeftTitleDiv);
+            const topCenterTitle = <div className="mt-2 d-none d-md-block"><h4>
+                <Badge color="light" id="mapNameCenter" className="border border-dark">
+                    {mapData ? mapData.name : ''}
+                </Badge>
+            </h4></div>;
+            const topCenterTitleDiv = document.createElement('div');
+            ReactDOM.render(topCenterTitle, topCenterTitleDiv);
+            map.controls[google.maps.ControlPosition.TOP_CENTER].push(topCenterTitleDiv);
+            setNameSetted(true);
         }
-    }, [mapData, mapDataLoading, controllerSetted]);
+    }, [map, mapData]);
 
     useEffect(() => {
         /* 地図の表示完了とmapDataの取得が完了した場合に動作する */
