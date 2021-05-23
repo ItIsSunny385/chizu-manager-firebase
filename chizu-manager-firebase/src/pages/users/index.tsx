@@ -113,7 +113,7 @@ export default function Index() {
                                         color={Colors.Danger}
                                         onClick={() => { setDeleteId(id); }}
                                     >
-                                        <Trash className="mb-1" /><span className="ml-1 d-none d-md-inline">編集</span>
+                                        <Trash className="mb-1" /><span className="ml-1 d-none d-md-inline">削除</span>
                                     </Button>
                                 </Fragment>,
                         };
