@@ -50,7 +50,7 @@ export default function MapApp(props: Props) {
                 <GoogleMap
                     mapContainerStyle={{
                         width: '100%',
-                        height: height ? `calc(${height}px - 4rem)` : 'calc(100vh - 4rem)'
+                        height: height ? `${height - 57}px` : 'calc(100vh - 57px)'
                     }}
                     center={center}
                     zoom={zoom}
