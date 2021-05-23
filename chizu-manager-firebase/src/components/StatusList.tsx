@@ -1,5 +1,5 @@
 import '../utils/InitializeFirebase'; // comoponent中では import firebase の前に書く
-import { Dispatch, Fragment, SetStateAction, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import firebase from 'firebase';
 import BootstrapTable from 'react-bootstrap-table-next';
 import { Button } from 'reactstrap';
@@ -8,12 +8,14 @@ import EditStatusModal from './EditStatusModal';
 import { Status, StatusCollectionName, StatusType } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
 import { getStatusMapFromQuerySnapshot } from '../utils/statusUtil';
+import { Colors } from '../types/bootstrap';
+import { Pencil, Trash } from 'react-bootstrap-icons';
 
 const db = firebase.firestore();
 
 interface Props {
-    type: StatusType,
-    loaded: () => void,
+    type: StatusType;
+    loaded: () => void;
 }
 
 export default function StatusList(props: Props) {
@@ -50,17 +52,19 @@ export default function StatusList(props: Props) {
                             '',
                         action:
                             <Fragment>
-                                <a
+                                <Button
                                     className="mr-1"
-                                    href="#"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        setEditStatusId(id);
-                                    }}
+                                    size="sm"
+                                    onClick={() => { setEditStatusId(id); }}
                                 >
-                                    編集
-                                    </a>
-                                <a>削除</a>
+                                    <Pencil className="mb-1" /><span className="ml-1 d-none d-md-inline">編集</span>
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    color={Colors.Danger}
+                                >
+                                    <Trash className="mb-1" /><span className="ml-1 d-none d-md-inline">編集</span>
+                                </Button>
                             </Fragment>,
                     };
                 })}
@@ -80,7 +84,7 @@ export default function StatusList(props: Props) {
                         }
                     },
                     { dataField: 'statusAfterReseting', text: 'リセット後' },
-                    { dataField: 'action', text: '' },
+                    { dataField: 'action', text: '', classes: 'p-2' },
                 ]}
                 noDataIndication={() => (<div className="text-center">データがありません</div>)}
             />

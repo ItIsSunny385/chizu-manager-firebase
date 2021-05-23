@@ -17,6 +17,7 @@ import { PageRoles } from '../../types/role';
 import { useRouter } from 'next/router';
 import { getUser, listeningUserMap } from '../../utils/userUtil';
 import { removeMapUser } from '../../utils/mapUtil';
+import { Pencil, Trash } from 'react-bootstrap-icons';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -100,21 +101,27 @@ export default function Index() {
                             role: x.isAdmin ? '管理者' : '一般ユーザ',
                             action:
                                 <Fragment>
-                                    <a className="mr-1" href="#" onClick={(e) => {
-                                        e.preventDefault();
-                                        setEditId(id);
-                                    }}>編集</a>
-                                    <a href="#" onClick={(e) => {
-                                        e.preventDefault();
-                                        setDeleteId(id);
-                                    }}>削除</a>
+                                    <Button
+                                        className="mr-1"
+                                        size="sm"
+                                        onClick={() => { setEditId(id); }}
+                                    >
+                                        <Pencil className="mb-1" /><span className="ml-1 d-none d-md-inline">編集</span>
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        color={Colors.Danger}
+                                        onClick={() => { setDeleteId(id); }}
+                                    >
+                                        <Trash className="mb-1" /><span className="ml-1 d-none d-md-inline">編集</span>
+                                    </Button>
                                 </Fragment>,
                         };
                     })}
                 columns={[
                     { dataField: 'displayName', text: '表示名', sort: true },
                     { dataField: 'role', text: '権限', sort: true },
-                    { dataField: 'action', text: '' },
+                    { dataField: 'action', text: '', classes: 'p-2' },
                 ]}
                 pagination={paginationFactory({})}
                 noDataIndication={() => (<div className="text-center">データがありません</div>)}

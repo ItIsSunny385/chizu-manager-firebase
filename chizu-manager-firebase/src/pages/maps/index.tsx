@@ -15,6 +15,8 @@ import { User } from '../../types/model';
 import { getUser } from '../../utils/userUtil';
 import Link from 'next/link';
 import ConfirmDeletionModal from '../../components/ConfirmDeletionModal';
+import { Colors } from '../../types/bootstrap';
+import { Pencil, Trash } from 'react-bootstrap-icons';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -83,20 +85,24 @@ export default function Index() {
                                 <Link
                                     href='/maps/[id]'
                                     as={`/maps/${x.id}`}
+                                    passHref
                                 >
-                                    <a className="mr-1">編集</a>
+                                    <Button className="mr-1" size="sm">
+                                        <Pencil className="mb-1" /><span className="ml-1 d-none d-md-inline">編集</span>
+                                    </Button>
                                 </Link>
-                                <a href="#" onClick={(e) => {
-                                    e.preventDefault();
+                                <Button color={Colors.Danger} size="sm" onClick={() => {
                                     setDeleteId(x.id);
-                                }}>削除</a>
+                                }}>
+                                    <Trash className="mb-1" /><span className="ml-1 d-none d-md-inline">編集</span>
+                                </Button>
                             </Fragment>
                         };
                     })}
                 columns={[
                     { dataField: 'name', text: '名前', sort: true },
                     { dataField: 'using', text: '使用状況', sort: true },
-                    { dataField: 'action', text: '' }
+                    { dataField: 'action', text: '', classes: 'p-2' }
                 ]}
                 pagination={paginationFactory({})}
                 noDataIndication={() => (<div className="text-center">データがありません</div>)}
