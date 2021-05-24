@@ -29,6 +29,7 @@ export default function Login() {
             title={'ログイン'}
             loading={loading}
             pageRole={undefined}
+            unsubscribes={undefined}
         >
             <Container>
                 <Row xs="1" md="3">

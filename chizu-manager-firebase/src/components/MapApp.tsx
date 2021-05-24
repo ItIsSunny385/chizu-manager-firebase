@@ -15,7 +15,7 @@ interface Props {
     children?: any;
     onLoadMap: (map: google.maps.Map<Element>) => void | Promise<void>;
     onRightClick: (e: google.maps.MapMouseEvent) => void;
-    messageModalProps?: MessageModalProps;
+    unsubscribes: (() => void)[] | undefined;
 }
 
 export default function MapApp(props: Props) {
@@ -44,7 +44,7 @@ export default function MapApp(props: Props) {
                 width: '100%',
                 height: height ? `${height}px` : '100vh',
             }}
-            messageModalProps={props.messageModalProps}
+            unsubscribes={props.unsubscribes}
         >
             <LoadScript googleMapsApiKey={apiKey}>
                 <GoogleMap

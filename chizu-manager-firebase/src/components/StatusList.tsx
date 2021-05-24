@@ -16,6 +16,7 @@ const db = firebase.firestore();
 interface Props {
     type: StatusType;
     loaded: () => void;
+    addUnsubscribe: (unsubscribe: () => void) => void;
 }
 
 export default function StatusList(props: Props) {
@@ -27,10 +28,11 @@ export default function StatusList(props: Props) {
     const title = props.type === StatusType.HouseOrRoom ? '家・部屋ステータス' : '集合住宅ステータス';
 
     useEffect(() => {
-        db.collection(collectionName).orderBy('number', 'asc').onSnapshot((snapshot) => {
+        const unsubscribe = db.collection(collectionName).orderBy('number', 'asc').onSnapshot((snapshot) => {
             setStatusMap(getStatusMapFromQuerySnapshot(snapshot));
             props.loaded();
         });
+        props.addUnsubscribe(unsubscribe);
     }, []);
 
     return (

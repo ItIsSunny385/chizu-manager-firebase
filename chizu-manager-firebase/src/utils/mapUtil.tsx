@@ -63,7 +63,7 @@ export function listeningMapQueryWithNoChildren(
     setMapDataMap: (data: Map<string, MapData>) => void,
     reset: (mapId: string) => void,
 ) {
-    query.onSnapshot((snapshot) => {
+    return query.onSnapshot((snapshot) => {
         const newMapDataMap = cloneMapDataMap(mapDataMapRef.current);
         for (let change of snapshot.docChanges()) {
             if (change.type === 'added') {
@@ -159,10 +159,12 @@ export function listeningHouseMap(
 export function listeningBuildingMap(
     getBuildingMap: () => Map<string, Building> | undefined,
     buildingsSnap: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>,
-    setBuildingMap: (buildingMap: Map<string, Building>) => void
+    setBuildingMap: (buildingMap: Map<string, Building>) => void,
+    addUnsubscribes: (data: (() => void)[]) => void
 ) {
     const buildings1 = getBuildingMap();
     if (!buildings1) return;
+    const newUnsubscribes1: (() => void)[] = [];
     for (let changeB of buildingsSnap.docChanges()) {
         if (changeB.type === 'added') {
             const newBuilding1: Building = {
@@ -174,13 +176,14 @@ export function listeningBuildingMap(
                 floors: new Map<string, Floor>(),
             };
             buildings1.set(changeB.doc.id, newBuilding1);
-            changeB.doc.ref.collection('floors').orderBy('number', 'asc').onSnapshot((floorsSnap) => {
+            const unsubscribe1 = changeB.doc.ref.collection('floors').orderBy('number', 'asc').onSnapshot((floorsSnap) => {
                 const buildings2 = getBuildingMap();
                 if (!buildings2) return;
                 const newBuilding2 = buildings2.get(changeB.doc.id);
                 if (!newBuilding2) {
                     return;
                 }
+                const newUnsubscribes2: (() => void)[] = [];
                 for (let changeF of floorsSnap.docChanges()) {
                     if (changeF.type === 'added') {
                         newBuilding2.floors.set(changeF.doc.id, {
@@ -188,7 +191,7 @@ export function listeningBuildingMap(
                             number: changeF.doc.data().number,
                             rooms: new Map<string, Room>(),
                         });
-                        changeF.doc.ref.collection('rooms').orderBy('orderNumber', 'asc').onSnapshot((roomsSnap) => {
+                        const unsubscribe2 = changeF.doc.ref.collection('rooms').orderBy('orderNumber', 'asc').onSnapshot((roomsSnap) => {
                             const buildings3 = getBuildingMap();
                             if (!buildings3) return;
                             const newBuilding3 = buildings3.get(changeB.doc.id);
@@ -221,6 +224,7 @@ export function listeningBuildingMap(
                             }
                             setBuildingMap(buildings3);
                         });
+                        newUnsubscribes2.push(unsubscribe2);
                     } else if (changeF.type === 'modified') {
                         const newFloor = { ...newBuilding2.floors.get(changeF.doc.id) } as Floor;
                         newFloor.number = changeF.doc.data().number;
@@ -230,7 +234,9 @@ export function listeningBuildingMap(
                     }
                 }
                 setBuildingMap(buildings2);
+                addUnsubscribes(newUnsubscribes2);
             });
+            newUnsubscribes1.push(unsubscribe1);
         } else if (changeB.type === 'modified') {
             const newBuilding = buildings1.get(changeB.doc.id)!;
             newBuilding.name = changeB.doc.data().name;
@@ -242,14 +248,16 @@ export function listeningBuildingMap(
         }
     }
     setBuildingMap(buildings1);
+    addUnsubscribes(newUnsubscribes1);
 }
 
 export function listeningMapChildrenAndSetMapDataMap(
     mapRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
     mapDataMapRef: React.MutableRefObject<Map<string, MapData>>,
-    setMapDataMap: (data: Map<string, MapData>) => void
+    setMapDataMap: (data: Map<string, MapData>) => void,
+    addUnsubscribes: (data: (() => void)[]) => void
 ) {
-    mapRef.collection('houses').onSnapshot((housesSnap) => {
+    const unsubscribe1 = mapRef.collection('houses').onSnapshot((housesSnap) => {
         listeningHouseMap(
             (): Map<string, House> | undefined => {
                 const newMapDataMap1 = cloneMapDataMap(mapDataMapRef.current);
@@ -267,7 +275,7 @@ export function listeningMapChildrenAndSetMapDataMap(
         );
     });
 
-    mapRef.collection('buildings').onSnapshot((buildingsSnap) => {
+    const unsubscribe2 = mapRef.collection('buildings').onSnapshot((buildingsSnap) => {
         listeningBuildingMap(
             (): Map<string, Building> | undefined => {
                 const newMapDataMap1 = cloneMapDataMap(mapDataMapRef.current);
@@ -281,17 +289,20 @@ export function listeningMapChildrenAndSetMapDataMap(
                 if (!newMapData2) return;
                 newMapData2.buildings = buildingMap;
                 setMapDataMap(newMapDataMap2);
-            }
+            },
+            addUnsubscribes
         );
     });
+    addUnsubscribes([unsubscribe1, unsubscribe2]);
 }
 
 export function listeningMapInfoWithChildren(
     mapRef: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>,
     mapDataRef: React.MutableRefObject<MapData | undefined>,
     setMapData: (data: MapData | undefined) => void,
+    addUnsubscribes: (data: (() => void)[]) => void
 ) {
-    mapRef.onSnapshot((mapSnap) => {
+    const unsubscribe1 = mapRef.onSnapshot((mapSnap) => {
         const newData = mapSnap.data();
         if (!newData) {
             setMapData(undefined);
@@ -323,7 +334,7 @@ export function listeningMapInfoWithChildren(
                 houses: new Map<string, House>(),
             };
             setMapData(newMapData);
-            mapRef.collection('houses').onSnapshot((housesSnap) => {
+            const unsubscribe2 = mapRef.collection('houses').onSnapshot((housesSnap) => {
                 listeningHouseMap(
                     () => {
                         if (!mapDataRef.current) return undefined;
@@ -339,7 +350,7 @@ export function listeningMapInfoWithChildren(
                     }
                 )
             });
-            mapRef.collection('buildings').onSnapshot((buildingsSnap) => {
+            const unsubscribe3 = mapRef.collection('buildings').onSnapshot((buildingsSnap) => {
                 listeningBuildingMap(
                     () => {
                         if (!mapDataRef.current) return undefined;
@@ -352,11 +363,14 @@ export function listeningMapInfoWithChildren(
                         const newMapData2 = cloneMapData(mapDataRef.current);
                         newMapData2.buildings = buildingMap;
                         setMapData(newMapData2);
-                    }
+                    },
+                    addUnsubscribes
                 )
             });
+            addUnsubscribes([unsubscribe2, unsubscribe3]);
         }
     });
+    addUnsubscribes([unsubscribe1]);
 }
 
 export function cloneMapDataMap(mapDataMap: Map<string, MapData>): Map<string, MapData> {

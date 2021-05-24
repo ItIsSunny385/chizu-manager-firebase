@@ -1,4 +1,4 @@
-import { useState, useEffect, MouseEvent, Fragment, useRef } from 'react';
+import { useState, useEffect, Fragment, useRef } from 'react';
 import firebase from 'firebase';
 import AdminApp from '../../components/AdminApp';
 import AddUserModal from '../../components/AddUserModal';
@@ -33,12 +33,19 @@ export default function Index() {
     const [keyword, setKeyword] = useState('');
     const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
     const [user, setUser] = useState(undefined as User | undefined);
+    const [unsubscribes, _setUnsubscribes] = useState<(() => void)[]>([]);
     const router = useRouter();
 
     const initialRef = useRef(initial);
     const setInitial = (data: boolean) => {
         initialRef.current = data;
         _setInitial(data);
+    };
+
+    const unsubscribesRef = useRef(unsubscribes);
+    const setUnsubscribes = (data: (() => void)[]) => {
+        unsubscribesRef.current = data;
+        _setUnsubscribes(data);
     };
 
     useEffect(() => {
@@ -51,6 +58,9 @@ export default function Index() {
             }
             unsubscribe();
         });
+        return () => {
+            unsubscribesRef.current.forEach(x => { x(); });
+        };
     }, []);
 
     useEffect(() => {
@@ -59,7 +69,7 @@ export default function Index() {
                 router.push('/users/login');
                 return;
             }
-            listeningUserMap(
+            const unsubscribe = listeningUserMap(
                 db.collection('users').where('deleted', '==', false).orderBy('displayName', 'asc'),
                 (newUserMap) => {
                     setUserMap(newUserMap);
@@ -69,6 +79,7 @@ export default function Index() {
                     }
                 }
             );
+            setUnsubscribes([unsubscribe]);
         }
     }, [user]);
 
@@ -81,6 +92,7 @@ export default function Index() {
             pageRole={PageRoles.Administrator}
             loading={loading}
             flashMessageProps={flashMessageProps}
+            unsubscribes={unsubscribesRef.current}
         >
             <Form inline className="mb-2">
                 <FormGroup>

@@ -16,7 +16,7 @@ interface Props {
     children: any;
     loading: boolean;
     containerStyle?: React.CSSProperties;
-    messageModalProps?: MessageModalProps;
+    unsubscribes: (() => void)[] | undefined;
 }
 
 export default function App(props: Props) {
@@ -26,16 +26,15 @@ export default function App(props: Props) {
                 <title>{props.title} | 地図マネージャ</title>
             </Head>
             <main style={props.containerStyle}>
-                <Header pageRole={props.pageRole} authUser={props.authUser} user={props.user} />
+                <Header
+                    pageRole={props.pageRole}
+                    authUser={props.authUser}
+                    user={props.user}
+                    unsubscribes={props.unsubscribes}
+                />
                 {props.children}
                 {props.loading && <SpinnerWithBack />}
             </main>
-            {/* メッセージモーダル */}
-            {
-                props.messageModalProps
-                &&
-                <MessageModal {...props.messageModalProps} />
-            }
         </React.Fragment>
     );
 }

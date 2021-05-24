@@ -27,7 +27,7 @@ export function listeningUserMap(
     query: firebase.firestore.Query<firebase.firestore.DocumentData>,
     setUserMap: (newUserMap: SetStateAction<Map<string, User>>) => void
 ) {
-    query.onSnapshot((snapshot) => {
+    return query.onSnapshot((snapshot) => {
         const newUserMap = new Map<string, User>();
         snapshot.forEach((x) => {
             newUserMap.set(x.id, {

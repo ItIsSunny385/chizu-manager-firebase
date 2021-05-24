@@ -1,6 +1,6 @@
 import '../../utils/InitializeFirebase';
 import firebase from 'firebase';
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useRef } from 'react';
 import AdminApp from '../../components/AdminApp';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
@@ -29,7 +29,14 @@ export default function Index() {
     const [user, setUser] = useState(undefined as User | undefined);
     const [deleteId, setDeleteId] = useState(undefined as string | undefined);
     const [newMapRef] = useState(db.collection('maps').doc());
+    const [unsubscribes, _setUnsubscribes] = useState<(() => void)[]>([]);
     const router = useRouter();
+
+    const unsubscribesRef = useRef(unsubscribes);
+    const setUnsubscribes = (data: (() => void)[]) => {
+        unsubscribesRef.current = data;
+        _setUnsubscribes(data);
+    };
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -41,6 +48,9 @@ export default function Index() {
             }
             unsubscribe();
         });
+        return () => {
+            unsubscribesRef.current.forEach(x => { x(); });
+        };
     }, []);
 
     useEffect(() => {
@@ -49,10 +59,11 @@ export default function Index() {
                 router.push('/users/login');
                 return;
             }
-            db.collection('maps').orderBy('name', 'asc').onSnapshot((snapshot) => {
+            const unsubscribe = db.collection('maps').orderBy('name', 'asc').onSnapshot((snapshot) => {
                 setMaps(getMapDataArrayWithNoChildByQuerySnapshot(snapshot));
                 setLoading(false);
             });
+            setUnsubscribes([unsubscribe]);
         }
     }, [user]);
 
@@ -64,6 +75,7 @@ export default function Index() {
             pageTitle="地図一覧"
             pageRole={PageRoles.Administrator}
             loading={loading}
+            unsubscribes={unsubscribesRef.current}
         >
             <Form inline className="mb-2">
                 <FormGroup>

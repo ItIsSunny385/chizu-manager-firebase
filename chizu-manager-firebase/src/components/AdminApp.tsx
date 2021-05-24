@@ -11,11 +11,12 @@ interface Props {
     authUser: firebase.User | undefined;
     user: User | undefined;
     pageRole: PageRoles | undefined;
-    children: any,
-    activeTabId: number,
-    pageTitle: string,
-    loading: boolean,
-    flashMessageProps?: FlashMessageProps
+    children: any;
+    activeTabId: number;
+    pageTitle: string;
+    loading: boolean;
+    flashMessageProps?: FlashMessageProps;
+    unsubscribes: (() => void)[] | undefined;
 };
 
 export default function AdminApp(props: Props) {
@@ -39,6 +40,7 @@ export default function AdminApp(props: Props) {
             title={props.pageTitle}
             loading={props.loading}
             pageRole={props.pageRole}
+            unsubscribes={props.unsubscribes}
         >
             <Container>
                 <Row>

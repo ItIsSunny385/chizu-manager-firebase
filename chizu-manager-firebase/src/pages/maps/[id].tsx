@@ -48,6 +48,7 @@ export default function View() {
     const [mouseDownTime, _setMouseDownTime] = useState(undefined as number | undefined);
     const [currentPosition, setCurrentPosition] = useState(undefined as google.maps.LatLng | undefined);
     const [saveBorder, setSaveBorder] = useState(false);
+    const [unsubscribes, _setUnsubscribes] = useState<(() => void)[]>([]);
     const router = useRouter();
     const { id } = router.query as { id: string };
 
@@ -68,6 +69,15 @@ export default function View() {
         mouseDownTimeRef.current = data;
         _setMouseDownTime(data);
     };
+    const unsubscribesRef = useRef(unsubscribes);
+    const setUnsubscribes = (data: (() => void)[]) => {
+        unsubscribesRef.current = data;
+        _setUnsubscribes(data);
+    };
+    const addUnsubscribes = (unsubscribes: (() => void)[]) => {
+        const newUnsubscribes = [...unsubscribesRef.current, ...unsubscribes];
+        setUnsubscribes(newUnsubscribes);
+    };
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -79,6 +89,9 @@ export default function View() {
             }
             unsubscribe();
         });
+        return () => {
+            unsubscribesRef.current.forEach(x => { x(); });
+        };
     }, []);
 
     useEffect(() => {
@@ -111,10 +124,11 @@ export default function View() {
             getStatusMap(db, 'building_statuses', setBuildingStatusMap);
 
             /* ユーザ情報を取得 */
-            listeningUserMap(
+            const unsubscribe = listeningUserMap(
                 db.collection('users').where('deleted', '==', false).where('isAdmin', '==', false).orderBy('displayName', 'asc'),
                 setUserMap
             );
+            addUnsubscribes([unsubscribe]);
 
             /* 地図情報を監視 */
             const mapRef = db.collection('maps').doc(id);
@@ -126,7 +140,8 @@ export default function View() {
                     if (mapDataLoadingRef.current) {
                         setMapDataLoading(false);
                     }
-                }
+                },
+                addUnsubscribes
             );
         }
     }, [user]);
@@ -289,6 +304,7 @@ export default function View() {
                 loading={loading}
                 onLoadMap={setMap}
                 onRightClick={(e) => { setNewLatLng(e.latLng); }}
+                unsubscribes={unsubscribesRef.current}
             >
                 {/* GoogleMapがロードされ、mapDataが設定されてから中身を描画する　*/}
                 {

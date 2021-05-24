@@ -13,6 +13,7 @@ export interface Props {
     authUser: firebase.User | undefined;
     user: User | undefined;
     pageRole: PageRoles | undefined;
+    unsubscribes: (() => void)[] | undefined;
 }
 
 const auth = firebase.auth();
@@ -55,6 +56,9 @@ export default function Header(props: Props) {
                             </NavItem>
                             <NavItem>
                                 <NavLink href="#" onClick={(e) => {
+                                    if (props.unsubscribes) {
+                                        props.unsubscribes.forEach(x => { x() });
+                                    }
                                     auth.signOut();
                                     router.push('/users/login');
                                 }}>

@@ -41,6 +41,7 @@ export default function Index() {
     const [userMap, setUserMap] = useState(new Map<string, User>());
     const [mouseDownTime, _setMouseDownTime] = useState(undefined as number | undefined);
     const [currentPosition, setCurrentPosition] = useState(undefined as google.maps.LatLng | undefined);
+    const [unsubscribes, _setUnsubscribes] = useState<(() => void)[]>([]);
     const router = useRouter();
 
     const mapDataMapRef = useRef(mapDataMap);
@@ -67,6 +68,16 @@ export default function Index() {
         _setMouseDownTime(data);
     };
 
+    const unsubscribesRef = useRef(unsubscribes);
+    const setUnsubscribes = (data: (() => void)[]) => {
+        unsubscribesRef.current = data;
+        _setUnsubscribes(data);
+    };
+    const addUnsubscribes = (unsubscribes: (() => void)[]) => {
+        const newUnsubscribes = [...unsubscribesRef.current, ...unsubscribes];
+        setUnsubscribes(newUnsubscribes);
+    };
+
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((authUser) => {
             if (!authUser) {
@@ -77,6 +88,9 @@ export default function Index() {
             }
             unsubscribe();
         });
+        return () => {
+            unsubscribesRef.current.forEach(x => { x(); });
+        };
     }, []);
 
     useEffect(() => {
@@ -91,7 +105,7 @@ export default function Index() {
             getStatusMap(db, 'building_statuses', setBuildingStatusMap);
 
             /* ユーザ情報を取得 */
-            listeningUserMap(
+            const unsubscribe1 = listeningUserMap(
                 db.collection('users').where('deleted', '==', false).where('isAdmin', '==', false).orderBy('displayName', 'asc'),
                 setUserMap
             );
@@ -109,7 +123,7 @@ export default function Index() {
             };
 
             /* マネージャとしての地図 */
-            listeningMapQueryWithNoChildren(
+            const unsubscribe2 = listeningMapQueryWithNoChildren(
                 db.collection('maps').where('managers', 'array-contains', userRef).where('using', '==', true),
                 mapDataMapRef,
                 setMapDataMap,
@@ -117,13 +131,13 @@ export default function Index() {
             );
 
             /* 編集者としての地図 */
-            listeningMapQueryWithNoChildren(
+            const unsubscribe3 = listeningMapQueryWithNoChildren(
                 db.collection('maps').where('allEditable', '==', true).where('using', '==', true),
                 mapDataMapRef,
                 setMapDataMap,
                 resetMapData
             );
-            listeningMapQueryWithNoChildren(
+            const unsubscribe4 = listeningMapQueryWithNoChildren(
                 db.collection('maps').where('editors', 'array-contains', userRef).where('using', '==', true),
                 mapDataMapRef,
                 setMapDataMap,
@@ -131,18 +145,19 @@ export default function Index() {
             );
 
             /* 利用者としての地図 */
-            listeningMapQueryWithNoChildren(
+            const unsubscribe5 = listeningMapQueryWithNoChildren(
                 db.collection('maps').where('allUsable', '==', true).where('using', '==', true),
                 mapDataMapRef,
                 setMapDataMap,
                 resetMapData
             );
-            listeningMapQueryWithNoChildren(
+            const unsubscribe6 = listeningMapQueryWithNoChildren(
                 db.collection('maps').where('users', 'array-contains', userRef).where('using', '==', true),
                 mapDataMapRef,
                 setMapDataMap,
                 resetMapData
             );
+            addUnsubscribes([unsubscribe1, unsubscribe2, unsubscribe3, unsubscribe4, unsubscribe5, unsubscribe6]);
 
             setLoading(false);
         }
@@ -216,7 +231,8 @@ export default function Index() {
         listeningMapChildrenAndSetMapDataMap(
             db.collection('maps').doc(mapId),
             mapDataMapRef,
-            setMapDataMap
+            setMapDataMap,
+            addUnsubscribes
         );
         setListeningMapIds([...listeningMapIds, mapId]);
     }, [mapId]);
@@ -322,6 +338,7 @@ export default function Index() {
             pageRole={pageRole}
             onLoadMap={setMap}
             onRightClick={(e) => { setNewLatLng(e.latLng); }}
+            unsubscribes={unsubscribesRef.current}
         >
             {
                 map
