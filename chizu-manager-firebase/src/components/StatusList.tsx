@@ -87,7 +87,12 @@ export default function StatusList(props: Props) {
                         }
                     },
                     { dataField: 'statusAfterReseting', text: 'リセット後' },
-                    { dataField: 'action', text: '', classes: 'p-2' },
+                    {
+                        dataField: 'action',
+                        text: '',
+                        classes: 'p-2',
+                        style: { minWidth: '85px' }
+                    },
                 ]}
                 noDataIndication={() => (<div className="text-center">データがありません</div>)}
             />
