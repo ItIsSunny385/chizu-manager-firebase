@@ -217,6 +217,9 @@ export default function Index() {
         }
         const watchId = navigator.geolocation.watchPosition(
             (position) => {
+                if (typeof google === 'undefined') {
+                    return;
+                }
                 setCurrentPosition(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
             },
             () => {
