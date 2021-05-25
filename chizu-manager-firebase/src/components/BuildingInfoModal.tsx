@@ -1,29 +1,31 @@
 import firebase from 'firebase';
-import React, { useState } from 'react';
-import { TrashFill } from 'react-bootstrap-icons';
-import { Button, FormGroup, FormText, Input, InputGroup, InputGroupAddon, Label } from 'reactstrap';
+import React, { Fragment, useEffect, useState } from 'react';
+import { Button, FormFeedback, FormGroup, FormText, Input, Label } from 'reactstrap';
 import { Building, Room } from '../types/map';
 import { cloneBuilding } from '../utils/mapUtil';
 import MessageModal from './MessageModal';
+import FloorEditor from './FloorEditor';
+import OkModal from './OkModal';
+import { ExclamationCircle } from 'react-bootstrap-icons';
 
 interface Props {
-    buildingRef: firebase.firestore.DocumentReference,
-    title: any,
-    data: Building,
-    defaultStatusRef: firebase.firestore.DocumentReference,
-    toggle: () => void,
-    finish: (result: Building) => void,
+    buildingRef: firebase.firestore.DocumentReference;
+    title: any;
+    data: Building;
+    defaultStatusRef: firebase.firestore.DocumentReference;
+    toggle: () => void;
+    finish: (result: Building) => void;
 }
 
 const MAX_BUILDING_NAME_LENGTH = 16;
-const MAX_ROOM_NAME_LENGTH = 16;
 
 export default function BuildingInfoModal(props: Props) {
     const [data, setData] = useState(cloneBuilding(props.data));
+    const [displayNameError, setDisplayNameError] = useState(false);
+    const [floorErrors, setFloorErrors] = useState(new Map<string, boolean>());
+    const [displayErrorModal, setDisplayErrorModal] = useState(false);
+
     const onChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.value.length > MAX_BUILDING_NAME_LENGTH) {
-            return;
-        }
         const newData = cloneBuilding(data);
         newData.name = e.target.value;
         setData(newData);
@@ -53,6 +55,10 @@ export default function BuildingInfoModal(props: Props) {
         setData(newData);
     };
     const onClickFinishButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        if (displayNameError || Array.from(floorErrors.values()).some(x => x)) {
+            setDisplayErrorModal(true);
+            return;
+        }
         props.finish(data);
     };
     const messageModalProps = {
@@ -69,63 +75,45 @@ export default function BuildingInfoModal(props: Props) {
             <Button onClick={onClickFinishButton}>完了</Button>
         </React.Fragment>
     };
+
+    useEffect(() => {
+        setDisplayNameError(data.name.length > MAX_BUILDING_NAME_LENGTH);
+    }, [data]);
+
     return <MessageModal {...messageModalProps}>
         <FormGroup>
-            <Label for="buildingName">名前</Label>
-            <Input id="buildingName" value={data.name} onChange={onChangeName} />
+            <Label for="buildingName">建物名</Label>
+            <Input
+                id="buildingName"
+                value={data.name}
+                onChange={onChangeName}
+                className={displayNameError ? 'is-invalid' : ''}
+            />
+            {
+                displayNameError
+                &&
+                <FormFeedback>建物名が長すぎます。</FormFeedback>
+            }
             <FormText>{`名前は${MAX_BUILDING_NAME_LENGTH}文字までです。`}</FormText>
         </FormGroup>
         {
-            Array.from(data.floors.values()).map((floor, i) => {
+            Array.from(data.floors.values()).map((floor) => {
                 const floorRef = props.buildingRef.collection('floors').doc(floor.id);
-                const roomsRef = floorRef.collection('rooms');
-                const onClickAddRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                    const newData = cloneBuilding(data);
-                    const nextOrderNumber = floor.rooms.size > 0
-                        ? Math.max(...Array.from(floor.rooms.values()).map(x => x.orderNumber)) + 1 : 1;
-                    const roomRef = roomsRef.doc();
-                    const newRoom: Room = {
-                        id: roomRef.id,
-                        orderNumber: nextOrderNumber,
-                        roomNumber: '',
-                        statusRef: props.defaultStatusRef,
-                        comment: null,
-                    };
-                    newData.floors.get(floor.id)!.rooms.set(roomRef.id, newRoom);
-                    setData(newData);
-                };
-                return <details key={floor.number} className="mt-1">
-                    <summary>{floor.number}階</summary>
-                    <div>
-                        <FormText>{`部屋番号は${MAX_ROOM_NAME_LENGTH}文字までです。`}</FormText>
-                        {
-                            Array.from(floor.rooms.values()).map((room, j) => {
-                                const onChangeRoom = (e: React.ChangeEvent<HTMLInputElement>) => {
-                                    if (e.target.value.length > MAX_ROOM_NAME_LENGTH) {
-                                        return;
-                                    }
-                                    const newData = cloneBuilding(data);
-                                    newData.floors.get(floor.id)!.rooms.get(room.id)!.roomNumber = e.target.value;
-                                    setData(newData);
-                                };
-                                const onClickDeleteRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                                    const newData = cloneBuilding(data);
-                                    newData.floors.get(floor.id)!.rooms.delete(room.id);
-                                    setData(newData);
-                                };
-                                return <InputGroup key={j} className="mt-1">
-                                    <Input value={room.roomNumber} onChange={onChangeRoom} />
-                                    <InputGroupAddon addonType="append">
-                                        <Button onClick={onClickDeleteRoom}><TrashFill /></Button>
-                                    </InputGroupAddon>
-                                </InputGroup>;
-                            })
-                        }
-                        <div className="mt-1 text-right">
-                            <Button onClick={onClickAddRoom}>部屋追加</Button>
-                        </div>
-                    </div>
-                </details>;
+                return <FloorEditor
+                    floorRef={floorRef}
+                    data={floor}
+                    defaultStatusRef={props.defaultStatusRef}
+                    setData={(newFloor) => {
+                        const newBuilding = cloneBuilding(data);
+                        newBuilding.floors.set(floor.id, newFloor);
+                        setData(newBuilding);
+                    }}
+                    setError={(error) => {
+                        const newFloorErrors = new Map<string, boolean>(floorErrors);
+                        newFloorErrors.set(floor.id, error);
+                        setFloorErrors(newFloorErrors);
+                    }}
+                />
             })
         }
         <div className="mt-3">
@@ -136,5 +124,19 @@ export default function BuildingInfoModal(props: Props) {
             }
             <Button onClick={onClickAddFloor}>フロア追加</Button>
         </div>
+        {
+            displayErrorModal
+            &&
+            <OkModal
+                header={<Fragment>
+                    <ExclamationCircle className="mb-1 mr-2" />エラー
+                </Fragment>}
+                zIndex={2000}
+                toggle={() => { setDisplayErrorModal(false); }}
+                ok={() => { setDisplayErrorModal(false); }}
+            >
+                <div>入力エラーがあります。</div>
+            </OkModal>
+        }
     </MessageModal>;
 }
