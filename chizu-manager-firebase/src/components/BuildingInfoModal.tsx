@@ -1,7 +1,7 @@
 import firebase from 'firebase';
 import React, { useState } from 'react';
 import { TrashFill } from 'react-bootstrap-icons';
-import { Button, FormGroup, Input, InputGroup, InputGroupAddon, Label } from 'reactstrap';
+import { Button, FormGroup, FormText, Input, InputGroup, InputGroupAddon, Label } from 'reactstrap';
 import { Building, Room } from '../types/map';
 import { cloneBuilding } from '../utils/mapUtil';
 import MessageModal from './MessageModal';
@@ -15,9 +15,15 @@ interface Props {
     finish: (result: Building) => void,
 }
 
+const MAX_BUILDING_NAME_LENGTH = 16;
+const MAX_ROOM_NAME_LENGTH = 16;
+
 export default function BuildingInfoModal(props: Props) {
     const [data, setData] = useState(cloneBuilding(props.data));
     const onChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.value.length > MAX_BUILDING_NAME_LENGTH) {
+            return;
+        }
         const newData = cloneBuilding(data);
         newData.name = e.target.value;
         setData(newData);
@@ -66,7 +72,8 @@ export default function BuildingInfoModal(props: Props) {
     return <MessageModal {...messageModalProps}>
         <FormGroup>
             <Label for="buildingName">名前</Label>
-            <Input id="buildingName" defaultValue={data.name} onChange={onChangeName} />
+            <Input id="buildingName" value={data.name} onChange={onChangeName} />
+            <FormText>{`名前は${MAX_BUILDING_NAME_LENGTH}文字までです。`}</FormText>
         </FormGroup>
         {
             Array.from(data.floors.values()).map((floor, i) => {
@@ -90,9 +97,13 @@ export default function BuildingInfoModal(props: Props) {
                 return <details key={floor.number} className="mt-1">
                     <summary>{floor.number}階</summary>
                     <div>
+                        <FormText>{`部屋番号は${MAX_ROOM_NAME_LENGTH}文字までです。`}</FormText>
                         {
                             Array.from(floor.rooms.values()).map((room, j) => {
                                 const onChangeRoom = (e: React.ChangeEvent<HTMLInputElement>) => {
+                                    if (e.target.value.length > MAX_ROOM_NAME_LENGTH) {
+                                        return;
+                                    }
                                     const newData = cloneBuilding(data);
                                     newData.floors.get(floor.id)!.rooms.get(room.id)!.roomNumber = e.target.value;
                                     setData(newData);
@@ -103,7 +114,7 @@ export default function BuildingInfoModal(props: Props) {
                                     setData(newData);
                                 };
                                 return <InputGroup key={j} className="mt-1">
-                                    <Input defaultValue={room.roomNumber} onChange={onChangeRoom} />
+                                    <Input value={room.roomNumber} onChange={onChangeRoom} />
                                     <InputGroupAddon addonType="append">
                                         <Button onClick={onClickDeleteRoom}><TrashFill /></Button>
                                     </InputGroupAddon>
