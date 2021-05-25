@@ -42,6 +42,7 @@ export default function Index() {
     const [mouseDownTime, _setMouseDownTime] = useState(undefined as number | undefined);
     const [currentPosition, setCurrentPosition] = useState(undefined as google.maps.LatLng | undefined);
     const [unsubscribes, _setUnsubscribes] = useState<(() => void)[]>([]);
+    const [watchId, setWatchId] = useState(undefined as number | undefined);
     const router = useRouter();
 
     const mapDataMapRef = useRef(mapDataMap);
@@ -90,6 +91,9 @@ export default function Index() {
         });
         return () => {
             unsubscribesRef.current.forEach(x => { x(); });
+            if (navigator && watchId) {
+                navigator.geolocation.clearWatch(watchId);
+            }
         };
     }, []);
 
@@ -207,11 +211,11 @@ export default function Index() {
         if (!map) {
             return;
         }
-        if (!navigator.geolocation) {
+        if (!navigator.geolocation || !google) {
             alert("あなたの端末では、現在位置を取得できません。");
             return;
         }
-        navigator.geolocation.watchPosition(
+        const watchId = navigator.geolocation.watchPosition(
             (position) => {
                 setCurrentPosition(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
             },
@@ -219,6 +223,7 @@ export default function Index() {
                 setCurrentPosition(undefined);
             }
         );
+        setWatchId(watchId);
     }, [map]);
 
     useEffect(() => {
