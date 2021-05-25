@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from 'react';
-import { Button, Input, InputGroup, InputGroupAddon, InputGroupText } from 'reactstrap';
+import { Button, Input, InputGroup, InputGroupAddon, InputGroupText, Tooltip } from 'reactstrap';
 import { Room } from '../types/map';
 import { Status } from '../types/model';
 import { ChatTextFill } from 'react-bootstrap-icons';
@@ -13,13 +13,26 @@ interface Props {
     updateComment: (comment: string | null) => void;
 }
 
+const DISPLAY_ROOM_NUMBER_LENGTH = 4;
+
 export default function BuildingMarkerRoomInfo(props: Props) {
     const [displayComment, setDisipalyComment] = useState(false);
+    const [tooltipOpen, setTooltipOpen] = useState(false);
 
     return <Fragment>
         <InputGroup size="sm">
-            <InputGroupAddon addonType="prepend">
-                <InputGroupText>{props.data.roomNumber}</InputGroupText>
+            <InputGroupAddon id={props.data.id} addonType="prepend">
+                {
+                    props.data.roomNumber.length <= DISPLAY_ROOM_NUMBER_LENGTH
+                        ?
+                        <InputGroupText>{props.data.roomNumber}</InputGroupText>
+                        :
+                        <InputGroupText
+                            onClick={() => { setTooltipOpen(!tooltipOpen); }}
+                        >
+                            {props.data.roomNumber.substr(0, DISPLAY_ROOM_NUMBER_LENGTH) + '...'}
+                        </InputGroupText>
+                }
             </InputGroupAddon>
             <Input
                 type="select"
@@ -49,5 +62,19 @@ export default function BuildingMarkerRoomInfo(props: Props) {
                 toggle={() => { setDisipalyComment(false); }}
             />
         }
-    </Fragment>;
+        {
+            props.data.roomNumber.length > DISPLAY_ROOM_NUMBER_LENGTH
+            &&
+            tooltipOpen
+            &&
+            <Tooltip
+                placement="bottom"
+                isOpen={tooltipOpen}
+                target={props.data.id}
+                toggle={() => { setTooltipOpen(!tooltipOpen); }}
+            >
+                {props.data.roomNumber}
+            </Tooltip>
+        }
+    </Fragment >;
 }
