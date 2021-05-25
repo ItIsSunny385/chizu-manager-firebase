@@ -80,8 +80,9 @@ export default function StatusList(props: Props) {
                             return {
                                 backgroundImage: `url(${getMarkerUrl(Array.from(statusMap.values())[rowIndex].pin)}`,
                                 backgroundRepeat: 'no-repeat',
-                                backgroundPosition: 'bottom',
+                                backgroundPosition: 'center top 11px',
                                 backgroundSize: '37px',
+                                fontSize: '14px',
                             };
                         }
                     },
