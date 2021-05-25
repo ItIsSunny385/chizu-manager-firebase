@@ -2,6 +2,7 @@ import { Fragment, useState } from "react";
 import MessageModal from "./MessageModal";
 import { Button, Form, FormFeedback, FormGroup, FormText, Input, Label } from "reactstrap";
 import FlashMessage, { Props as FlashMessageProps } from "./FlashMessage";
+import ConfirmResetingModal from "./ConfirmResetingModal";
 import { Colors } from "../types/bootstrap";
 import { ArrowRepeat, Gear, InfoCircle } from "react-bootstrap-icons";
 
@@ -17,7 +18,9 @@ export default function MapSettingModal(props: Props) {
     const [name, setName] = useState(props.name);
     const [displayNameError, setDisplayNameError] = useState(undefined as string | undefined);
     const [using, setUsing] = useState(props.using);
-    const [flashMessageProps, setFlashMessageProps] = useState(undefined as FlashMessageProps | undefined);
+    const [flashMessageProps1, setFlashMessageProps1] = useState(undefined as FlashMessageProps | undefined);
+    const [flashMessageProps2, setFlashMessageProps2] = useState(undefined as FlashMessageProps | undefined);
+    const [displayResetingModal, setDisplayResetingModal] = useState(false);
 
     const messageModalProps = {
         modalHeaderProps: {
@@ -37,9 +40,9 @@ export default function MapSettingModal(props: Props) {
 
     return <MessageModal {...messageModalProps}>
         {
-            flashMessageProps
+            flashMessageProps1
             &&
-            <FlashMessage {...flashMessageProps} />
+            <FlashMessage {...flashMessageProps1} />
         }
         <div className="mb-5">
             <h4 className="mb-3"><InfoCircle className="mb-1 mr-2" />地図情報</h4>
@@ -85,28 +88,47 @@ export default function MapSettingModal(props: Props) {
                         if (props.name !== name || props.using !== using) {
                             props.updateNameAndUsing(name, using);
                         }
-                        setFlashMessageProps({
+                        setFlashMessageProps1({
                             color: Colors.Success,
                             message: '地図情報を更新しました。',
                             className: 'mt-0',
-                            close: () => { setFlashMessageProps(undefined); }
+                            close: () => { setFlashMessageProps1(undefined); }
                         });
                     }
                 }}>更新</Button>
             </Form>
         </div>
+        {
+            flashMessageProps2
+            &&
+            <FlashMessage {...flashMessageProps2} />
+        }
         <div>
             <h4 className="mb-3"><ArrowRepeat className="mb-1 mr-2" />ステータスリセット  </h4>
             <div className="mb-3">家・建物・部屋のステータスをリセットします。</div>
-            <Button onClick={() => {
-                props.reset();
-                setFlashMessageProps({
-                    color: Colors.Success,
-                    message: '家・建物・部屋のステータスをリセットしました。',
-                    className: 'mt-0',
-                    close: () => { setFlashMessageProps(undefined); }
-                });
-            }}>リセット</Button>
+            <Button
+                onClick={() => {
+                    setDisplayResetingModal(true);
+                }}
+            >リセット</Button>
         </div>
+        {
+            displayResetingModal
+            &&
+            <ConfirmResetingModal
+                toggle={() => {
+                    setDisplayResetingModal(false);
+                }}
+                reset={() => {
+                    props.reset();
+                    setDisplayResetingModal(false);
+                    setFlashMessageProps2({
+                        color: Colors.Success,
+                        message: '家・建物・部屋のステータスをリセットしました。',
+                        close: () => { setFlashMessageProps2(undefined); }
+                    });
+                }}
+            />
+        }
     </MessageModal>;
 }
