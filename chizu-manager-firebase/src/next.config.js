@@ -8,7 +8,7 @@ module.exports = {
         storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
         messagingSenderId: process.env.FIREBASE_MESSAGE_SENDER_ID,
         appId: process.env.FIREBASE_APP_ID,
-        googleMapsApiKey: process.env.GOOGLEMAPS_API_KEY,
+        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
         googleMapsCenterLat: process.env.GOOGLE_MAPS_CENTER_LAT,
         googleMapsCenterLng: process.env.GOOGLE_MAPS_CENTER_LNG,
         googleMapsZoom: process.env.GOOGLE_MAPS_ZOOM,
