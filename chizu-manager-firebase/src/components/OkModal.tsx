@@ -9,7 +9,7 @@ interface Props {
     ok: () => void;
 }
 
-export default function ConfirmDeletionModal(props: Props) {
+export default function OkModal(props: Props) {
     const messageModalProps = {
         modalHeaderProps: {
             toggle: props.toggle,

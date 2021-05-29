@@ -1,11 +1,12 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import firebase from 'firebase';
-import { Button, Form, FormGroup, FormText, Input, InputGroup, InputGroupAddon, InputGroupText, Label } from "reactstrap";
+import { Button, Form, FormFeedback, FormGroup, FormText, Input, InputGroup, InputGroupAddon, InputGroupText, Label } from "reactstrap";
 import MessageModal from "./MessageModal";
 import { Status, Pins, StatusType, StatusCollectionName } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
 import { cloneStatus } from "../utils/statusUtil";
-import { Gear } from "react-bootstrap-icons";
+import { ExclamationCircle, Gear } from "react-bootstrap-icons";
+import OkModal from "./OkModal";
 
 export interface Props {
     type: StatusType,
@@ -18,6 +19,14 @@ const db = firebase.firestore();
 
 export default function AddStatusModal(props: Props) {
     const [data, setData] = useState(cloneStatus(props.statusMap.get(props.id)!));
+    const [displayNameError, setDisplayNameError] = useState(false);
+    const [displayLabelError, setDisplayLabelError] = useState(false);
+    const [displayErrorModal, setDisplayErrorModal] = useState(false);
+
+    useEffect(() => {
+        setDisplayNameError(data.name.length > 8);
+        setDisplayLabelError(data.label.length > 4);
+    }, [data]);
 
     const collectionName = StatusCollectionName[props.type];
     const title = <Fragment>
@@ -25,8 +34,11 @@ export default function AddStatusModal(props: Props) {
         {props.type === StatusType.HouseOrRoom ? '家・部屋ステータス編集' : '集合住宅ステータス編集'}
     </Fragment>;
 
-
     const onClickSaveButton = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        if (displayNameError || displayLabelError) {
+            setDisplayErrorModal(true);
+            return;
+        }
         const originalData = props.statusMap.get(props.id)!;
         if (JSON.stringify(originalData) !== JSON.stringify(data)) {
             const batch = firebase.firestore().batch();
@@ -83,7 +95,13 @@ export default function AddStatusModal(props: Props) {
                         newData.name = e.target.value;
                         setData(newData);
                     }}
+                    className={displayNameError ? 'is-invalid' : ''}
                 />
+                {
+                    displayNameError
+                    &&
+                    <FormFeedback>名前が長すぎます。</FormFeedback>
+                }
                 <FormText>8文字以内で入力してください。</FormText>
             </FormGroup>
             <FormGroup>
@@ -135,7 +153,13 @@ export default function AddStatusModal(props: Props) {
                         newData.label = e.target.value;
                         setData(newData);
                     }}
+                    className={displayLabelError ? 'is-invalid' : ''}
                 />
+                {
+                    displayLabelError
+                    &&
+                    <FormFeedback>ラベルが長すぎます。</FormFeedback>
+                }
                 <FormText>4文字以内で入力してください。ピン上に表示されます。</FormText>
             </FormGroup>
             <FormGroup>
@@ -161,5 +185,19 @@ export default function AddStatusModal(props: Props) {
                 <FormText>地図をリセットした時に、どのステータスに変更するか設定してください。</FormText>
             </FormGroup>
         </Form>
+        {
+            displayErrorModal
+            &&
+            <OkModal
+                header={<Fragment>
+                    <ExclamationCircle className="mb-1 mr-2" />エラー
+                    </Fragment>}
+                zIndex={2000}
+                toggle={() => { setDisplayErrorModal(false); }}
+                ok={() => { setDisplayErrorModal(false); }}
+            >
+                <div>入力エラーがあります。</div>
+            </OkModal>
+        }
     </MessageModal>;
 }
