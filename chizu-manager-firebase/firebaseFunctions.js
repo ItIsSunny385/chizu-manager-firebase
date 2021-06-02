@@ -32,7 +32,7 @@ exports.onCreateDeleteAuthUser = functions.firestore
     })
 
 /* 地図の削除用関数 */
-exports.onnDeleteMap = functions.firestore
+exports.onDeleteMap = functions.firestore
     .document('maps/{mapId}')
     .onDelete(async (mapSnap, context) => {
         const batch = admin.firestore().batch()
