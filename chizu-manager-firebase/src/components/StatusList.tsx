@@ -9,7 +9,9 @@ import { Status, StatusCollectionName, StatusType } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
 import { getStatusMapFromQuerySnapshot } from '../utils/statusUtil';
 import { Colors } from '../types/bootstrap';
-import { Pencil, Trash } from 'react-bootstrap-icons';
+import { ExclamationCircle, Pencil, Trash } from 'react-bootstrap-icons';
+import OkModal from './OkModal';
+import ConfirmDeletionModal from './ConfirmDeletionModal';
 
 const db = firebase.firestore();
 
@@ -23,6 +25,8 @@ export default function StatusList(props: Props) {
     const [statusMap, setStatusMap] = useState(new Map<string, Status>());
     const [displayAddStatusModal, setDisplayAddStatusModal] = useState(false);
     const [editStatusId, setEditStatusId] = useState(undefined as string | undefined);
+    const [errorMessage, setErrorMessage] = useState(undefined as string | undefined);
+    const [deleteStatusId, setDeleteStatusId] = useState(undefined as string | undefined);
 
     const collectionName = StatusCollectionName[props.type];
     const title = props.type === StatusType.HouseOrRoom ? '家・部屋ステータス' : '集合住宅ステータス';
@@ -64,6 +68,20 @@ export default function StatusList(props: Props) {
                                 <Button
                                     size="sm"
                                     color={Colors.Danger}
+                                    onClick={() => {
+                                        const resetingStatusSetted = !!status.statusAfterResetingRef;
+                                        let settedAsResetingStatus = false;
+                                        statusMap.forEach((x) => {
+                                            if (x.statusAfterResetingRef && x.statusAfterResetingRef.id === id) {
+                                                settedAsResetingStatus = true;
+                                            }
+                                        });
+                                        if (!resetingStatusSetted || settedAsResetingStatus) {
+                                            setErrorMessage('リセット後ステータスが設定されていないか、他のステータスのリセット後ステータスとして設定されている場合は削除できません。');
+                                            return;
+                                        }
+                                        setDeleteStatusId(id);
+                                    }}
                                 >
                                     <Trash className="mb-1" /><span className="ml-1 d-none d-md-inline">削除</span>
                                 </Button>
@@ -115,6 +133,31 @@ export default function StatusList(props: Props) {
                     statusMap={statusMap}
                     toggle={() => { setEditStatusId(undefined); }}
                 />
+            }
+            {
+                deleteStatusId
+                &&
+                <ConfirmDeletionModal
+                    toggle={() => { setDeleteStatusId(undefined); }}
+                    delete={() => {
+                        db.collection(collectionName).doc(deleteStatusId).delete();
+                        setDeleteStatusId(undefined);
+                    }}
+                />
+            }
+            {
+                errorMessage
+                &&
+                <OkModal
+                    header={<Fragment>
+                        <ExclamationCircle className="mb-1 mr-2" />エラー
+                    </Fragment>}
+                    zIndex={2000}
+                    toggle={() => { setErrorMessage(undefined); }}
+                    ok={() => { setErrorMessage(undefined); }}
+                >
+                    <div>{errorMessage}</div>
+                </OkModal>
             }
         </Fragment>
     );

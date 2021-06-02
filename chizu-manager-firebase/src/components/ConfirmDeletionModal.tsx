@@ -19,6 +19,7 @@ export default function ConfirmDeletionModal(props: Props) {
         </Fragment>,
         modalProps: {
             isOpen: true,
+            zIndex: 2000,
             toggle: props.toggle,
         },
         modalFooterContents: <Fragment>
