@@ -1,6 +1,6 @@
 {
     "name": "chizu-manager-firebase",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Chizu Manager Application by Firebase",
     "main": "firebaseFunctions.js",
     "scripts": {
