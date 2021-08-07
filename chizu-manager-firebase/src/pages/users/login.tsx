@@ -44,26 +44,13 @@ export default function Login() {
                         <Form>
                             <FormGroup>
                                 <Label for="email">メールアドレス</Label>
-                                <Input
-                                    type="email"
-                                    name="email"
-                                    onChange={(e) => { setEmail(e.target.value); }}
-                                />
+                                <Input type="email" name="email" onChange={(e) => { setEmail(e.target.value); }} />
                             </FormGroup>
                             <FormGroup>
                                 <Label for="password">パスワード</Label>
-                                <Input type="password" name="password"
-                                    onChange={(e) => { setPassword(e.target.value); }}
-                                    onKeyUp={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            document.getElementById('login')?.click();
-                                        }
-                                    }}
-                                />
+                                <Input type="password" name="password" onChange={(e) => { setPassword(e.target.value); }} />
                             </FormGroup>
                             <Button
-                                id="login"
                                 onClick={async (e) => {
                                     try {
                                         setLoading(true);
