@@ -15,6 +15,7 @@ import { User } from '../../types/model';
 import { getUser } from '../../utils/userUtil';
 import Link from 'next/link';
 import ConfirmDeletionModal from '../../components/ConfirmDeletionModal';
+import MapList from '../../components/MapList';
 import { Colors } from '../../types/bootstrap';
 import { Pencil, Trash } from 'react-bootstrap-icons';
 
@@ -83,42 +84,7 @@ export default function Index() {
                     <Input type="text" onChange={(e) => { setKeyword(e.target.value); }} />
                 </FormGroup>
             </Form>
-            <BootstrapTable
-                bootstrap4
-                keyField='fullId'
-                data={maps.filter(x => x.name.includes(keyword))
-                    .map(x => {
-                        return {
-                            fullId: x.id,
-                            id: x.id ? x.id.substr(0, 10) + '...' : '',
-                            name: x.name,
-                            using: x.using ? '使用中' : '不使用',
-                            action: <Fragment>
-                                <Link
-                                    href='/maps/[id]'
-                                    as={`/maps/${x.id}`}
-                                    passHref
-                                >
-                                    <Button className="mr-1" size="sm">
-                                        <Pencil className="mb-1" /><span className="ml-1 d-none d-md-inline">編集</span>
-                                    </Button>
-                                </Link>
-                                <Button color={Colors.Danger} size="sm" onClick={() => {
-                                    setDeleteId(x.id);
-                                }}>
-                                    <Trash className="mb-1" /><span className="ml-1 d-none d-md-inline">削除</span>
-                                </Button>
-                            </Fragment>
-                        };
-                    })}
-                columns={[
-                    { dataField: 'name', text: '名前', sort: true },
-                    { dataField: 'using', text: '使用状況', sort: true },
-                    { dataField: 'action', text: '', classes: 'p-2' }
-                ]}
-                pagination={paginationFactory({})}
-                noDataIndication={() => (<div className="text-center">データがありません</div>)}
-            />
+            <MapList data={maps.filter(x => x.name.includes(keyword))} />
             <div className="text-left mb-2 mt-2">
                 <Link href="/maps/[id]" as={`/maps/${newMapRef.id}`} passHref>
                     <Button tag="a">追加</Button>
