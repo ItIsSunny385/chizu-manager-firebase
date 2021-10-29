@@ -1,9 +1,7 @@
 import '../../utils/InitializeFirebase';
 import firebase from 'firebase';
-import { useState, useEffect, Fragment, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import AdminApp from '../../components/AdminApp';
-import BootstrapTable from 'react-bootstrap-table-next';
-import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
 import { MapData } from '../../types/map';
@@ -16,8 +14,6 @@ import { getUser } from '../../utils/userUtil';
 import Link from 'next/link';
 import ConfirmDeletionModal from '../../components/ConfirmDeletionModal';
 import MapList from '../../components/MapList';
-import { Colors } from '../../types/bootstrap';
-import { Pencil, Trash } from 'react-bootstrap-icons';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
