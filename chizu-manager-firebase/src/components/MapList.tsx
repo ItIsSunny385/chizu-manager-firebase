@@ -9,7 +9,7 @@ interface Props {
     data: MapData[],
 }
 
-const NumItemOfAPage = 1;
+const NumItemOfAPage = 10;
 
 export default function MapList(props: Props) {
     const [currentPage, setCurrentPage] = useState(1);
