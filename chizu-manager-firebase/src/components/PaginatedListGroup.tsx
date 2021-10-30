@@ -12,7 +12,7 @@ interface Props<T> {
     getHref?: (x: T) => string | undefined;
 }
 
-const NumItemOfAPage = 1;
+const NumItemOfAPage = 10;
 
 export default function PaginatedListGroup<T>(props: Props<T>) {
     const [currentPage, setCurrentPage] = useState(1);
@@ -36,6 +36,7 @@ export default function PaginatedListGroup<T>(props: Props<T>) {
                             key={props.getKey && props.getKey(x)}
                             className={props.getClassName && props.getClassName(x)}
                             tag={props.getTag && props.getTag(x)}
+                            href={props.getHref && props.getHref(x)}
                         >
                             {props.getItem(x)}
                         </ListGroupItem>
