@@ -4,7 +4,7 @@ import AdminApp from '../../components/AdminApp';
 import AddUserModal from '../../components/AddUserModal';
 import EditUserModal from '../../components/EditUserModal';
 import ConfirmDeletionModal from '../../components/ConfirmDeletionModal';
-import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
+import { Badge, Button, Form, FormGroup, Input, Label, ListGroup, ListGroupItem } from 'reactstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -18,6 +18,7 @@ import { useRouter } from 'next/router';
 import { getUser, listeningUserMap } from '../../utils/userUtil';
 import { removeMapUser } from '../../utils/mapUtil';
 import { Pencil, Trash } from 'react-bootstrap-icons';
+import PaginatedListGroup from '../../components/PaginatedListGroup';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -100,43 +101,29 @@ export default function Index() {
                     <Input type="text" onChange={(e) => { setKeyword(e.target.value); }} />
                 </FormGroup>
             </Form>
-            <BootstrapTable
-                bootstrap4
-                keyField='fullId'
-                data={Array.from(userMap.entries())
-                    .filter(([id, x]) => x.displayName.includes(keyword))
-                    .map(([id, x]) => {
-                        return {
-                            fullId: id,
-                            id: id.substr(0, 10) + '...',
-                            displayName: x.displayName,
-                            role: x.isAdmin ? '管理者' : '一般ユーザ',
-                            action:
-                                <Fragment>
-                                    <Button
-                                        className="mr-1"
-                                        size="sm"
-                                        onClick={() => { setEditId(id); }}
-                                    >
-                                        <Pencil className="mb-1" /><span className="ml-1 d-none d-md-inline">編集</span>
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        color={Colors.Danger}
-                                        onClick={() => { setDeleteId(id); }}
-                                    >
-                                        <Trash className="mb-1" /><span className="ml-1 d-none d-md-inline">削除</span>
-                                    </Button>
-                                </Fragment>,
-                        };
-                    })}
-                columns={[
-                    { dataField: 'displayName', text: '表示名', sort: true },
-                    { dataField: 'role', text: '権限', sort: true },
-                    { dataField: 'action', text: '', classes: 'p-2' },
-                ]}
-                pagination={paginationFactory({})}
-                noDataIndication={() => (<div className="text-center">データがありません</div>)}
+            <PaginatedListGroup<[string, User]>
+                data={Array.from(userMap.entries()).filter(([id, x]) => x.displayName.includes(keyword))}
+                getItem={([id, x]) =>
+                    <Fragment>
+                        <Badge
+                            color={x.isAdmin ? Colors.Danger : Colors.Secondary}
+                            className="mr-2"
+                        >
+                            {x.isAdmin ? '管理者' : '一般ユーザ'}
+                        </Badge>
+                        {x.displayName}
+                    </Fragment>
+                }
+                noData={
+                    <ListGroup>
+                        <ListGroupItem className="text-center">データがありません。</ListGroupItem>
+                    </ListGroup>
+                }
+                getKey={([id, x]) => id}
+                getClassName={([id, x]) => "text-center"}
+                getTag={([id, x]) => "a"}
+                getHref={([id, x]) => "#"}
+                getOnClick={([id, x]) => ((e) => { setEditId(id); e.preventDefault(); })}
             />
             <div className="text-left mb-2 mt-2">
                 <Button onClick={() => { setDisplayAddModal(true); }} className="ml-1">追加</Button>

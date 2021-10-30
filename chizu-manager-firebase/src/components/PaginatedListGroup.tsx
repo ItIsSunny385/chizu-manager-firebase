@@ -1,4 +1,4 @@
-import { ElementType, Fragment, useEffect, useState } from 'react';
+import { ElementType, Fragment, MouseEventHandler, useEffect, useState } from 'react';
 import { ListGroup, ListGroupItem } from 'reactstrap';
 import MyPagination from './MyPagination';
 
@@ -10,6 +10,7 @@ interface Props<T> {
     getClassName?: (x: T) => string | undefined;
     getTag?: (x: T) => ElementType<any> | undefined;
     getHref?: (x: T) => string | undefined;
+    getOnClick?: (x: T) => MouseEventHandler<HTMLElement> | undefined
 }
 
 const NumItemOfAPage = 10;
@@ -37,6 +38,7 @@ export default function PaginatedListGroup<T>(props: Props<T>) {
                             className={props.getClassName && props.getClassName(x)}
                             tag={props.getTag && props.getTag(x)}
                             href={props.getHref && props.getHref(x)}
+                            onClick={props.getOnClick && props.getOnClick(x)}
                         >
                             {props.getItem(x)}
                         </ListGroupItem>
