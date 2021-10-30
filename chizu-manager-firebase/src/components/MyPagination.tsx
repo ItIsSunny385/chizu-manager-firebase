@@ -1,24 +1,36 @@
+import { MouseEventHandler } from 'react';
 import { PaginationItem, Pagination, PaginationLink } from 'reactstrap';
 
 interface Props {
     current: number;
     max: number;
-    onClick: (pageNum: number) => (() => void);
+    onClick: (pageNum: number) => (MouseEventHandler<HTMLAnchorElement> | undefined);
 }
 
 export default function MyPagination(props: Props) {
     return <Pagination>
         <PaginationItem disabled={props.current === 1}>
-            <PaginationLink first href="#" />
+            <PaginationLink
+                first
+                href="#"
+                onClick={props.onClick(1)}
+            />
         </PaginationItem>
         <PaginationItem disabled={props.current === 1}>
-            <PaginationLink previous href="#" />
+            <PaginationLink
+                previous
+                href="#"
+                onClick={props.onClick(props.current - 1)}
+            />
         </PaginationItem>
         {
             props.current >= Math.max(props.max, 5)
             &&
             <PaginationItem>
-                <PaginationLink href="#" onClick={props.onClick(props.current - 4)}>
+                <PaginationLink
+                    href="#"
+                    onClick={props.onClick(props.current - 4)}
+                >
                     {props.current - 4}
                 </PaginationLink>
             </PaginationItem>
@@ -27,7 +39,10 @@ export default function MyPagination(props: Props) {
             props.current >= Math.max(props.max - 1, 4)
             &&
             <PaginationItem>
-                <PaginationLink href="#" onClick={props.onClick(props.current - 3)}>
+                <PaginationLink
+                    href="#"
+                    onClick={props.onClick(props.current - 3)}
+                >
                     {props.current - 3}
                 </PaginationLink>
             </PaginationItem>
@@ -36,7 +51,10 @@ export default function MyPagination(props: Props) {
             props.current - 2 >= 1
             &&
             <PaginationItem>
-                <PaginationLink href="#" onClick={props.onClick(props.current - 2)}>
+                <PaginationLink
+                    href="#"
+                    onClick={props.onClick(props.current - 2)}
+                >
                     {props.current - 2}
                 </PaginationLink>
             </PaginationItem>
@@ -45,7 +63,10 @@ export default function MyPagination(props: Props) {
             props.current - 1 >= 1
             &&
             <PaginationItem>
-                <PaginationLink href="#" onClick={props.onClick(props.current - 1)}>
+                <PaginationLink
+                    href="#"
+                    onClick={props.onClick(props.current - 1)}
+                >
                     {props.current - 1}
                 </PaginationLink>
             </PaginationItem>
@@ -59,7 +80,10 @@ export default function MyPagination(props: Props) {
             props.current + 1 <= props.max
             &&
             <PaginationItem>
-                <PaginationLink href="#" onClick={props.onClick(props.current + 1)}>
+                <PaginationLink
+                    href="#"
+                    onClick={props.onClick(props.current + 1)}
+                >
                     {props.current + 1}
                 </PaginationLink>
             </PaginationItem>
@@ -68,7 +92,10 @@ export default function MyPagination(props: Props) {
             props.current + 2 <= props.max
             &&
             <PaginationItem>
-                <PaginationLink href="#" onClick={props.onClick(props.current + 2)}>
+                <PaginationLink
+                    href="#"
+                    onClick={props.onClick(props.current + 2)}
+                >
                     {props.current + 2}
                 </PaginationLink>
             </PaginationItem>
@@ -77,7 +104,10 @@ export default function MyPagination(props: Props) {
             props.current <= Math.min(2, props.max - 3)
             &&
             <PaginationItem>
-                <PaginationLink href="#" onClick={props.onClick(props.current + 3)}>
+                <PaginationLink
+                    href="#"
+                    onClick={props.onClick(props.current + 3)}
+                >
                     {props.current + 3}
                 </PaginationLink>
             </PaginationItem>
@@ -86,16 +116,27 @@ export default function MyPagination(props: Props) {
             props.current <= Math.min(1, props.max - 4)
             &&
             <PaginationItem>
-                <PaginationLink href="#" onClick={props.onClick(props.current + 4)}>
+                <PaginationLink
+                    href="#"
+                    onClick={props.onClick(props.current + 4)}
+                >
                     {props.current + 4}
                 </PaginationLink>
             </PaginationItem>
         }
         <PaginationItem disabled={props.current === props.max}>
-            <PaginationLink next href="#" />
+            <PaginationLink
+                next
+                href="#"
+                onClick={props.onClick(props.current + 1)}
+            />
         </PaginationItem>
         <PaginationItem disabled={props.current === props.max}>
-            <PaginationLink last href="#" />
+            <PaginationLink
+                last
+                href="#"
+                onClick={props.onClick(props.max)}
+            />
         </PaginationItem>
     </Pagination >
 }

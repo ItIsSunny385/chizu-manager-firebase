@@ -9,7 +9,7 @@ interface Props {
     data: MapData[],
 }
 
-const NumItemOfAPage = 10;
+const NumItemOfAPage = 1;
 
 export default function MapList(props: Props) {
     const [currentPage, setCurrentPage] = useState(1);
@@ -51,7 +51,7 @@ export default function MapList(props: Props) {
             <MyPagination
                 current={currentPage}
                 max={Math.ceil(props.data.length / NumItemOfAPage)}
-                onClick={(pageNum) => (() => { setCurrentPage(pageNum); })}
+                onClick={(pageNum) => ((e) => { e.preventDefault(); setCurrentPage(pageNum); })}
             />
         </Fragment>;
 }
