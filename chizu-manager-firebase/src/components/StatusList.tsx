@@ -1,15 +1,13 @@
 import '../utils/InitializeFirebase'; // comoponent中では import firebase の前に書く
 import { Fragment, useEffect, useState } from 'react';
 import firebase from 'firebase';
-import BootstrapTable from 'react-bootstrap-table-next';
-import { Button } from 'reactstrap';
+import { Button, ListGroup, ListGroupItem } from 'reactstrap';
 import AddStatusModal from './AddStatusModal';
 import EditStatusModal from './EditStatusModal';
 import { Status, StatusCollectionName, StatusType } from '../types/model';
 import { getMarkerUrl } from '../utils/markerUtil';
 import { getStatusMapFromQuerySnapshot } from '../utils/statusUtil';
-import { Colors } from '../types/bootstrap';
-import { ExclamationCircle, Pencil, Trash } from 'react-bootstrap-icons';
+import { ExclamationCircle } from 'react-bootstrap-icons';
 import OkModal from './OkModal';
 import ConfirmDeletionModal from './ConfirmDeletionModal';
 
@@ -42,78 +40,41 @@ export default function StatusList(props: Props) {
     return (
         <Fragment>
             <h5 className="mb-3">{title}</h5>
-            <BootstrapTable
-                bootstrap4
-                keyField='fullId'
-                data={Array.from(statusMap.entries()).map(([id, status]) => {
-                    return {
-                        fullId: id,
-                        id: id.substr(0, 10) + '...',
-                        name: status.name,
-                        pin: status.label,
-                        statusAfterReseting: status.statusAfterResetingRef
-                            ?
-                            statusMap.get(status.statusAfterResetingRef.id)!.name
-                            :
-                            '',
-                        action:
-                            <Fragment>
-                                <Button
-                                    className="mr-1"
-                                    size="sm"
-                                    onClick={() => { setEditStatusId(id); }}
+            {
+                statusMap.size === 0
+                    ?
+                    <ListGroup>
+                        <ListGroupItem className="text-center">データがありません。</ListGroupItem>
+                    </ListGroup>
+                    :
+                    <ListGroup className="mb-2">
+                        {
+                            Array.from(statusMap.entries()).map(([id, x]) =>
+                                <ListGroupItem
+                                    key={id}
+                                    className="text-center"
                                 >
-                                    <Pencil className="mb-1" /><span className="ml-1 d-none d-md-inline">編集</span>
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    color={Colors.Danger}
-                                    onClick={() => {
-                                        const resetingStatusSetted = !!status.statusAfterResetingRef;
-                                        let settedAsResetingStatus = false;
-                                        statusMap.forEach((x) => {
-                                            if (x.statusAfterResetingRef && x.statusAfterResetingRef.id === id) {
-                                                settedAsResetingStatus = true;
-                                            }
-                                        });
-                                        if (!resetingStatusSetted || settedAsResetingStatus) {
-                                            setErrorMessage('リセット後ステータスが設定されていないか、他のステータスのリセット後ステータスとして設定されている場合は削除できません。');
-                                            return;
-                                        }
-                                        setDeleteStatusId(id);
-                                    }}
-                                >
-                                    <Trash className="mb-1" /><span className="ml-1 d-none d-md-inline">削除</span>
-                                </Button>
-                            </Fragment>,
-                    };
-                })}
-                columns={[
-                    { dataField: 'name', text: '名前' },
-                    {
-                        dataField: 'pin',
-                        text: 'ピン',
-                        classes: 'text-center font-weight-bold',
-                        style: (cell, row, rowIndex, colIndex) => {
-                            return {
-                                backgroundImage: `url(${getMarkerUrl(Array.from(statusMap.values())[rowIndex].pin)}`,
-                                backgroundRepeat: 'no-repeat',
-                                backgroundPosition: 'center top 11px',
-                                backgroundSize: '37px',
-                                fontSize: '14px',
-                            };
+                                    <span
+                                        className="mr-1 p-3 text-dark font-weight-bold"
+                                        style={{
+                                            backgroundImage: `url(${getMarkerUrl(x.pin)}`,
+                                            backgroundRepeat: 'no-repeat',
+                                            backgroundPosition: 'center top 13px',
+                                            backgroundSize: '37px',
+                                            fontSize: '14px',
+                                        }}
+                                    >
+                                        {x.label}
+                                    </span>
+                                    <a href="#" onClick={(e) => { setEditStatusId(id); e.preventDefault(); }}>
+                                        {x.name}
+                                        <small>（リセット後：{x.statusAfterResetingRef ? statusMap.get(id)!.name : 'なし'}）</small>
+                                    </a>
+                                </ListGroupItem>
+                            )
                         }
-                    },
-                    { dataField: 'statusAfterReseting', text: 'リセット後' },
-                    {
-                        dataField: 'action',
-                        text: '',
-                        classes: 'p-2',
-                        style: { minWidth: '85px' }
-                    },
-                ]}
-                noDataIndication={() => (<div className="text-center">データがありません</div>)}
-            />
+                    </ListGroup>
+            }
             <Button onClick={(e) => { setDisplayAddStatusModal(true); }}>追加</Button>
             {
                 displayAddStatusModal
