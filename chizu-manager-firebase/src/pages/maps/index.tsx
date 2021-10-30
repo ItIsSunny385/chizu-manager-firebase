@@ -1,19 +1,20 @@
 import '../../utils/InitializeFirebase';
 import firebase from 'firebase';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import AdminApp from '../../components/AdminApp';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
 import { MapData } from '../../types/map';
 import { getMapDataArrayWithNoChildByQuerySnapshot } from '../../utils/mapUtil';
-import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
+import { Badge, Button, Form, FormGroup, Input, Label, ListGroup, ListGroupItem } from 'reactstrap';
 import { useRouter } from 'next/router';
 import { PageRoles } from '../../types/role';
 import { User } from '../../types/model';
 import { getUser } from '../../utils/userUtil';
 import Link from 'next/link';
 import ConfirmDeletionModal from '../../components/ConfirmDeletionModal';
-import MapList from '../../components/MapList';
+import PaginatedListGroup from '../../components/PaginatedListGroup';
+import { Colors } from '../../types/bootstrap';
 
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -80,7 +81,29 @@ export default function Index() {
                     <Input type="text" onChange={(e) => { setKeyword(e.target.value); }} />
                 </FormGroup>
             </Form>
-            <MapList data={maps.filter(x => x.name.includes(keyword))} />
+            <PaginatedListGroup<MapData>
+                data={maps.filter(x => x.name.includes(keyword))}
+                getItem={(x) =>
+                    <Fragment>
+                        <Badge
+                            color={x.using ? Colors.Primary : Colors.Secondary}
+                            className="mr-2"
+                        >
+                            {x.using ? '使用中' : '不使用'}
+                        </Badge>
+                        {x.name}
+                    </Fragment>
+                }
+                noData={
+                    <ListGroup>
+                        <ListGroupItem className="text-center">データがありません。</ListGroupItem>
+                    </ListGroup>
+                }
+                getKey={(x) => x.id}
+                getClassName={(x) => "text-center"}
+                getTag={(x) => "a"}
+                getHref={(x) => `/maps/${x.id}`}
+            />
             <div className="text-left mb-2 mt-2">
                 <Link href="/maps/[id]" as={`/maps/${newMapRef.id}`} passHref>
                     <Button tag="a">追加</Button>
