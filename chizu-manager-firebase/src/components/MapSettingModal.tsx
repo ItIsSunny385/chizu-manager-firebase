@@ -4,7 +4,8 @@ import { Button, Form, FormFeedback, FormGroup, FormText, Input, Label } from "r
 import FlashMessage, { Props as FlashMessageProps } from "./FlashMessage";
 import ConfirmResetingModal from "./ConfirmResetingModal";
 import { Colors } from "../types/bootstrap";
-import { ArrowRepeat, Gear, InfoCircle } from "react-bootstrap-icons";
+import { ArrowRepeat, Gear, InfoCircle, Trash } from "react-bootstrap-icons";
+import ConfirmDeletionModal from "./ConfirmDeletionModal";
 
 interface Props {
     name: string;
@@ -12,6 +13,7 @@ interface Props {
     updateNameAndUsing: (name: string, using: boolean) => void;
     reset: () => void;
     toggle: () => void;
+    delete: () => void;
 }
 
 export default function MapSettingModal(props: Props) {
@@ -21,6 +23,7 @@ export default function MapSettingModal(props: Props) {
     const [flashMessageProps1, setFlashMessageProps1] = useState(undefined as FlashMessageProps | undefined);
     const [flashMessageProps2, setFlashMessageProps2] = useState(undefined as FlashMessageProps | undefined);
     const [displayResetingModal, setDisplayResetingModal] = useState(false);
+    const [displayDeleteModal, setDisplayDeleteModal] = useState(false);
 
     const messageModalProps = {
         modalHeaderProps: {
@@ -103,7 +106,7 @@ export default function MapSettingModal(props: Props) {
             &&
             <FlashMessage {...flashMessageProps2} />
         }
-        <div>
+        <div className="mb-5">
             <h4 className="mb-3"><ArrowRepeat className="mb-1 mr-2" />ステータスリセット  </h4>
             <div className="mb-3">家・建物・部屋のステータスをリセットします。</div>
             <Button
@@ -128,6 +131,19 @@ export default function MapSettingModal(props: Props) {
                         close: () => { setFlashMessageProps2(undefined); }
                     });
                 }}
+            />
+        }
+        <div>
+            <h4 className="mb-3"><Trash className="mb-1 mr-2" />地図削除</h4>
+            <div className="mb-3">地図を削除します。</div>
+            <Button onClick={() => { setDisplayDeleteModal(true); }}>削除</Button>
+        </div>
+        {
+            displayDeleteModal
+            &&
+            <ConfirmDeletionModal
+                toggle={() => { setDisplayDeleteModal(false); }}
+                delete={props.delete}
             />
         }
     </MessageModal>;

@@ -2,8 +2,6 @@ import '../../utils/InitializeFirebase';
 import firebase from 'firebase';
 import { useState, useEffect, useRef, Fragment } from 'react';
 import AdminApp from '../../components/AdminApp';
-import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
-import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
 import { MapData } from '../../types/map';
 import { getMapDataArrayWithNoChildByQuerySnapshot } from '../../utils/mapUtil';
 import { Badge, Button, Form, FormGroup, Input, Label, ListGroup, ListGroupItem } from 'reactstrap';
@@ -12,7 +10,6 @@ import { PageRoles } from '../../types/role';
 import { User } from '../../types/model';
 import { getUser } from '../../utils/userUtil';
 import Link from 'next/link';
-import ConfirmDeletionModal from '../../components/ConfirmDeletionModal';
 import PaginatedListGroup from '../../components/PaginatedListGroup';
 import { Colors } from '../../types/bootstrap';
 
@@ -25,7 +22,6 @@ export default function Index() {
     const [keyword, setKeyword] = useState('');
     const [authUser, setAuthUser] = useState(undefined as firebase.User | undefined);
     const [user, setUser] = useState(undefined as User | undefined);
-    const [deleteId, setDeleteId] = useState(undefined as string | undefined);
     const [newMapRef] = useState(db.collection('maps').doc());
     const [unsubscribes, _setUnsubscribes] = useState<(() => void)[]>([]);
     const router = useRouter();
@@ -109,19 +105,6 @@ export default function Index() {
                     <Button tag="a">追加</Button>
                 </Link>
             </div>
-            {
-                deleteId
-                &&
-                <ConfirmDeletionModal
-                    toggle={() => {
-                        setDeleteId(undefined);
-                    }}
-                    delete={() => {
-                        db.collection('maps').doc(deleteId).delete();
-                        setDeleteId(undefined);
-                    }}
-                />
-            }
         </AdminApp>
     );
 }

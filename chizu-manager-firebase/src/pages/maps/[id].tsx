@@ -199,7 +199,7 @@ export default function View() {
                     }}
                 >
                     完了
-            </Button>
+                </Button>
             </div>;
             const leftBottomButtonDiv = document.createElement('div');
             ReactDOM.render(leftBottomButtons, leftBottomButtonDiv);
@@ -448,6 +448,10 @@ export default function View() {
                     toggle={() => {
                         setPageMode(prevPageMode!);
                         setPrevPageMode(undefined);
+                    }}
+                    delete={() => {
+                        db.collection('maps').doc(id).delete();
+                        document.getElementById('finish')!.click();
                     }}
                 />
             }

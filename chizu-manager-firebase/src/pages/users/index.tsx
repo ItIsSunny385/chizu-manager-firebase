@@ -5,10 +5,6 @@ import AddUserModal from '../../components/AddUserModal';
 import EditUserModal from '../../components/EditUserModal';
 import ConfirmDeletionModal from '../../components/ConfirmDeletionModal';
 import { Badge, Button, Form, FormGroup, Input, Label, ListGroup, ListGroupItem } from 'reactstrap';
-import BootstrapTable from 'react-bootstrap-table-next';
-import paginationFactory from 'react-bootstrap-table2-paginator';
-import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
-import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
 import '../../utils/InitializeFirebase';
 import { User } from '../../types/model';
 import { Props as FlashMessageProps } from '../../components/FlashMessage';
@@ -17,7 +13,6 @@ import { PageRoles } from '../../types/role';
 import { useRouter } from 'next/router';
 import { getUser, listeningUserMap } from '../../utils/userUtil';
 import { removeMapUser } from '../../utils/mapUtil';
-import { Pencil, Trash } from 'react-bootstrap-icons';
 import PaginatedListGroup from '../../components/PaginatedListGroup';
 
 const db = firebase.firestore();
